@@ -1,0 +1,27 @@
+name: AlmaLinux 8
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up LXD
+      run: |
+        sudo snap install lxd
+        sudo lxd init --auto
+
+    - name: Launch container
+      run: |
+        lxc launch images:almalinux/8 cmm_el8 -c security.privileged=true
+
+    - name: Run script in container
+      run: |
+        sleep 10  # give it some time to boot
+        lxc exec cmm_el8 -- bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+      continue-on-error: true
