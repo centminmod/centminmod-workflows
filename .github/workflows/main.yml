@@ -28,4 +28,4 @@ jobs:
       run: |
         docker run -d --name=cmm_el8 --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
         sleep 10  # give it some time to boot
-        docker exec -it cmm_el8 curl -4sL https://centminmod.com/installer-el8x.sh | bash ./installer-el8x.sh
+        docker exec cmm_el8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
