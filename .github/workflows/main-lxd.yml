@@ -1,4 +1,4 @@
-name: AlmaLinux 8
+name: AlmaLinux 8 LXD
 
 on:
   workflow_dispatch:
