@@ -3,9 +3,12 @@ FROM almalinux/8-init
 ENV container=docker
 
 RUN dnf -y update && \
-    dnf -y install initscripts systemd-sysv sudo curl && \
+    dnf -y install initscripts systemd-sysv sudo curl python3 && \
     dnf clean all && \
-    systemctl mask \
+    curl -o /usr/local/bin/systemctl.py -L "https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/main/files/docker/systemctl.py" && \
+    chmod +x /usr/local/bin/systemctl.py
+
+RUN /usr/local/bin/systemctl.py mask \
       dev-hugepages.mount \
       sys-fs-fuse-connections.mount \
       systemd-logind.service \
