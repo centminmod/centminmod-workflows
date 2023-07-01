@@ -8,4 +8,4 @@ RUN dnf -y update && \
     dnf clean all
 
 VOLUME [ "/sys/fs/cgroup", "/run" ]
-CMD ["/usr/sbin/init"]
+CMD ["/sbin/init"]
