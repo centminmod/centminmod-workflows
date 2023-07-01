@@ -1,5 +1,6 @@
 FROM almalinux/8-init
 
+ENV TERM=xterm-256color
 ENV container=docker
 
 RUN dnf -y update && \
