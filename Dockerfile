@@ -5,25 +5,6 @@ ENV container=docker
 RUN dnf -y update && \
     dnf -y install initscripts systemd-sysv sudo curl python3 && \
     dnf clean all && \
-    curl -o /usr/local/bin/systemctl.py -L "https://raw.githubusercontent.com/gdraheim/docker-systemctl-replacement/main/files/docker/systemctl.py" && \
-    chmod +x /usr/local/bin/systemctl.py
-
-RUN /usr/local/bin/systemctl.py mask \
-      dev-hugepages.mount \
-      sys-fs-fuse-connections.mount \
-      systemd-logind.service \
-      systemd-remount-fs.service \
-      getty.target \
-      console-getty.service \
-      systemd-udevd.service
-
-RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i = systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-rm -f /lib/systemd/system/multi-user.target.wants/*;\
-rm -f /lib/systemd/system/local-fs.target.wants/*; \
-rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-rm -f /lib/systemd/system/basic.target.wants/*;\
-rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 VOLUME [ "/sys/fs/cgroup", "/run" ]
 CMD ["/usr/sbin/init"]
