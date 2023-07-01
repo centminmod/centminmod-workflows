@@ -11,6 +11,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
+    - name: Install Sysbox
+      run: |
+        curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+        sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
 
@@ -26,9 +31,7 @@ jobs:
 
     - name: Run container
       run: |
-        curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
-        sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb
-        docker run -d --privileged --cap-add NET_ADMIN --name=cmm_el8 -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
+        docker run -d --name=cmm_el8 --runtime=sysbox-runc -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
         sleep 10  # give it some time to boot
         docker exec cmm_el8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
       continue-on-error: true
