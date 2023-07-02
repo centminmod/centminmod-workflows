@@ -29,7 +29,7 @@ jobs:
         load: true
         tags: cmm_el8:latest
 
-    - name: Run container
+    - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
       run: |
         docker run -d --name=cmm_el8 --runtime=sysbox-runc -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
         sleep 10
@@ -44,4 +44,30 @@ jobs:
         docker exec cmm_el8 bash -c "journalctl -xe --no-pager | tail -n 500"
         sleep 10
         docker exec cmm_el8 bash -c "systemctl status php-fpm.service"
+      continue-on-error: true
+
+    - name: Inspect Nginx setup
+      run: |
+        sleep 10
+        docker exec cmm_el8 bash -c "ls -lAh /usr/local/nginx/logs"
+        sleep 10
+        docker exec cmm_el8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+        sleep 10
+        docker exec cmm_el8 bash -c "ps aux | grep nginx"
+      continue-on-error: true
+
+    - name: Inspect Sysstat and systemd-journald service
+      run: |
+        docker exec cmm_el8 bash -c "systemctl status sysstat.service"
+        docker exec cmm_el8 bash -c "systemctl status systemd-journald.service"
+      continue-on-error: true
+    
+    - name: Check permissions of /var/log/journal
+      run: |
+        docker exec cmm_el8 bash -c "ls -ld /var/log/journal"
+      continue-on-error: true
+    
+    - name: Show recent systemd-journald logs
+      run: |
+        docker exec cmm_el8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 500"
       continue-on-error: true
