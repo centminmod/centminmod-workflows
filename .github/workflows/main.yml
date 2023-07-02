@@ -79,6 +79,10 @@ jobs:
     - name: Inspect pure-ftpd setup
       run: |
         sleep 10
+        docker exec cmm_el8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+        sleep 10
+        docker exec cmm_el8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+        sleep 10
         docker exec cmm_el8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 150"
         sleep 10
         docker exec cmm_el8 bash -c "systemctl status pure-ftpd.service"
