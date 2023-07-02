@@ -29,85 +29,85 @@ jobs:
         file: ./dockerfiles/Dockerfile-almalinux9
         platforms: linux/amd64
         load: true
-        tags: cmm_el8:latest
+        tags: cmm_el9:latest
 
     - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
       run: |
-        docker run -d --name=cmm_el8 --runtime=sysbox-runc -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
+        docker run  --cgroupns host -d --name=cmm_el9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el9:latest
         sleep 10
-        docker exec cmm_el8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+        docker exec cmm_el9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
       continue-on-error: true
 
     - name: Inspect PHP-FPM setup
       run: |
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl restart php-fpm.service"
+        docker exec cmm_el9 bash -c "systemctl restart php-fpm.service"
         sleep 10
-        docker exec cmm_el8 bash -c "journalctl -xe --no-pager | tail -n 500"
+        docker exec cmm_el9 bash -c "journalctl -xe --no-pager | tail -n 500"
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl status php-fpm.service"
+        docker exec cmm_el9 bash -c "systemctl status php-fpm.service"
         sleep 10
-        docker exec cmm_el8 bash -c "php-config"
+        docker exec cmm_el9 bash -c "php-config"
         sleep 10
-        docker exec cmm_el8 bash -c "php -v"
+        docker exec cmm_el9 bash -c "php -v"
       continue-on-error: true
 
     - name: Inspect Nginx setup
       run: |
         sleep 10
-        docker exec cmm_el8 bash -c "ls -lAh /usr/local/nginx/logs"
+        docker exec cmm_el9 bash -c "ls -lAh /usr/local/nginx/logs"
         sleep 10
-        docker exec cmm_el8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+        docker exec cmm_el9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
         sleep 10
-        docker exec cmm_el8 bash -c "ps aux | grep nginx"
+        docker exec cmm_el9 bash -c "ps aux | grep nginx"
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl status nginx.service"
+        docker exec cmm_el9 bash -c "systemctl status nginx.service"
         sleep 10
-        docker exec cmm_el8 bash -c "curl -I http://localhost"
+        docker exec cmm_el9 bash -c "curl -I http://localhost"
         sleep 10
-        docker exec cmm_el8 bash -c "nginx -V"
+        docker exec cmm_el9 bash -c "nginx -V"
       continue-on-error: true
 
     - name: Inspect MariaDB setup
       run: |
         sleep 10
-        docker exec cmm_el8 bash -c "mysqladmin var | tr -s ' '"
+        docker exec cmm_el9 bash -c "mysqladmin var | tr -s ' '"
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl status mariadb.service"
+        docker exec cmm_el9 bash -c "systemctl status mariadb.service"
       continue-on-error: true
 
     - name: Inspect pure-ftpd setup
       run: |
         sleep 10
-        docker exec cmm_el8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+        docker exec cmm_el9 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
         sleep 10
-        docker exec cmm_el8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+        docker exec cmm_el9 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
         sleep 10
-        docker exec cmm_el8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 150"
+        docker exec cmm_el9 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 150"
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl status pure-ftpd.service"
+        docker exec cmm_el9 bash -c "systemctl status pure-ftpd.service"
       continue-on-error: true
 
     - name: Inspect chronyd setup
       run: |
         sleep 10
-        docker exec cmm_el8 bash -c "journalctl -u chronyd --no-pager | tail -n 150"
+        docker exec cmm_el9 bash -c "journalctl -u chronyd --no-pager | tail -n 150"
         sleep 10
-        docker exec cmm_el8 bash -c "systemctl status chronyd.service"
+        docker exec cmm_el9 bash -c "systemctl status chronyd.service"
       continue-on-error: true
 
     - name: Inspect Sysstat and systemd-journald service
       run: |
-        docker exec cmm_el8 bash -c "systemctl status sysstat.service"
-        docker exec cmm_el8 bash -c "systemctl status systemd-journald.service"
+        docker exec cmm_el9 bash -c "systemctl status sysstat.service"
+        docker exec cmm_el9 bash -c "systemctl status systemd-journald.service"
       continue-on-error: true
     
     - name: Check permissions of /var/log/journal
       run: |
-        docker exec cmm_el8 bash -c "ls -ld /var/log/journal"
+        docker exec cmm_el9 bash -c "ls -ld /var/log/journal"
       continue-on-error: true
     
     - name: Show recent systemd-journald logs
       run: |
-        docker exec cmm_el8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 500"
+        docker exec cmm_el9 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 500"
       continue-on-error: true
