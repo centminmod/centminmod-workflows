@@ -79,6 +79,8 @@ jobs:
     - name: Inspect pure-ftpd setup
       run: |
         sleep 10
+        docker exec cmm_el8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 500"
+        sleep 10
         docker exec cmm_el8 bash -c "systemctl status pure-ftpd.service"
       continue-on-error: true
 
