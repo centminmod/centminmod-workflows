@@ -23,8 +23,8 @@ jobs:
       id: docker_build
       uses: docker/build-push-action@v2
       with:
-        context: dockerfiles
-        file: Dockerfile-almalinux8
+        context: .
+        file: ./dockerfiles/Dockerfile-almalinux8
         platforms: linux/amd64
         load: true
         tags: cmm_el8:latest
