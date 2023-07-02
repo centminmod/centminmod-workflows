@@ -2,6 +2,8 @@ name: AlmaLinux 9
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [run-almalinux-9-workflow]
 
 jobs:
   build:
