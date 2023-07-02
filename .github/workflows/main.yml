@@ -42,4 +42,6 @@ jobs:
         docker exec cmm_el8 bash -c "systemctl restart php-fpm.service"
         sleep 10
         docker exec cmm_el8 bash -c "journalctl -xe --no-pager | tail -n 500"
+        sleep 10
+        docker exec cmm_el8 bash -c "systemctl status php-fpm.service"
       continue-on-error: true
