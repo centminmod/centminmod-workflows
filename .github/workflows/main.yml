@@ -44,6 +44,10 @@ jobs:
         docker exec cmm_el8 bash -c "journalctl -xe --no-pager | tail -n 500"
         sleep 10
         docker exec cmm_el8 bash -c "systemctl status php-fpm.service"
+        sleep 10
+        docker exec cmm_el8 bash -c "php-config"
+        sleep 10
+        docker exec cmm_el8 bash -c "php -v"
       continue-on-error: true
 
     - name: Inspect Nginx setup
@@ -58,6 +62,8 @@ jobs:
         docker exec cmm_el8 bash -c "systemctl status nginx.service"
         sleep 10
         docker exec cmm_el8 bash -c "curl -I http://localhost"
+        sleep 10
+        docker exec cmm_el8 bash -c "nginx -V"
       continue-on-error: true
 
     - name: Inspect MariaDB setup
