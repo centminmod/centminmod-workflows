@@ -121,3 +121,8 @@ jobs:
       run: |
         docker exec cmm_el9 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 500"
       continue-on-error: true
+
+    - name: Run cminfo
+      run: |
+        docker exec cmm_el9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+      continue-on-error: true
