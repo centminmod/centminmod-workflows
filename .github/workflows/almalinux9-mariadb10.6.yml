@@ -3,7 +3,7 @@ name: AlmaLinux 9 with MariaDB 10.6 Default
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-9-workflow]
+    types: [run-almalinux-9-mariadb-10.6-workflow]
 
 jobs:
   build:
