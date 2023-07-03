@@ -124,5 +124,13 @@ jobs:
 
     - name: Run cminfo
       run: |
+        sleep 5
+        docker exec cmm_el9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh debug-menuexit"
+        sleep 5
         docker exec cmm_el9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+      continue-on-error: true
+
+    - name: Create Nginx HTTPS vhost
+      run: |
+        docker exec cmm_el9 bash -c "/usr/bin/nv -d domain.com -s y"
       continue-on-error: true
