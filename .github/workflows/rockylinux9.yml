@@ -125,8 +125,6 @@ jobs:
     - name: Run cminfo
       run: |
         sleep 5
-        docker exec cmm_el9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh debug-menuexit"
-        sleep 5
         docker exec cmm_el9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
       continue-on-error: true
 
