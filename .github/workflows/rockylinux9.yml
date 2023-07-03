@@ -76,6 +76,16 @@ jobs:
         docker exec cmm_el9 bash -c "systemctl status mariadb.service"
       continue-on-error: true
 
+    - name: Inspect Python3 setup
+      run: |
+        sleep 10
+        docker exec cmm_el9 bash -c "python3 --version"
+        sleep 10
+        docker exec cmm_el9 bash -c "pip --version"
+        sleep 10
+        docker exec cmm_el9 bash -c "alternatives --list | egrep -i 'pip|python'"
+      continue-on-error: true
+
     - name: Inspect pure-ftpd setup
       run: |
         sleep 10
