@@ -3,7 +3,7 @@ name: Oracle Linux 8
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-oracle-8-workflow]
+    types: [run-oraclelinux-8-workflow]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-oracle8
+        file: ./dockerfiles/Dockerfile-oraclelinux8
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
