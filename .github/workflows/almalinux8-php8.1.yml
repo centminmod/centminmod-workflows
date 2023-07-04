@@ -46,6 +46,16 @@ jobs:
         docker exec cmm_el89 bash -c "/usr/local/bin/wget -V"
       continue-on-error: true
 
+    - name: Inspect ccache install
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/ccache -V"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/ccache -s"
+        sleep 1
+        docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
+      continue-on-error: true
+
     - name: Inspect PHP-FPM setup
       run: |
         sleep 1
@@ -82,10 +92,16 @@ jobs:
 
     - name: Inspect MariaDB setup
       run: |
-        sleep 1
-        docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status mariadb.service"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/my.cnf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
       continue-on-error: true
 
     - name: Inspect Python3 setup
@@ -118,6 +134,8 @@ jobs:
         docker exec cmm_el89 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
         sleep 1
         docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service"
+        sleep 1
+        docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem"
       continue-on-error: true
 
     - name: Inspect chronyd setup
@@ -126,6 +144,24 @@ jobs:
         docker exec cmm_el89 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
         sleep 1
         docker exec cmm_el89 bash -c "systemctl status chronyd.service"
+      continue-on-error: true
+
+    - name: Inspect CSF Firewall setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "csf -v"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "csf -ra"
+      continue-on-error: true
+
+    - name: Inspect logrotation setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
       continue-on-error: true
 
     - name: Inspect Sysstat and systemd-journald service
@@ -148,6 +184,16 @@ jobs:
       run: |
         sleep 1
         docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+      continue-on-error: true
+
+    - name: Run tools/csfcf.sh
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
       continue-on-error: true
 
     - name: Create Nginx HTTPS vhost
