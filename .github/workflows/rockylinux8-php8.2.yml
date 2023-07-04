@@ -126,16 +126,18 @@ jobs:
 
     - name: Inspect pure-ftpd setup
       run: |
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
       continue-on-error: true
 
     - name: Inspect chronyd setup
