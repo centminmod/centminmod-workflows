@@ -1,0 +1,204 @@
+name: Cento 7
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run-centos-7-workflow]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install Sysbox
+      run: |
+        curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+        sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build 
+      id: docker_build
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./dockerfiles/Dockerfile-centos7
+        platforms: linux/amd64
+        load: true
+        tags: cmm_el89:latest
+
+    - name: Run container Centmmin Mod LEMP Cento 7 Install
+      run: |
+        docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        sleep 4
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+      continue-on-error: true
+
+    - name: Inspect wget install
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/bin/wget -V"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/wget -V"
+      continue-on-error: true
+
+    - name: Inspect ccache install
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/ccache -V"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/ccache -s"
+        sleep 1
+        docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
+      continue-on-error: true
+
+    - name: Inspect PHP-FPM setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "systemctl restart php-fpm.service"
+        sleep 1
+        docker exec cmm_el89 bash -c "journalctl -xe --no-pager | tail -n 75"
+        sleep 1
+        docker exec cmm_el89 bash -c "systemctl status php-fpm.service"
+        sleep 1
+        docker exec cmm_el89 bash -c "php-config"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/bin/php -v"
+        sleep 1
+        docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
+      continue-on-error: true
+
+    - name: Inspect Nginx setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/logs"
+        sleep 1
+        docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+        sleep 1
+        docker exec cmm_el89 bash -c "ps aux | grep nginx"
+        sleep 1
+        docker exec cmm_el89 bash -c "systemctl status nginx.service"
+        sleep 1
+        docker exec cmm_el89 bash -c "curl -I http://localhost"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/sbin/nginx -V"
+        sleep 1
+        docker exec cmm_el89 bash -c "ldd /usr/local/sbin/nginx"
+      continue-on-error: true
+
+    - name: Inspect MariaDB setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "systemctl status mariadb.service"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/my.cnf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
+      continue-on-error: true
+
+    - name: Inspect Python3 setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "python3 --version"
+        sleep 1
+        docker exec cmm_el89 bash -c "pip --version"
+        sleep 1
+        docker exec cmm_el89 bash -c "alternatives --list | egrep -i 'pip|python'"
+      continue-on-error: true
+
+    - name: Inspect Redis Server setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "redis-cli info"
+        sleep 1
+        docker exec cmm_el89 bash -c "systemctl status redis"
+        sleep 1
+        docker exec cmm_el89 bash -c "php --ri redis"
+      continue-on-error: true
+
+    - name: Inspect pure-ftpd setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+      continue-on-error: true
+
+    - name: Inspect ntpd setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "journalctl -u ntpd --no-pager | tail -n 100"
+        sleep 1
+        docker exec cmm_el89 bash -c "systemctl status ntpd.service"
+      continue-on-error: true
+
+    - name: Inspect CSF Firewall setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "csf -v"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "csf -ra"
+      continue-on-error: true
+
+    - name: Inspect logrotation setup
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+      continue-on-error: true
+
+    - name: Inspect Sysstat and systemd-journald service
+      run: |
+        docker exec cmm_el89 bash -c "systemctl status sysstat.service"
+        docker exec cmm_el89 bash -c "systemctl status systemd-journald.service"
+      continue-on-error: true
+    
+    - name: Check permissions of /var/log/journal
+      run: |
+        docker exec cmm_el89 bash -c "ls -ld /var/log/journal"
+      continue-on-error: true
+    
+    - name: Show recent systemd-journald logs
+      run: |
+        docker exec cmm_el89 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+      continue-on-error: true
+
+    - name: Run cminfo
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+      continue-on-error: true
+
+    - name: Run tools/csfcf.sh
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+        sleep 1
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+      continue-on-error: true
+
+    - name: Create Nginx HTTPS vhost
+      run: |
+        docker exec cmm_el89 bash -c "/usr/bin/nv -d domain.com -s y"
+      continue-on-error: true
