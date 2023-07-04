@@ -1,9 +1,9 @@
-name: AlmaLinux 8 with MariaDB 10.4 Default
+name: Rocky Linux 8 with PHP 8.2
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-8-mariadb-10.4-workflow]
+    types: [run-rockylinux-8-workflow-php82]
 
 jobs:
   build:
@@ -26,16 +26,16 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-almalinux8
+        file: ./dockerfiles/Dockerfile-rockylinux8
         platforms: linux/amd64
         load: true
         tags: cmm_el8:latest
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 8 + MariaDB 10.4 Default Install
+    - name: Run container Centmmin Mod LEMP Rocky Linux 8 Install
       run: |
         docker run -d --name=cmm_el8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el8:latest
         sleep 10
-        docker exec cmm_el8 bash -c "curl -4sL https://centminmod.com/installer-el8x-mariadb10.4.sh | bash"
+        docker exec cmm_el8 bash -c "curl -4sL https://centminmod.com/installer-el8x-82.sh | bash"
       continue-on-error: true
 
     - name: Inspect PHP-FPM setup

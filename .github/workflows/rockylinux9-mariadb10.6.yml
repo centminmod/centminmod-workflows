@@ -49,7 +49,7 @@ jobs:
         sleep 10
         docker exec cmm_el9 bash -c "php-config"
         sleep 10
-        docker exec cmm_el9 bash -c "php -v"
+        docker exec cmm_el9 bash -c "/usr/local/bin/php -v"
       continue-on-error: true
 
     - name: Inspect Nginx setup
@@ -65,7 +65,7 @@ jobs:
         sleep 10
         docker exec cmm_el9 bash -c "curl -I http://localhost"
         sleep 10
-        docker exec cmm_el9 bash -c "nginx -V"
+        docker exec cmm_el9 bash -c "/usr/local/sbin/nginx -V"
       continue-on-error: true
 
     - name: Inspect MariaDB setup
