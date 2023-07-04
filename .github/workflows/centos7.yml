@@ -33,7 +33,7 @@ jobs:
 
     - name: Run container Centmmin Mod LEMP Cento 7 Install
       run: |
-        docker run --privileged -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        docker run --privileged -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run --tmpfs /run --tmpfs /run/lock --tmpfs /tmp -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
       continue-on-error: true
