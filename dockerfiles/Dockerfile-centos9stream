@@ -7,7 +7,6 @@ RUN dnf -y update && \
     dnf install -y \
         initscripts \
         systemd-sysv \
-        curl \
         python3 \
         iptables   \
         iproute    \
