@@ -38,6 +38,13 @@ jobs:
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-81-edge.sh | bash"
       continue-on-error: true
 
+    - name: centmin.sh setup
+      run: |
+        sleep 1
+        docker exec cmm_el89 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+        docker exec cmm_el89 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+      continue-on-error: true
+
     - name: YUM repolist all
       run: |
         sleep 1
