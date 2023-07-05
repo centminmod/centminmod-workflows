@@ -208,3 +208,8 @@ jobs:
       run: |
         docker exec cmm_el89 bash -c "/usr/bin/nv -d domain.com -s y"
       continue-on-error: true
+
+    - name: YUM History Info
+      run: |
+        docker exec cmm_el89 bash -c "for id in $(sudo yum history list | awk '{print $1}' | grep -E '^[0-9]+$'); do yum history info $id; done"
+      continue-on-error: true
