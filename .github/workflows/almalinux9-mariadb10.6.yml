@@ -236,5 +236,5 @@ jobs:
 
     - name: YUM History Info
       run: |
-        docker exec cmm_el89 bash -c "for id in $(sudo yum history list | awk '{print $1}' | grep -E '^[0-9]+$'); do yum history info $id; done"
+        docker exec cmm_el89 bash -c "for id in $(yum history list | awk '{print $1}' | grep -E '^[0-9]+$'); do yum history info $id; done"
       continue-on-error: true
