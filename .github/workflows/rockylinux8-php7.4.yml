@@ -90,13 +90,13 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "php-config || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAhrt $(php-config --extension-dir || true)"
-        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "/usr/local/bin/php --ini"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "/usr/local/bin/php -v"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "ls -lAhrt $(php-config --extension-dir || true)"
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
