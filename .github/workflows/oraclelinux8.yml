@@ -81,18 +81,23 @@ jobs:
 
     - name: Inspect PHP-FPM setup
       run: |
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl restart php-fpm.service"
-        sleep 1
-        docker exec cmm_el89 bash -c "journalctl -xe --no-pager | tail -n 75"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "journalctl -xe --no-pager | tail -n 35"
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status php-fpm.service"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "php-config"
-        sleep 1
-        docker exec cmm_el89 bash -c "/usr/local/bin/php -v"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "ls -lAhrt $(php-config --extension-dir)"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "/usr/local/bin/php --ini"
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "/usr/local/bin/php -v"
+        docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
     - name: Inspect Nginx setup
