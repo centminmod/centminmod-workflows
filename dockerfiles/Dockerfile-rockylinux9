@@ -37,7 +37,7 @@ RUN dnf -y update && \
 
 RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service systemd-firstboot.service systemd-networkd-wait-online.service
 
-COPY centmin-option-4.sh /home/centmin-option-4.sh
+COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
 RUN chmod +x /home/centmin-option-4.sh
 
 VOLUME [ "/sys/fs/cgroup", "/run" ]
