@@ -251,6 +251,11 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
+    - name: centmin.sh menu option 4 Nginx upgrade test
+      run: |
+        docker exec cmm_el89 /home/centmin-option-4.sh
+      continue-on-error: true
+
     - name: YUM History Info
       run: |
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"

@@ -1,0 +1,14 @@
+#!/usr/bin/expect -f
+set timeout -1
+spawn ./centmin.sh
+expect "Enter option"
+send -- "4\r"
+expect "Nginx Upgrade - Would you like to continue?"
+send -- "y\r"
+expect "Install which version of Nginx"
+send -- "1.25.1\r"
+expect "Do you still want to continue?"
+send -- "y\r"
+expect "Enter option"
+send -- "24\r"
+expect eof
