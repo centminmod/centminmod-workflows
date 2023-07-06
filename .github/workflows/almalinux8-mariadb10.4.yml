@@ -38,6 +38,16 @@ jobs:
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-mariadb10.4.sh | bash"
       continue-on-error: true
 
+    - name: Disk Usage Analysis
+      run: |
+        docker exec cmm_el89 bash -c "du -sh /svr-setup"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "df -hT"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+        docker exec cmm_el89 bash -c "echo '---'"
+      continue-on-error: true
+
     - name: centmin.sh setup
       run: |
         sleep 1
