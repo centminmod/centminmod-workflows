@@ -166,7 +166,7 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem"
+        docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
       continue-on-error: true
