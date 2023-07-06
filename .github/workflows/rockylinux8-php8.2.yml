@@ -205,7 +205,7 @@ jobs:
     
     - name: Check permissions of /var/log/journal
       run: |
-        docker exec cmm_el89 bash -c "ls -ld /var/log/journal"
+        docker exec cmm_el89 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
       continue-on-error: true
     
     - name: Show recent systemd-journald logs
