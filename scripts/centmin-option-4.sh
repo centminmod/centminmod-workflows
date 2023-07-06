@@ -1,6 +1,6 @@
 #!/usr/bin/expect -f
 set timeout -1
-spawn ./centmin.sh
+spawn /usr/local/src/centminmod/centmin.sh
 expect "Enter option"
 send -- "4\r"
 expect "Nginx Upgrade - Would you like to continue?"
