@@ -111,8 +111,9 @@ jobs:
         docker exec cmm_el89 bash -c "curl -sIv http://localhost"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "/usr/local/sbin/nginx -V"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ldd /usr/local/sbin/nginx"
+        docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
     - name: Inspect MariaDB setup
