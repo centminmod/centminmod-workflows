@@ -176,7 +176,7 @@ jobs:
         sleep 1
         docker exec cmm_el89 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
         sleep 1
-        docker exec cmm_el89 bash -c "systemctl status chronyd.service"
+        docker exec cmm_el89 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
       continue-on-error: true
 
     - name: Inspect CSF Firewall setup
