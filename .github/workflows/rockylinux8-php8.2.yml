@@ -234,6 +234,21 @@ jobs:
         docker exec cmm_el89 bash -c "/usr/bin/nv -d domain.com -s y"
       continue-on-error: true
 
+    - name: Test mysqladmin_shell.sh MySQL Database Management
+      run: |
+        docker exec cmm_el89 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "echo 'multidb'"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "echo 'createuserdb'"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "echo 'showgrants'"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/mysqladmin_shell.sh showgrants"
+        docker exec cmm_el89 bash -c "echo '---'"
+      continue-on-error: true
+
     - name: YUM History Info
       run: |
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
