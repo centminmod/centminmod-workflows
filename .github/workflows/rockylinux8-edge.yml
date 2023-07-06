@@ -245,7 +245,9 @@ jobs:
         docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "echo 'showgrants'"
-        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+        docker exec cmm_el89 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+        docker exec cmm_el89 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+        docker exec cmm_el89 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
