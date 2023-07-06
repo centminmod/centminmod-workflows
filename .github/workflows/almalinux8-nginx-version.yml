@@ -1,4 +1,4 @@
-name: AlmaLinux 8
+name: AlmaLinux 8 Nginx Version Triggered
 
 on:
   workflow_dispatch:
