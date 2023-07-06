@@ -137,7 +137,7 @@ jobs:
         sleep 1
         docker exec cmm_el89 bash -c "pip --version"
         sleep 1
-        docker exec cmm_el89 bash -c "alternatives --list | egrep -i 'pip|python'"
+        docker exec cmm_el89 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
       continue-on-error: true
 
     - name: Inspect Redis Server setup
