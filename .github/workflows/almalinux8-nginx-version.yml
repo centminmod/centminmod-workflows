@@ -38,8 +38,11 @@ jobs:
         load: true
         tags: cmm_el89:latest
 
-    - name: Debug payload
+    - name: Debug payload (repository_dispatch)
       run: echo ${{ github.event.client_payload.release }}
+      
+    - name: Debug input (workflow_dispatch)
+      run: echo ${{ github.event.inputs.release }}
 
     - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
       env:
