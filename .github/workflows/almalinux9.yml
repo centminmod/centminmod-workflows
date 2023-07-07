@@ -31,6 +31,12 @@ jobs:
         load: true
         tags: cmm_el89:latest
 
+    - name: Debug payload (repository_dispatch)
+      run: echo ${{ github.event.client_payload.release }}
+      
+    - name: Debug input (workflow_dispatch)
+      run: echo ${{ github.event.inputs.release }}
+
     - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
       run: |
         docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
