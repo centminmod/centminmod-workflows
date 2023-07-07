@@ -54,8 +54,14 @@ jobs:
         docker exec cmm_el89 bash -c "curl -4sLO https://centminmod.com/installer-el8x.sh"
         docker exec cmm_el89 bash -c "dos2unix installer-el8x.sh"
         docker exec -e NGINX_VERSION=${NGINX_VERSION} cmm_el89 bash -c "sed -i 's|NGINX_VERSION='\''[^'\'']*'\''|NGINX_VERSION='\''${NGINX_VERSION}'\''|g' installer-el8x.sh"
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "grep 'NGINX_VERSION=' installer-el8x.sh"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/centminmod/custom_config.inc"
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "bash installer-el8x.sh"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/centminmod/custom_config.inc"
       continue-on-error: false
 
     - name: Disk Usage Analysis
