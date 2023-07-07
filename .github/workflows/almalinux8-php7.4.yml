@@ -266,3 +266,27 @@ jobs:
       run: |
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
+
+  discordNotificationSuccess:
+    needs: build
+    if: ${{ success() }} # Only run this job if the previous job was successful
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify Discord Success
+      run: |
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  discordNotificationFailure:
+    needs: build
+    if: ${{ failure() }} # Only run this job if the previous job was unsuccessful
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify Discord Failure
+      run: |
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
