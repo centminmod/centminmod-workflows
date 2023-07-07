@@ -43,7 +43,7 @@ jobs:
 
     - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
       env:
-        NGINX_VERSION: ${{ github.event.client_payload.release != null && github.event.client_payload.release || env.FALLBACK_NGINX_VERSION }}
+        NGINX_VERSION: ${{ (github.event.client_payload.release != null && github.event.client_payload.release) || (github.event.inputs.release != null && github.event.inputs.release) || env.FALLBACK_NGINX_VERSION }}
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
