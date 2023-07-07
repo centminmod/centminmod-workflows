@@ -47,8 +47,8 @@ jobs:
         docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod && touch /etc/centminmod/custom_config.inc"
         docker exec cmm_el89 bash -c "curl -4sLO https://centminmod.com/installer-el8x.sh"
         docker exec cmm_el89 bash -c "dos2unix installer-el8x.sh"
-        docker exec cmm_el89 bash -c "NGINX_VERSION=${NGINX_VERSION} sed -i 's|NGINX_VERSION='\''[^'\'']*'\''|NGINX_VERSION='\''\${NGINX_VERSION}'\''|g' installer-el8x.sh"
-        docker exec cmm_el89 bash -c "NGINX_VERSION=${NGINX_VERSION} grep 'NGINX_VERSION=' installer-el8x.sh"
+        docker exec -e NGINX_VERSION=${NGINX_VERSION} cmm_el89 bash -c "sed -i 's|NGINX_VERSION='\''[^'\'']*'\''|NGINX_VERSION='\''${NGINX_VERSION}'\''|g' installer-el8x.sh"
+        docker exec cmm_el89 bash -c "grep 'NGINX_VERSION=' installer-el8x.sh"
         docker exec cmm_el89 bash -c "bash installer-el8x.sh"
       continue-on-error: false
 
