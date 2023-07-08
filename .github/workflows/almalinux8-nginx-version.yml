@@ -241,8 +241,29 @@ jobs:
 
     - name: Run cminfo
       run: |
-        sleep 1
         docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+      continue-on-error: true
+
+    - name: Run tools/nginx-binary-backup.sh
+      run: |
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/nginx-binary-backup.sh backup"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/nginx-binary-backup.sh list"
+      continue-on-error: true
+
+    - name: Run addons/golang.sh
+      run: |
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+      continue-on-error: true
+
+    - name: Run addons/nodejs.sh
+      run: |
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+      continue-on-error: true
+
+    - name: Run addons/opendkim.sh
+      run: |
+        docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
       continue-on-error: true
 
     - name: Run tools/csfcf.sh
