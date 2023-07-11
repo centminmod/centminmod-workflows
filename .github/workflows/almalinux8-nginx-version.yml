@@ -296,6 +296,11 @@ jobs:
         docker exec cmm_el89 /home/centmin-option-4.sh
       continue-on-error: true
 
+    - name: Run cmupdate
+      run: |
+        docker exec cmm_el89 bash -c "cmupdate"
+      continue-on-error: true
+
     - name: YUM History Info
       run: |
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
