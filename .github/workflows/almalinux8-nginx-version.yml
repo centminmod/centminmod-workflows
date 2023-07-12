@@ -213,6 +213,8 @@ jobs:
         docker exec cmm_el89 bash -c "csf -v"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "csf -ra"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /etc/csf/csf.allow"
       continue-on-error: true
 
     - name: Inspect logrotation setup
