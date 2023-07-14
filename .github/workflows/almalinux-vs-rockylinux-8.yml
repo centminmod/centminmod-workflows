@@ -611,7 +611,7 @@ jobs:
       - name: Compare AlmaLinux 8 vs Rocky Linux installed packages and repos
         run: |
           mkdir artifacts
-          sudo apt-get update && sudo apt-get install -y diffutils
+          sudo apt-get update && sudo apt-get install -y diffutils || true
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt
           sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt
           diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt
