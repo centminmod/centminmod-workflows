@@ -629,6 +629,12 @@ jobs:
           echo "Running sdiff on repo lists"
           sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt || true
 
+      - name: Upload comparison artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: comparison_results
+          path: artifacts/
+
   discordNotificationSuccess:
     needs: [almalinux, rockylinux, compare]
     if: ${{ success() }}
