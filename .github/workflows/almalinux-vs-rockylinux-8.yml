@@ -14,7 +14,7 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -s -L https://github.com/nestybox/sysbox/releases/download/v0.4.1/sysbox_0.4.1-0.ubuntu-focal_amd64.deb -o sysbox.deb
+          curl -s -L https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb -o sysbox.deb
           sudo apt-get -y update
           sudo apt-get -y install ./sysbox.deb
 
@@ -296,7 +296,7 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -s -L https://github.com/nestybox/sysbox/releases/download/v0.4.1/sysbox_0.4.1-0.ubuntu-focal_amd64.deb -o sysbox.deb
+          curl -s -L https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb -o sysbox.deb
           sudo apt-get -y update
           sudo apt-get -y install ./sysbox.deb
 
