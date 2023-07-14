@@ -630,7 +630,7 @@ jobs:
           sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt || true
 
   discordNotificationSuccess:
-    needs: [almalinux, rockylinux]
+    needs: [almalinux, rockylinux, compare]
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
@@ -642,7 +642,7 @@ jobs:
              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   discordNotificationFailure:
-    needs: [almalinux, rockylinux]
+    needs: [almalinux, rockylinux, compare]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
