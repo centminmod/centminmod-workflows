@@ -290,7 +290,7 @@ jobs:
       - name: Generate AlmaLinux package and repo lists
         run: |
           mkdir artifacts
-          docker exec cmm_almalinux8 yum list installed | sort > artifacts/almalinux_packages.txt
+          docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' > artifacts/almalinux_packages.txt
           docker exec cmm_almalinux8 yum repolist all > artifacts/almalinux_repos.txt
 
       - name: Upload AlmaLinux package and repo lists
@@ -583,7 +583,7 @@ jobs:
       - name: Generate Rocky Linux package and repo lists
         run: |
           mkdir artifacts
-          docker exec cmm_rockylinux8 yum list installed | sort > artifacts/rockylinux_packages.txt
+          docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' > artifacts/rockylinux_packages.txt
           docker exec cmm_rockylinux8 yum repolist all > artifacts/rockylinux_repos.txt
 
       - name: Upload Rocky Linux package and repo lists
@@ -623,11 +623,11 @@ jobs:
           echo "Running diff on package lists"
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt || true
           echo "Running sdiff on package lists"
-          sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt || true
+          sdiff -s -w 180 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt || true
           echo "Running diff on repo lists"
           diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt || true
           echo "Running sdiff on repo lists"
-          sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt || true
+          sdiff -s -w 180 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt || true
 
       - name: Upload comparison artifacts
         uses: actions/upload-artifact@v3
