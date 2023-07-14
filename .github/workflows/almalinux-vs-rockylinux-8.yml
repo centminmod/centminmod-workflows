@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Sysbox
         run: |
@@ -294,7 +294,7 @@ jobs:
           docker exec cmm_almalinux8 yum repolist all > artifacts/almalinux_repos.txt
 
       - name: Upload AlmaLinux package and repo lists
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: almalinux_lists
           path: artifacts/*
@@ -303,7 +303,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Sysbox
         run: |
@@ -587,7 +587,7 @@ jobs:
           docker exec cmm_rockylinux8 yum repolist all > artifacts/rockylinux_repos.txt
 
       - name: Upload Rocky Linux package and repo lists
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: rockylinux_lists
           path: artifacts/*
@@ -597,13 +597,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Download almalinux package and repo lists
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: almalinux_lists
           path: almalinux
   
       - name: Download rockylinux package and repo lists
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: rockylinux_lists
           path: rockylinux
