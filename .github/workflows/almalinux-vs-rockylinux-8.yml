@@ -287,6 +287,18 @@ jobs:
           docker exec cmm_almalinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
         continue-on-error: true
 
+      - name: Generate AlmaLinux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_almalinux8 yum list installed | sort > artifacts/almalinux_packages.txt
+          docker exec cmm_almalinux8 yum repolist all > artifacts/almalinux_repos.txt
+
+      - name: Upload AlmaLinux package and repo lists
+        uses: actions/upload-artifact@v2
+        with:
+          name: almalinux_lists
+          path: artifacts/*
+
   rockylinux:
     runs-on: ubuntu-22.04
     steps:
@@ -568,33 +580,52 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
         continue-on-error: true
 
+      - name: Generate Rocky Linux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_rockylinux8 yum list installed | sort > artifacts/rockylinux_packages.txt
+          docker exec cmm_rockylinux8 yum repolist all > artifacts/rockylinux_repos.txt
+
+      - name: Upload Rocky Linux package and repo lists
+        uses: actions/upload-artifact@v2
+        with:
+          name: rockylinux_lists
+          path: artifacts/*
+
   compare:
     needs: [almalinux, rockylinux]
     runs-on: ubuntu-22.04
     steps:
+      - name: Download package and repo lists
+        uses: actions/download-artifact@v2
+        with:
+          name: almalinux_lists
+          path: almalinux
+        uses: actions/download-artifact@v2
+        with:
+          name: rockylinux_lists
+          path: rockylinux
+
       - name: Compare AlmaLinux 8 vs Rocky Linux installed packages and repos
         run: |
-          docker exec cmm_almalinux8 repoquery --installed --qf '%{NAME} %{VERSION}-%{RELEASE} %{SIZE}' | sort > almalinux_packages.txt
-          docker exec cmm_rockylinux8 repoquery --installed --qf '%{NAME} %{VERSION}-%{RELEASE} %{SIZE}' | sort > rockylinux_packages.txt
+          mkdir artifacts
           sudo apt-get update && sudo apt-get install -y diffutils
-          diff almalinux_packages.txt rockylinux_packages.txt > packages_diff.txt
-          sdiff -s -w 120 almalinux_packages.txt rockylinux_packages.txt > packages_sdiff.txt
-          docker exec cmm_almalinux8 yum repolist all > almalinux_repos.txt
-          docker exec cmm_rockylinux8 yum repolist all > rockylinux_repos.txt
-          diff almalinux_repos.txt rockylinux_repos.txt > repos_diff.txt
-          sdiff -s -w 120 almalinux_repos.txt rockylinux_repos.txt > repos_sdiff.txt
+          diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt
+          sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt
+          diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt
+          sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt
           echo
-          echo "packages_diff.txt"
-          cat packages_diff.txt
+          echo "artifacts/packages_diff.txt"
+          cat artifacts/packages_diff.txt
           echo
-          echo "packages_sdiff.txt"
-          cat packages_sdiff.txt
+          echo "artifacts/packages_sdiff.txt"
+          cat artifacts/packages_sdiff.txt
           echo
-          echo "repos_diff.txt"
-          cat repos_diff.txt
+          echo "artifacts/repos_diff.txt"
+          cat artifacts/repos_diff.txt
           echo
-          echo "repos_sdiff.txt"
-          cat repos_sdiff.txt
+          echo "artifacts/repos_sdiff.txt"
+          cat artifacts/repos_sdiff.txt
 
   discordNotificationSuccess:
     needs: [almalinux, rockylinux]
