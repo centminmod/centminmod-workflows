@@ -596,11 +596,13 @@ jobs:
     needs: [almalinux, rockylinux]
     runs-on: ubuntu-22.04
     steps:
-      - name: Download package and repo lists
+      - name: Download almalinux package and repo lists
         uses: actions/download-artifact@v2
         with:
           name: almalinux_lists
           path: almalinux
+  
+      - name: Download rockylinux package and repo lists
         uses: actions/download-artifact@v2
         with:
           name: rockylinux_lists
