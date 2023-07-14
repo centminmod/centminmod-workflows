@@ -610,24 +610,24 @@ jobs:
 
       - name: Compare AlmaLinux 8 vs Rocky Linux installed packages and repos
         run: |
+          set -x
+          echo "Creating artifacts directory"
           mkdir artifacts
+          echo "Installing diffutils"
           sudo apt-get update && sudo apt-get install -y diffutils || true
+          echo "List artifacts"
+          echo "ls -lAh almalinux"
+          ls -lAh almalinux
+          echo "ls -lAh rockylinux"
+          ls -lAh rockylinux
+          echo "Running diff on package lists"
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt
+          echo "Running sdiff on package lists"
           sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt
+          echo "Running diff on repo lists"
           diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt
+          echo "Running sdiff on repo lists"
           sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt
-          echo
-          echo "artifacts/packages_diff.txt"
-          cat artifacts/packages_diff.txt
-          echo
-          echo "artifacts/packages_sdiff.txt"
-          cat artifacts/packages_sdiff.txt
-          echo
-          echo "artifacts/repos_diff.txt"
-          cat artifacts/repos_diff.txt
-          echo
-          echo "artifacts/repos_sdiff.txt"
-          cat artifacts/repos_sdiff.txt
 
   discordNotificationSuccess:
     needs: [almalinux, rockylinux]
