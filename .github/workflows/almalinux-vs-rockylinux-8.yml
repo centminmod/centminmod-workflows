@@ -621,13 +621,13 @@ jobs:
           echo "ls -lAh rockylinux"
           ls -lAh rockylinux
           echo "Running diff on package lists"
-          diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt
+          diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_diff.txt || true
           echo "Running sdiff on package lists"
-          sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt
+          sdiff -s -w 120 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt > artifacts/packages_sdiff.txt || true
           echo "Running diff on repo lists"
-          diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt
+          diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_diff.txt || true
           echo "Running sdiff on repo lists"
-          sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt
+          sdiff -s -w 120 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt > artifacts/repos_sdiff.txt || true
 
   discordNotificationSuccess:
     needs: [almalinux, rockylinux]
