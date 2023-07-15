@@ -291,6 +291,7 @@ jobs:
         run: |
           mkdir artifacts
           docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | tee artifacts/almalinux_packages.txt
+          docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/almalinux_packages_filtered.txt
           docker exec cmm_almalinux8 yum repolist all | tee artifacts/almalinux_repos.txt
 
       - name: Upload AlmaLinux package and repo lists
@@ -584,6 +585,7 @@ jobs:
         run: |
           mkdir artifacts
           docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | tee artifacts/rockylinux_packages.txt
+          docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/rockylinux_packages_filtered.txt
           docker exec cmm_rockylinux8 yum repolist all | tee artifacts/rockylinux_repos.txt
 
       - name: Upload Rocky Linux package and repo lists
@@ -622,6 +624,8 @@ jobs:
           ls -lAh rockylinux
           echo "Running diff on package lists"
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_diff.txt || true
+          echo "Running diff on filtered package lists"
+          diff almalinux/almalinux_packages_filtered.txt rockylinux/rockylinux_packages_filtered.txt | tee artifacts/packages_diff_filtered.txt || true
           echo "Running sdiff on package lists"
           sdiff -s -w 180 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_sdiff.txt || true
           echo "Running diff on repo lists"
