@@ -594,7 +594,6 @@ jobs:
           name: rockylinux_lists
           path: artifacts/*
 
-
   oraclelinux:
     runs-on: ubuntu-22.04
     steps:
