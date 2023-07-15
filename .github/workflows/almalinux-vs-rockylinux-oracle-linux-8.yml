@@ -293,6 +293,7 @@ jobs:
           docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | tee artifacts/almalinux_packages.txt
           docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/almalinux_packages_filtered.txt
           docker exec cmm_almalinux8 yum repolist all | tee artifacts/almalinux_repos.txt
+          docker exec cmm_almalinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/almalinux_repoquery.txt
 
       - name: Upload AlmaLinux package and repo lists
         uses: actions/upload-artifact@v3
@@ -587,6 +588,7 @@ jobs:
           docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | tee artifacts/rockylinux_packages.txt
           docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/rockylinux_packages_filtered.txt
           docker exec cmm_rockylinux8 yum repolist all | tee artifacts/rockylinux_repos.txt
+          docker exec cmm_rockylinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d'| tee artifacts/rockylinux_repoquery.txt
 
       - name: Upload Rocky Linux package and repo lists
         uses: actions/upload-artifact@v3
@@ -881,6 +883,7 @@ jobs:
           docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | tee artifacts/oraclelinux_packages.txt
           docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/oraclelinux_packages_filtered.txt
           docker exec cmm_oraclelinux8 yum repolist all | tee artifacts/oraclelinux_repos.txt
+          docker exec cmm_oraclelinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' tee artifacts/oraclelinux_repoquery.txt
 
       - name: Upload Oracle Linux package and repo lists
         uses: actions/upload-artifact@v3
@@ -948,6 +951,14 @@ jobs:
           diff almalinux/almalinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_diff_almalinux8-vs-oraclelinux8.txt || true
           echo "Running sdiff on repo lists - Almalinux 8 vs Oracle Linux 8"
           sdiff -s -w 220 almalinux/almalinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_sdiff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on repoquery lists - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_repoquery.txt rockylinux/rockylinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running sdiff on repoquery lists - AlmaLinux 8 vs Rocky Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repoquery.txt rockylinux/rockylinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running diff on repoquery lists - Almalinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on repoquery lists - Almalinux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux8-vs-oraclelinux8.txt || true
 
       - name: Upload comparison artifacts
         uses: actions/upload-artifact@v3
