@@ -588,7 +588,7 @@ jobs:
           docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | tee artifacts/rockylinux_packages.txt
           docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/rockylinux_packages_filtered.txt
           docker exec cmm_rockylinux8 yum repolist all | tee artifacts/rockylinux_repos.txt
-          docker exec cmm_rockylinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d'| tee artifacts/rockylinux_repoquery.txt
+          docker exec cmm_rockylinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/rockylinux_repoquery.txt
 
       - name: Upload Rocky Linux package and repo lists
         uses: actions/upload-artifact@v3
@@ -883,7 +883,7 @@ jobs:
           docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | tee artifacts/oraclelinux_packages.txt
           docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/oraclelinux_packages_filtered.txt
           docker exec cmm_oraclelinux8 yum repolist all | tee artifacts/oraclelinux_repos.txt
-          docker exec cmm_oraclelinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' tee artifacts/oraclelinux_repoquery.txt
+          docker exec cmm_oraclelinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/oraclelinux_repoquery.txt
 
       - name: Upload Oracle Linux package and repo lists
         uses: actions/upload-artifact@v3
