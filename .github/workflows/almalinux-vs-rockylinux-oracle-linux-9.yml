@@ -294,6 +294,7 @@ jobs:
           docker exec cmm_almalinux9 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/almalinux_packages_filtered.txt
           docker exec cmm_almalinux9 yum repolist all | tee artifacts/almalinux_repos.txt
           docker exec cmm_almalinux9 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/almalinux_repoquery.txt
+          docker exec cmm_almalinux9 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/almalinux_kernel-version.txt
 
       - name: Upload AlmaLinux package and repo lists
         uses: actions/upload-artifact@v3
@@ -600,6 +601,7 @@ jobs:
           docker exec cmm_rockylinux9 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/rockylinux_packages_filtered.txt
           docker exec cmm_rockylinux9 yum repolist all | tee artifacts/rockylinux_repos.txt
           docker exec cmm_rockylinux9 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/rockylinux_repoquery.txt
+          docker exec cmm_rockylinux9 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/rockylinux_kernel-version.txt
 
       - name: Upload Rocky Linux package and repo lists
         uses: actions/upload-artifact@v3
@@ -906,6 +908,7 @@ jobs:
           docker exec cmm_oraclelinux9 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/oraclelinux_packages_filtered.txt
           docker exec cmm_oraclelinux9 yum repolist all | tee artifacts/oraclelinux_repos.txt
           docker exec cmm_oraclelinux9 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/oraclelinux_repoquery.txt
+          docker exec cmm_oraclelinux9 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/oraclelinux_kernel-version.txt
 
       - name: Upload Oracle Linux package and repo lists
         uses: actions/upload-artifact@v3
@@ -1016,6 +1019,10 @@ jobs:
           diff almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux9-vs-oraclelinux9.txt || true
           echo "Running sdiff on repoquery lists - Almalinux 9 vs Oracle Linux 9"
           sdiff -s -w 220 almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux9-vs-oraclelinux9.txt || true
+          echo "Running diff latest kernel version - AlmaLinux 9 vs Rocky Linux 9"
+          diff almalinux/almalinux_kernel-version.txt rockylinux/rockylinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux9-vs-rockylinux9.txt || true
+          echo "Running diff latest kernel version - AlmaLinux 9 vs Oracle Linux 9"
+          diff almalinux/almalinux_kernel-version.txt oraclelinux/oraclelinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux9-vs-oraclelinux9.txt || true
 
       - name: Upload comparison artifacts
         uses: actions/upload-artifact@v3
