@@ -949,19 +949,19 @@ jobs:
       - name: Download AlmaLinux Centmin Mod log
         uses: actions/download-artifact@v3
         with:
-          name: almalinux_log
+          name: almalinux_logs
           path: almalinux_logs
 
       - name: Download Rocky Linux Centmin Mod log
         uses: actions/download-artifact@v3
         with:
-          name: rockylinux_log
+          name: rockylinux_logs
           path: rockylinux_logs
 
       - name: Download Oracle Linux Centmin Mod log
         uses: actions/download-artifact@v3
         with:
-          name: oraclelinux_log
+          name: oraclelinux_logs
           path: oraclelinux_logs
 
       - name: Compare AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 installed packages and repos
