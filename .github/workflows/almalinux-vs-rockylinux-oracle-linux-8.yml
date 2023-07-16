@@ -301,6 +301,17 @@ jobs:
           name: almalinux_lists
           path: artifacts/*
 
+      - name: Copy AlmaLinux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_almalinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload AlmaLinux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: almalinux_logs
+          path: centminlogs/*
+
   rockylinux:
     runs-on: ubuntu-22.04
     steps:
@@ -595,6 +606,17 @@ jobs:
         with:
           name: rockylinux_lists
           path: artifacts/*
+
+      - name: Copy Rocky Linux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_rockylinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload Rocky Linux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: rockylinux_logs
+          path: centminlogs/*
 
   oraclelinux:
     runs-on: ubuntu-22.04
@@ -891,6 +913,17 @@ jobs:
           name: oraclelinux_lists
           path: artifacts/*
 
+      - name: Copy Oracle Linux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_oraclelinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload Oracle Linux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: oraclelinux_logs
+          path: centminlogs/*
+
   compare:
     needs: [almalinux, rockylinux, oraclelinux]
     runs-on: ubuntu-22.04
@@ -913,11 +946,29 @@ jobs:
           name: oraclelinux_lists
           path: oraclelinux
 
+      - name: Download AlmaLinux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: almalinux_log
+          path: almalinux_logs
+
+      - name: Download Rocky Linux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: rockylinux_log
+          path: rockylinux_logs
+
+      - name: Download Oracle Linux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: oraclelinux_log
+          path: oraclelinux_logs
+
       - name: Compare AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 installed packages and repos
         run: |
           set -x
           echo "Creating artifacts directory"
-          mkdir artifacts
+          mkdir -p artifacts
           echo "Installing diffutils"
           sudo apt-get update && sudo apt-get install -y diffutils || true
           echo "List artifacts"
@@ -927,6 +978,12 @@ jobs:
           ls -lAh rockylinux
           echo "ls -lAh oraclelinux"
           ls -lAh oraclelinux
+          echo "ls -lAh almalinux_logs"
+          ls -lAh almalinux_logs
+          echo "ls -lAh rockylinux_logs"
+          ls -lAh rockylinux_logs
+          echo "ls -lAh oraclelinux_logs"
+          ls -lAh oraclelinux_logs
           echo "Running diff on package lists - AlmaLinux 8 vs Rocky Linux 8"
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_diff_almalinux8-vs-rockylinux8.txt || true
           echo "Running diff on filtered package lists - AlmaLinux 8 vs Rocky Linux 8"
@@ -965,6 +1022,24 @@ jobs:
         with:
           name: comparison_results
           path: artifacts/
+
+      - name: Upload AlmaLinux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: almalinux_cmm_logs
+          path: almalinux_logs/
+
+      - name: Upload Rocky Linux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rockylinux_cmm_logs
+          path: rockylinux_logs/
+
+      - name: Upload Oracle Linux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: oraclelinux_cmm_logs
+          path: oraclelinux_logs/
 
   discordNotificationSuccess:
     needs: [almalinux, rockylinux, compare]
