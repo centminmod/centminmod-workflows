@@ -300,6 +300,7 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "./cmm-mariadb10-switch-mysql8-2023.sh swap"
         docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "/usr/local/bin/mysql8-update"
       continue-on-error: true
 
   discordNotificationSuccess:
