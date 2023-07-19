@@ -304,6 +304,12 @@ jobs:
           docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "echo 'Switch to caching_sha2_password plugin method'"
+          docker exec cmm_almalinux8 bash -c "mysqlroot_user_pass=$(awk -F '=' '/password=/{print $2}' /root/.my.cnf | sed -e "s|'||g"); mysql -e \"ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password USING PASSWORD('$mysqlroot_user_pass')\""
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "mysql -e \"select concat(user, '@', host, ' => ', json_detailed(priv)) from mysql.global_priv;\""
+          docker exec cmm_almalinux8 bash -c "mysqladmin ver"
         continue-on-error: true
 
       - name: Generate AlmaLinux package and repo lists
@@ -630,6 +636,12 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "echo 'Switch to caching_sha2_password plugin method'"
+          docker exec cmm_rockylinux8 bash -c "mysqlroot_user_pass=$(awk -F '=' '/password=/{print $2}' /root/.my.cnf | sed -e "s|'||g"); mysql -e \"ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password USING PASSWORD('$mysqlroot_user_pass')\""
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "mysql -e \"select concat(user, '@', host, ' => ', json_detailed(priv)) from mysql.global_priv;\""
+          docker exec cmm_rockylinux8 bash -c "mysqladmin ver"
         continue-on-error: true
 
       - name: Generate Rocky Linux package and repo lists
@@ -956,6 +968,12 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'Switch to caching_sha2_password plugin method'"
+          docker exec cmm_oraclelinux8 bash -c "mysqlroot_user_pass=$(awk -F '=' '/password=/{print $2}' /root/.my.cnf | sed -e "s|'||g"); mysql -e \"ALTER USER root@localhost IDENTIFIED WITH caching_sha2_password USING PASSWORD('$mysqlroot_user_pass')\""
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "mysql -e \"select concat(user, '@', host, ' => ', json_detailed(priv)) from mysql.global_priv;\""
+          docker exec cmm_oraclelinux8 bash -c "mysqladmin ver"
         continue-on-error: true
 
       - name: Generate Oracle Linux package and repo lists
