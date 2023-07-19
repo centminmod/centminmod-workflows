@@ -300,6 +300,10 @@ jobs:
           docker exec cmm_almalinux8 bash -c "./cmm-mariadb10-switch-mysql8-2023.sh swap"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/mysql8-update"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "mysqladmin var | tr -s ' '"
         continue-on-error: true
 
       - name: Generate AlmaLinux package and repo lists
@@ -622,6 +626,10 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "./cmm-mariadb10-switch-mysql8-2023.sh swap"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/mysql8-update"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "mysqladmin var | tr -s ' '"
         continue-on-error: true
 
       - name: Generate Rocky Linux package and repo lists
@@ -944,6 +952,10 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "./cmm-mariadb10-switch-mysql8-2023.sh swap"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/mysql8-update"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "mysqladmin var | tr -s ' '"
         continue-on-error: true
 
       - name: Generate Oracle Linux package and repo lists
