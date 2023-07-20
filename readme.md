@@ -17,28 +17,28 @@ Centmin Mod Workflows:
 
 * `AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 8 vs Rocky Linux 8 and AlmaLinux 8 vs Oracle Linux 8.
 * `AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 9 vs Rocky Linux 9 and AlmaLinux 9 vs Oracle Linux 9.
-* `CentOS 8 Stream` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `CentOS 8 Stream` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `CentOS 9 Stream` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Oracle Linux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Oracle Linux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Oracle Linux 9` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `AlmaLinux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `AlmaLinux 9` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Rocky Linux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Rocky Linux 9` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Oracle Linux 8 Edge with PHP 8.1 + Advance Options` - **GCC 12** + MariaDB 10.6 + Nginx 1.25.x with **OpenSSL 3.1.1/PCRE2** + Additional optional Nginx modules for NJS, Brotli, Geolite2, Slice, RTMP, FLV and MP4
 * `AlmaLinux 8 Edge with PHP 8.1 + Advance Options` - **GCC 12** + MariaDB 10.6 + Nginx 1.25.x with **OpenSSL 3.1.1/PCRE2** + Additional optional Nginx modules for NJS, Brotli, Geolite2, Slice, RTMP, FLV and MP4
-* `AlmaLinux 8 with PHP 7.4` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `AlmaLinux 8 with PHP 8.1` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `AlmaLinux 8 with PHP 8.2` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8 with PHP 7.4` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8 with PHP 8.1` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8 with PHP 8.2` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `AlmaLinux 9 with PHP 8.2` - GCC 11 + default PHP 8.2 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Rocky Linux 8 Edge with PHP 8.1 + Advance Options` - **GCC 12** + MariaDB 10.6  + Nginx 1.25.x with **OpenSSL 3.1.1/PCRE2** + Additional optional Nginx modules for NJS, Brotli, Geolite2, Slice, RTMP, FLV and MP4
-* `Rocky Linux 8 with PHP 7.4` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Rocky Linux 8 with PHP 8.1` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Rocky Linux 8 with PHP 8.2` - GCC 11 + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8 with PHP 7.4` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8 with PHP 8.1` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8 with PHP 8.2` - GCC 11 + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Rocky Linux 9 with PHP 8.2` - GCC 11 + default PHP 8.2 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `AlmaLinux 8 with MariaDB 10.4 Default` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `AlmaLinux 8 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.0 install + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8 with MariaDB 10.4 Default` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `AlmaLinux 8 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `AlmaLinux 9 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Rocky Linux 8 with MariaDB 10.4 Default` - GCC 11 + default PHP 8.0 install  + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
-* `Rocky Linux 8 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.0 install  + MariaDB 10.3 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8 with MariaDB 10.4 Default` - GCC 11 + default PHP 8.0 install  + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
+* `Rocky Linux 8 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.0 install  + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
 * `Rocky Linux 9 with MariaDB 10.6 Default` - GCC 11 + default PHP 8.1 install + MariaDB 10.6 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
