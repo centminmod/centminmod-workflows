@@ -316,6 +316,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "mysqladmin ver"
         continue-on-error: true
 
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_almalinux8 /home/centmin-option-5.sh
+        continue-on-error: true
+
       - name: Generate AlmaLinux package and repo lists
         run: |
           mkdir artifacts
@@ -652,6 +657,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "mysqladmin ver"
         continue-on-error: true
 
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_rockylinux8 /home/centmin-option-5.sh
+        continue-on-error: true
+
       - name: Generate Rocky Linux package and repo lists
         run: |
           mkdir artifacts
@@ -986,6 +996,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "mysql -e \"select concat(user, '@', host, ' => ', json_detailed(priv)) from mysql.global_priv;\""
           docker exec cmm_oraclelinux8 bash -c "mysqladmin ver"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
         continue-on-error: true
 
       - name: Generate Oracle Linux package and repo lists
