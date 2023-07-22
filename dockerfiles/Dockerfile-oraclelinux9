@@ -41,5 +41,14 @@ RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service sy
 COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
 RUN chmod +x /home/centmin-option-4.sh
 
+COPY scripts/centmin-option-5.sh /home/centmin-option-5.sh
+RUN chmod +x /home/centmin-option-5.sh
+
+COPY scripts/centmin-option-5-php8.1.sh /home/centmin-option-5-php8.1.sh
+RUN chmod +x /home/centmin-option-5-php8.1.sh
+
+COPY scripts/centmin-option-5-php8.2.sh /home/centmin-option-5-php8.2.sh
+RUN chmod +x /home/centmin-option-5-php8.2.sh
+
 VOLUME [ "/sys/fs/cgroup", "/run" ]
 CMD ["/sbin/init"]
