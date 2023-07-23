@@ -297,6 +297,17 @@ jobs:
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
 
+    - name: Copy AlmaLinux Centmin Mod logs from container
+      run: |
+        mkdir -p ./centminlogs
+        docker cp cmm_el89:/root/centminlogs ./centminlogs
+
+    - name: Upload AlmaLinux Centmin Mod Logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: almalinux_logs
+        path: centminlogs/*
+
   discordNotificationSuccess:
     needs: build
     if: ${{ success() }} # Only run this job if the previous job was successful
