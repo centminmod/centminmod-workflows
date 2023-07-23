@@ -113,6 +113,12 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/modules"
         docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/conf/lua-package-path-include.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "cat /usr/local/nginx/conf/lua-package-path-include.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "grep 'lua-package-path-include.conf' /usr/local/nginx/conf/nginx.conf"
+        docker exec cmm_el89 bash -c "echo '---'"
         sleep 1
         docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid"
         sleep 1
