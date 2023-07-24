@@ -3,7 +3,7 @@ name: CentOS 8 Stream + Nginx Lua Enabled
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-centosstream-8-workflow]
+    types: [run-centosstream-8-workflow-lua]
 
 jobs:
   build:

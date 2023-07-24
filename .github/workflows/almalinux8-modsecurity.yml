@@ -1,9 +1,9 @@
-name: CentOS 9 Stream + Nginx Lua Enabled
+name: AlmaLinux 8 + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-centosstream-9-workflow-lua]
+    types: [run-almalinux-8-workflow-modsecurity]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-centos9stream
+        file: ./dockerfiles/Dockerfile-almalinux8
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
@@ -37,11 +37,11 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP CentOS 9 Stream Install
+    - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-lua.sh | bash"
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-modsecurity.sh | bash"
       continue-on-error: true
 
     - name: Disk Usage Analysis
@@ -300,15 +300,15 @@ jobs:
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
 
-    - name: Copy CentOS 9 Stream Centmin Mod logs from container
+    - name: Copy AlmaLinux Centmin Mod logs from container
       run: |
         mkdir -p ./centminlogs
         docker cp cmm_el89:/root/centminlogs ./centminlogs
 
-    - name: Upload CentOS 9 Stream Centmin Mod Logs
+    - name: Upload AlmaLinux Centmin Mod Logs
       uses: actions/upload-artifact@v3
       with:
-        name: centos9stream_logs
+        name: almalinux_logs
         path: centminlogs/*
 
   discordNotificationSuccess:

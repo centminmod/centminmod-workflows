@@ -1,9 +1,9 @@
-name: CentOS 9 Stream + Nginx Lua Enabled
+name: CentOS 9 Stream + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-centosstream-9-workflow-lua]
+    types: [run-centosstream-9-workflow-modsecurity]
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-lua.sh | bash"
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-modsecurity.sh | bash"
       continue-on-error: true
 
     - name: Disk Usage Analysis
