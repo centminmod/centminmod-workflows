@@ -109,22 +109,21 @@ jobs:
     - name: Inspect Nginx setup
       run: |
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/logs"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/logs || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/modules"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/modules || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/conf/lua-package-path-include.conf"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/conf/lua-package-path-include.conf || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/${BUILDLUA_VER}/resty/"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/5.1/resty/ || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/${BUILDLUA_VER}/resty/core"
+        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/5.1/resty/core || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "cat /usr/local/nginx/conf/lua-package-path-include.conf"
+        docker exec cmm_el89 bash -c "cat /usr/local/nginx/conf/lua-package-path-include.conf || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "grep 'lua-package-path-include.conf' /usr/local/nginx/conf/nginx.conf"
+        docker exec cmm_el89 bash -c "grep 'lua-package-path-include.conf' /usr/local/nginx/conf/nginx.conf || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        sleep 1
-        docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+        docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid || true"
         sleep 1
         docker exec cmm_el89 bash -c "ps aux | grep nginx"
         sleep 1
