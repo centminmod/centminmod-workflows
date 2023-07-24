@@ -303,6 +303,17 @@ jobs:
         docker exec cmm_el89 bash -c "/usr/local/bin/mysql8-update"
       continue-on-error: true
 
+    - name: Copy AlmaLinux Centmin Mod logs from container
+      run: |
+        mkdir -p ./centminlogs
+        docker cp cmm_el89:/root/centminlogs ./centminlogs
+
+    - name: Upload AlmaLinux Centmin Mod Logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: almalinux_logs
+        path: centminlogs/*
+
   discordNotificationSuccess:
     needs: build
     if: ${{ success() }} # Only run this job if the previous job was successful
