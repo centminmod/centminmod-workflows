@@ -85,13 +85,15 @@ jobs:
         continue-on-error: true
   
       - name: Inspect PHP-FPM setup
+        id: php_test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "systemctl restart php-fpm.service"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service"
+          docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
+          echo "::set-output name=php_test_status::$PHP_TEST_STATUS"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "php-config || true"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -317,6 +319,9 @@ jobs:
           name: almalinux_logs
           path: centminlogs/*
 
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
+
   rockylinux:
     runs-on: ubuntu-22.04
     steps:
@@ -396,13 +401,15 @@ jobs:
         continue-on-error: true
   
       - name: Inspect PHP-FPM setup
+        id: php_test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "systemctl restart php-fpm.service"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service"
+          docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
+          echo "::set-output name=php_test_status::$PHP_TEST_STATUS"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "php-config || true"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -628,6 +635,9 @@ jobs:
           name: rockylinux_logs
           path: centminlogs/*
 
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
+
   oraclelinux:
     runs-on: ubuntu-22.04
     steps:
@@ -707,13 +717,15 @@ jobs:
         continue-on-error: true
   
       - name: Inspect PHP-FPM setup
+        id: php_test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "systemctl restart php-fpm.service"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service" && echo "ORACLE_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ORACLE_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
+          echo "::set-output name=php_test_status::$PHP_TEST_STATUS"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "php-config || true"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -939,6 +951,9 @@ jobs:
           name: oraclelinux_logs
           path: centminlogs/*
 
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
+
   compare:
     needs: [almalinux, rockylinux, oraclelinux]
     runs-on: ubuntu-22.04
@@ -1069,9 +1084,9 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}.\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
-
+  
   discordNotificationFailure:
     needs: [almalinux, rockylinux, compare]
     if: ${{ failure() }}
@@ -1081,5 +1096,5 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}.\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
