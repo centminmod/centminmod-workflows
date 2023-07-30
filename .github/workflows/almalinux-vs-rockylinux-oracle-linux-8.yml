@@ -96,7 +96,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
           echo "PHP_TEST_STATUS: $ALMALINUX_PHP_TEST_STATUS"
-          echo "php_test_status=$ALMALINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
+          echo "php_test_status=$ALMALINUX_PHP_TEST_STATUS" >> $GITHUB_ENV
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "php-config || true"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -412,7 +412,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
           echo "PHP_TEST_STATUS: $ROCKYLINUX_PHP_TEST_STATUS"
-          echo "php_test_status=$ROCKYLINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
+          echo "php_test_status=$ROCKYLINUX_PHP_TEST_STATUS" >> $GITHUB_ENV
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "php-config || true"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -728,7 +728,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
           echo "PHP_TEST_STATUS: $ORACLELINUX_PHP_TEST_STATUS"
-          echo "php_test_status=$ORACLELINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
+          echo "php_test_status=$ORACLELINUX_PHP_TEST_STATUS" >> $GITHUB_ENV
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "php-config || true"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
