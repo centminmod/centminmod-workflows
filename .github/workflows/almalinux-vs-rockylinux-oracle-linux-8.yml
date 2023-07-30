@@ -95,6 +95,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "php-config || true"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -409,6 +410,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "php-config || true"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -723,6 +725,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "php-config || true"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1078,7 +1081,7 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}.\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
   
   discordNotificationFailure:
@@ -1090,5 +1093,5 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}.\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
