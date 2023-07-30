@@ -8,6 +8,8 @@ on:
 jobs:
   almalinux:
     runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -94,7 +96,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
           echo "PHP_TEST_STATUS: $ALMALINUX_PHP_TEST_STATUS"
-          echo "::set-output name=php_test_status::$ALMALINUX_PHP_TEST_STATUS"
+          echo "php_test_status=$ALMALINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "php-config || true"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -320,11 +322,10 @@ jobs:
           name: almalinux_logs
           path: centminlogs/*
 
-    outputs:
-      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
-
   rockylinux:
     runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -411,7 +412,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
           echo "PHP_TEST_STATUS: $ROCKYLINUX_PHP_TEST_STATUS"
-          echo "::set-output name=php_test_status::$ROCKYLINUX_PHP_TEST_STATUS"
+          echo "php_test_status=$ROCKYLINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "php-config || true"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -637,11 +638,10 @@ jobs:
           name: rockylinux_logs
           path: centminlogs/*
 
-    outputs:
-      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
-
   oraclelinux:
     runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -726,9 +726,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service" && echo "ORACLE_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ORACLE_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
-          echo "PHP_TEST_STATUS: $ORACLE_PHP_TEST_STATUS"
-          echo "::set-output name=php_test_status::$PHP_TEST_STATUS"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV
+          echo "PHP_TEST_STATUS: $ORACLELINUX_PHP_TEST_STATUS"
+          echo "php_test_status=$ORACLELINUX_PHP_TEST_STATUS" >> $GITHUB_ENV_FILE
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "php-config || true"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -953,9 +953,6 @@ jobs:
         with:
           name: oraclelinux_logs
           path: centminlogs/*
-
-    outputs:
-      php_test_status: ${{ steps.php_test.outputs.php_test_status }}
 
   compare:
     needs: [almalinux, rockylinux, oraclelinux]
