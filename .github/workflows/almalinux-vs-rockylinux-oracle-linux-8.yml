@@ -142,8 +142,8 @@ jobs:
         id: mariadb_test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "systemctl status mariadb.service" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_almalinux8 bash -c "systemctl status mariadb.service" && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_MARIADB_TEST_STATUS=$ALMALINUX_MARIADB_TEST_STATUS"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -463,8 +463,8 @@ jobs:
         id: mariadb_test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "systemctl status mariadb.service" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_rockylinux8 bash -c "systemctl status mariadb.service" && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_MARIADB_TEST_STATUS=$ROCKYLINUX_MARIADB_TEST_STATUS"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
