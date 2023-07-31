@@ -12,6 +12,9 @@ jobs:
       php_test_status: ${{ steps.php_test.outputs.ALMALINUX_PHP_TEST_STATUS }}
       nginx_test_status: ${{ steps.nginx_test.outputs.ALMALINUX_NGINX_TEST_STATUS }}
       mariadb_test_status: ${{ steps.mariadb_test.outputs.ALMALINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ALMALINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ALMALINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ALMALINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -165,16 +168,19 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Redis Server setup
+        id: redis_test
         run: |
           sleep 1
           docker exec cmm_almalinux8 bash -c "redis-cli info"
           sleep 1
-          docker exec cmm_almalinux8 bash -c "systemctl status redis"
+          docker exec cmm_almalinux8 bash -c "systemctl status redis" && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_REDIS_TEST_STATUS=$ALMALINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_almalinux8 bash -c "php --ri redis"
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
+        id: pureftpd_test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
@@ -183,7 +189,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "systemctl status pure-ftpd.service"
+          docker exec cmm_almalinux8 bash -c "systemctl status pure-ftpd.service" && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PUREFTPD_TEST_STATUS=$ALMALINUX_PUREFTPD_TEST_STATUS"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -199,6 +206,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect CSF Firewall setup
+        id: csf_test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
@@ -208,6 +216,9 @@ jobs:
           docker exec cmm_almalinux8 bash -c "csf -ra"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl status csf.service" && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_CSF_TEST_STATUS=$ALMALINUX_CSF_TEST_STATUS"
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -333,6 +344,9 @@ jobs:
       php_test_status: ${{ steps.php_test.outputs.ROCKYLINUX_PHP_TEST_STATUS }}
       nginx_test_status: ${{ steps.nginx_test.outputs.ROCKYLINUX_NGINX_TEST_STATUS }}
       mariadb_test_status: ${{ steps.mariadb_test.outputs.ROCKYLINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ROCKYLINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ROCKYLINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ROCKYLINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -486,16 +500,19 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Redis Server setup
+        id: redis_test
         run: |
           sleep 1
           docker exec cmm_rockylinux8 bash -c "redis-cli info"
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "systemctl status redis"
+          docker exec cmm_rockylinux8 bash -c "systemctl status redis" && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_REDIS_TEST_STATUS=$ROCKYLINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_rockylinux8 bash -c "php --ri redis"
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
+        id: pureftpd_test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
@@ -504,7 +521,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "systemctl status pure-ftpd.service"
+          docker exec cmm_rockylinux8 bash -c "systemctl status pure-ftpd.service" && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$ROCKYLINUX_PUREFTPD_TEST_STATUS"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -520,6 +538,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect CSF Firewall setup
+        id: csf_test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
@@ -529,6 +548,9 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "csf -ra"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl status csf.service" && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_CSF_TEST_STATUS=$ROCKYLINUX_CSF_TEST_STATUS"
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -654,6 +676,9 @@ jobs:
       php_test_status: ${{ steps.php_test.outputs.ORACLELINUX_PHP_TEST_STATUS }}
       nginx_test_status: ${{ steps.nginx_test.outputs.ORACLELINUX_NGINX_TEST_STATUS }}
       mariadb_test_status: ${{ steps.mariadb_test.outputs.ORACLELINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ORACLELINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ORACLELINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ORACLELINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -807,16 +832,19 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Redis Server setup
+        id: redis_test
         run: |
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "redis-cli info"
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "systemctl status redis"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status redis" && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_REDIS_TEST_STATUS=$ORACLELINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "php --ri redis"
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
+        id: pureftpd_test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
@@ -825,7 +853,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "systemctl status pure-ftpd.service"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status pure-ftpd.service" && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$ORACLELINUX_PUREFTPD_TEST_STATUS"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -841,6 +870,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect CSF Firewall setup
+        id: csf_test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
@@ -850,6 +880,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "csf -ra"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status csf.service" && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_CSF_TEST_STATUS=$ORACLELINUX_CSF_TEST_STATUS"
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -1099,7 +1132,7 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }}\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }}\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }}\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }}\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }}\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }}\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }}\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }}\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
   
   discordNotificationFailure:
@@ -1111,5 +1144,5 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }}\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }}\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }}\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }}\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }}\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }}\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }}\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }}\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
