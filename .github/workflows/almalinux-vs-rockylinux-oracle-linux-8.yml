@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       php_test_status: ${{ steps.php_test.outputs.ALMALINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ALMALINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ALMALINUX_MARIADB_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -114,6 +116,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Nginx setup
+        id: nginx_test
         run: |
           sleep 1
           docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
@@ -122,7 +125,8 @@ jobs:
           sleep 1
           docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
           sleep 1
-          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service"
+          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service" && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINX_TEST_STATUS=$ALMALINUX_NGINX_TEST_STATUS"
           sleep 1
           docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -135,9 +139,11 @@ jobs:
         continue-on-error: true
   
       - name: Inspect MariaDB setup
+        id: mariadb_test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "systemctl status mariadb.service"
+          docker exec cmm_almalinux8 bash -c "systemctl status mariadb.service" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -325,6 +331,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       php_test_status: ${{ steps.php_test.outputs.ROCKYLINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ROCKYLINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ROCKYLINUX_MARIADB_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -429,6 +437,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Nginx setup
+        id: nginx_test
         run: |
           sleep 1
           docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
@@ -437,7 +446,8 @@ jobs:
           sleep 1
           docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service"
+          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service" && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_NGINX_TEST_STATUS=$ROCKYLINUX_NGINX_TEST_STATUS"
           sleep 1
           docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -450,9 +460,11 @@ jobs:
         continue-on-error: true
   
       - name: Inspect MariaDB setup
+        id: mariadb_test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "systemctl status mariadb.service"
+          docker exec cmm_rockylinux8 bash -c "systemctl status mariadb.service" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -640,6 +652,8 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       php_test_status: ${{ steps.php_test.outputs.ORACLELINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ORACLELINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ORACLELINUX_MARIADB_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -744,6 +758,7 @@ jobs:
         continue-on-error: true
   
       - name: Inspect Nginx setup
+        id: nginx_test
         run: |
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
@@ -752,7 +767,8 @@ jobs:
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service" && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_NGINX_TEST_STATUS=$ORACLELINUX_NGINX_TEST_STATUS"
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -765,9 +781,11 @@ jobs:
         continue-on-error: true
   
       - name: Inspect MariaDB setup
+        id: mariadb_test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "systemctl status mariadb.service"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status mariadb.service" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1081,7 +1099,7 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
   
   discordNotificationFailure:
@@ -1093,5 +1111,5 @@ jobs:
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }}\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }}\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }}\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }}\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }}\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }}\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }}\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }}\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }}\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
