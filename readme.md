@@ -4,6 +4,7 @@ Centmin Mod:
 
 Centmin Mod Workflows:
 
+[![AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8.yml)
 [![AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-8.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-8.yml)
 [![AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-9.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-9.yml)
 
