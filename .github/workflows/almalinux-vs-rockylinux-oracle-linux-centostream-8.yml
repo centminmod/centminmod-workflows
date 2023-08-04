@@ -1,0 +1,1642 @@
+name: AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run-almalinux-vs-rockylinux-oraclelinux-centostream-8-workflow]
+
+jobs:
+  almalinux:
+    runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.ALMALINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ALMALINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ALMALINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ALMALINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ALMALINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ALMALINUX_REDIS_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux8
+          platforms: linux/amd64
+          load: true
+          tags: cmm_almalinux8:latest
+
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
+        run: |
+          docker run -d --name=cmm_almalinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
+          sleep 4
+          docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+        continue-on-error: true
+  
+      - name: Disk Usage Analysis
+        run: |
+          docker exec cmm_almalinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "df -hT"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_almalinux8 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+  
+      - name: YUM repolist all
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "yum repolist all"
+        continue-on-error: true
+  
+      - name: Inspect wget install
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/bin/wget -V"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/wget -V"
+        continue-on-error: true
+  
+      - name: Inspect ccache install
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/ccache -V"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/ccache -s"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+  
+      - name: Inspect PHP-FPM setup
+        id: php_test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "php-config || true"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect Nginx setup
+        id: nginx_test
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINX_TEST_STATUS=$ALMALINUX_NGINX_TEST_STATUS"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect MariaDB setup
+        id: mariadb_test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl status mariadb.service --no-pager" && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_MARIADB_TEST_STATUS=$ALMALINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "mysqladmin var | tr -s ' '"
+        continue-on-error: true
+  
+      - name: Inspect Python3 setup
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "python3 --version"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "pip --version"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+        continue-on-error: true
+  
+      - name: Inspect Redis Server setup
+        id: redis_test
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "redis-cli info"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "systemctl status redis" && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_REDIS_TEST_STATUS=$ALMALINUX_REDIS_TEST_STATUS"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "php --ri redis"
+        continue-on-error: true
+  
+      - name: Inspect pure-ftpd setup
+        id: pureftpd_test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PUREFTPD_TEST_STATUS=$ALMALINUX_PUREFTPD_TEST_STATUS"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+        continue-on-error: true
+  
+      - name: Inspect chronyd setup
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
+        continue-on-error: true
+  
+      - name: Inspect CSF Firewall setup
+        id: csf_test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "csf -v"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "csf -ra"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "systemctl status csf.service --no-pager" && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_CSF_TEST_STATUS=$ALMALINUX_CSF_TEST_STATUS"
+        continue-on-error: true
+  
+      - name: Inspect logrotation setup
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+        continue-on-error: true
+  
+      - name: Inspect Sysstat and systemd-journald service
+        run: |
+          docker exec cmm_almalinux8 bash -c "systemctl status sysstat.service --no-pager"
+          docker exec cmm_almalinux8 bash -c "systemctl status systemd-journald.service --no-pager"
+        continue-on-error: true
+      
+      - name: Check permissions of /var/log/journal
+        run: |
+          docker exec cmm_almalinux8 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
+        continue-on-error: true
+      
+      - name: Show recent systemd-journald logs
+        run: |
+          docker exec cmm_almalinux8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+        continue-on-error: true
+  
+      - name: Run cminfo
+        run: |
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+        continue-on-error: true
+  
+      - name: Run addons/golang.sh
+        run: |
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/nodejs.sh
+        run: |
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/opendkim.sh
+        run: |
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+        continue-on-error: true
+  
+      - name: Run tools/csfcf.sh
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+        continue-on-error: true
+  
+      - name: Create Nginx HTTPS vhost
+        run: |
+          docker exec cmm_almalinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+        continue-on-error: true
+  
+      - name: Test mysqladmin_shell.sh MySQL Database Management
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "echo 'multidb'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "echo 'createuserdb'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "echo 'showgrants'"
+          docker exec cmm_almalinux8 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_almalinux8 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_almalinux8 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "echo 'setpass'"
+          docker exec cmm_almalinux8 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+  
+      - name: centmin.sh menu option 4 Nginx upgrade test
+        run: |
+          docker exec cmm_almalinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+  
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
+        continue-on-error: true
+  
+      - name: YUM History Info
+        run: |
+          docker exec cmm_almalinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
+        continue-on-error: true
+
+      - name: Generate AlmaLinux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | tee artifacts/almalinux_packages.txt
+          docker exec cmm_almalinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/almalinux_packages_filtered.txt
+          docker exec cmm_almalinux8 yum repolist all | tee artifacts/almalinux_repos.txt
+          docker exec cmm_almalinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/almalinux_repoquery.txt
+          docker exec cmm_almalinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/almalinux_kernel-version.txt
+
+      - name: Upload AlmaLinux package and repo lists
+        uses: actions/upload-artifact@v3
+        with:
+          name: almalinux_lists
+          path: artifacts/*
+
+      - name: Copy AlmaLinux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_almalinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload AlmaLinux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: almalinux_logs
+          path: centminlogs/*
+
+  rockylinux:
+    runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.ROCKYLINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ROCKYLINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ROCKYLINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ROCKYLINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ROCKYLINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ROCKYLINUX_REDIS_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-rockylinux8
+          platforms: linux/amd64
+          load: true
+          tags: cmm_rockylinux8:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Rocky Linux 8 Install
+        run: |
+          docker run -d --name=cmm_rockylinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
+          sleep 4
+          docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+        continue-on-error: true
+  
+      - name: Disk Usage Analysis
+        run: |
+          docker exec cmm_rockylinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "df -hT"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_rockylinux8 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+  
+      - name: YUM repolist all
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "yum repolist all"
+        continue-on-error: true
+  
+      - name: Inspect wget install
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/bin/wget -V"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/wget -V"
+        continue-on-error: true
+  
+      - name: Inspect ccache install
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/ccache -V"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/ccache -s"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+  
+      - name: Inspect PHP-FPM setup
+        id: php_test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "php-config || true"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect Nginx setup
+        id: nginx_test
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_NGINX_TEST_STATUS=$ROCKYLINUX_NGINX_TEST_STATUS"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect MariaDB setup
+        id: mariadb_test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl status mariadb.service --no-pager" && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_MARIADB_TEST_STATUS=$ROCKYLINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "mysqladmin var | tr -s ' '"
+        continue-on-error: true
+  
+      - name: Inspect Python3 setup
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "python3 --version"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "pip --version"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+        continue-on-error: true
+  
+      - name: Inspect Redis Server setup
+        id: redis_test
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "redis-cli info"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "systemctl status redis" && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_REDIS_TEST_STATUS=$ROCKYLINUX_REDIS_TEST_STATUS"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "php --ri redis"
+        continue-on-error: true
+  
+      - name: Inspect pure-ftpd setup
+        id: pureftpd_test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$ROCKYLINUX_PUREFTPD_TEST_STATUS"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+        continue-on-error: true
+  
+      - name: Inspect chronyd setup
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
+        continue-on-error: true
+  
+      - name: Inspect CSF Firewall setup
+        id: csf_test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "csf -v"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "csf -ra"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "systemctl status csf.service --no-pager" && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_CSF_TEST_STATUS=$ROCKYLINUX_CSF_TEST_STATUS"
+        continue-on-error: true
+  
+      - name: Inspect logrotation setup
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+        continue-on-error: true
+  
+      - name: Inspect Sysstat and systemd-journald service
+        run: |
+          docker exec cmm_rockylinux8 bash -c "systemctl status sysstat.service --no-pager"
+          docker exec cmm_rockylinux8 bash -c "systemctl status systemd-journald.service --no-pager"
+        continue-on-error: true
+      
+      - name: Check permissions of /var/log/journal
+        run: |
+          docker exec cmm_rockylinux8 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
+        continue-on-error: true
+      
+      - name: Show recent systemd-journald logs
+        run: |
+          docker exec cmm_rockylinux8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+        continue-on-error: true
+  
+      - name: Run cminfo
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+        continue-on-error: true
+  
+      - name: Run addons/golang.sh
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/nodejs.sh
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/opendkim.sh
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+        continue-on-error: true
+  
+      - name: Run tools/csfcf.sh
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+        continue-on-error: true
+  
+      - name: Create Nginx HTTPS vhost
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+        continue-on-error: true
+  
+      - name: Test mysqladmin_shell.sh MySQL Database Management
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "echo 'multidb'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "echo 'createuserdb'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "echo 'showgrants'"
+          docker exec cmm_rockylinux8 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_rockylinux8 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_rockylinux8 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "echo 'setpass'"
+          docker exec cmm_rockylinux8 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+  
+      - name: centmin.sh menu option 4 Nginx upgrade test
+        run: |
+          docker exec cmm_rockylinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+  
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
+        continue-on-error: true
+  
+      - name: YUM History Info
+        run: |
+          docker exec cmm_rockylinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
+        continue-on-error: true
+
+      - name: Generate Rocky Linux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | tee artifacts/rockylinux_packages.txt
+          docker exec cmm_rockylinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/rockylinux_packages_filtered.txt
+          docker exec cmm_rockylinux8 yum repolist all | tee artifacts/rockylinux_repos.txt
+          docker exec cmm_rockylinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/rockylinux_repoquery.txt
+          docker exec cmm_rockylinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/rockylinux_kernel-version.txt
+
+      - name: Upload Rocky Linux package and repo lists
+        uses: actions/upload-artifact@v3
+        with:
+          name: rockylinux_lists
+          path: artifacts/*
+
+      - name: Copy Rocky Linux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_rockylinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload Rocky Linux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: rockylinux_logs
+          path: centminlogs/*
+
+  oraclelinux:
+    runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.ORACLELINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.ORACLELINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.ORACLELINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.ORACLELINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ORACLELINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.ORACLELINUX_REDIS_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-oraclelinux8
+          platforms: linux/amd64
+          load: true
+          tags: cmm_oraclelinux8:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Oracle Linux 8 Install
+        run: |
+          docker run -d --name=cmm_oraclelinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
+          sleep 4
+          docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+        continue-on-error: true
+  
+      - name: Disk Usage Analysis
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "df -hT"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_oraclelinux8 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+  
+      - name: YUM repolist all
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "yum repolist all"
+        continue-on-error: true
+  
+      - name: Inspect wget install
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/bin/wget -V"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/wget -V"
+        continue-on-error: true
+  
+      - name: Inspect ccache install
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/ccache -V"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/ccache -s"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+  
+      - name: Inspect PHP-FPM setup
+        id: php_test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "php-config || true"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect Nginx setup
+        id: nginx_test
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_NGINX_TEST_STATUS=$ORACLELINUX_NGINX_TEST_STATUS"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect MariaDB setup
+        id: mariadb_test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status mariadb.service --no-pager" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "mysqladmin var | tr -s ' '"
+        continue-on-error: true
+  
+      - name: Inspect Python3 setup
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "python3 --version"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "pip --version"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+        continue-on-error: true
+  
+      - name: Inspect Redis Server setup
+        id: redis_test
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "redis-cli info"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "systemctl status redis" && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_REDIS_TEST_STATUS=$ORACLELINUX_REDIS_TEST_STATUS"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "php --ri redis"
+        continue-on-error: true
+  
+      - name: Inspect pure-ftpd setup
+        id: pureftpd_test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$ORACLELINUX_PUREFTPD_TEST_STATUS"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+        continue-on-error: true
+  
+      - name: Inspect chronyd setup
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
+        continue-on-error: true
+  
+      - name: Inspect CSF Firewall setup
+        id: csf_test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "csf -v"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "csf -ra"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status csf.service --no-pager" && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_CSF_TEST_STATUS=$ORACLELINUX_CSF_TEST_STATUS"
+        continue-on-error: true
+  
+      - name: Inspect logrotation setup
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+        continue-on-error: true
+  
+      - name: Inspect Sysstat and systemd-journald service
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "systemctl status sysstat.service --no-pager"
+          docker exec cmm_oraclelinux8 bash -c "systemctl status systemd-journald.service --no-pager"
+        continue-on-error: true
+      
+      - name: Check permissions of /var/log/journal
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
+        continue-on-error: true
+      
+      - name: Show recent systemd-journald logs
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+        continue-on-error: true
+  
+      - name: Run cminfo
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+        continue-on-error: true
+  
+      - name: Run addons/golang.sh
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/nodejs.sh
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/opendkim.sh
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+        continue-on-error: true
+  
+      - name: Run tools/csfcf.sh
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+        continue-on-error: true
+  
+      - name: Create Nginx HTTPS vhost
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+        continue-on-error: true
+  
+      - name: Test mysqladmin_shell.sh MySQL Database Management
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'multidb'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'createuserdb'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'showgrants'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_oraclelinux8 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_oraclelinux8 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "echo 'setpass'"
+          docker exec cmm_oraclelinux8 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+  
+      - name: centmin.sh menu option 4 Nginx upgrade test
+        run: |
+          docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+  
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
+        continue-on-error: true
+  
+      - name: YUM History Info
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
+        continue-on-error: true
+
+      - name: Generate Oracle Linux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | tee artifacts/oraclelinux_packages.txt
+          docker exec cmm_oraclelinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/oraclelinux_packages_filtered.txt
+          docker exec cmm_oraclelinux8 yum repolist all | tee artifacts/oraclelinux_repos.txt
+          docker exec cmm_oraclelinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/oraclelinux_repoquery.txt
+          docker exec cmm_oraclelinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/oraclelinux_kernel-version.txt
+
+      - name: Upload Oracle Linux package and repo lists
+        uses: actions/upload-artifact@v3
+        with:
+          name: oraclelinux_lists
+          path: artifacts/*
+
+      - name: Copy Oracle Linux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_oraclelinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload Oracle Linux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: oraclelinux_logs
+          path: centminlogs/*
+
+  centosstreamlinux:
+    runs-on: ubuntu-22.04
+    outputs:
+      php_test_status: ${{ steps.php_test.outputs.CENTOSSTREAMLINUX_PHP_TEST_STATUS }}
+      nginx_test_status: ${{ steps.nginx_test.outputs.CENTOSSTREAMLINUX_NGINX_TEST_STATUS }}
+      mariadb_test_status: ${{ steps.mariadb_test.outputs.CENTOSSTREAMLINUX_MARIADB_TEST_STATUS }}
+      csf_test_status: ${{ steps.csf_test.outputs.CENTOSSTREAMLINUX_CSF_TEST_STATUS }}
+      pureftpd_test_status: ${{ steps.pureftpd_test.outputs.CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS }}
+      redis_test_status: ${{ steps.redis_test.outputs.CENTOSSTREAMLINUX_REDIS_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-centos8stream
+          platforms: linux/amd64
+          load: true
+          tags: cmm_centosstreamlinux8:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP CentOS Stream 8 Linux 8 Install
+        run: |
+          docker run -d --name=cmm_centosstreamlinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_centosstreamlinux8:latest
+          sleep 4
+          docker exec cmm_centosstreamlinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+        continue-on-error: true
+  
+      - name: Disk Usage Analysis
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "df -hT"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+  
+      - name: YUM repolist all
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "yum repolist all"
+        continue-on-error: true
+  
+      - name: Inspect wget install
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/bin/wget -V"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/wget -V"
+        continue-on-error: true
+  
+      - name: Inspect ccache install
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/ccache -V"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/ccache -s"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+  
+      - name: Inspect PHP-FPM setup
+        id: php_test
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status php-fpm.service --no-pager" && echo "CENTOSSTREAMLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_PHP_TEST_STATUS=$CENTOSSTREAMLINUX_PHP_TEST_STATUS"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "php-config || true"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect Nginx setup
+        id: nginx_test
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status nginx.service --no-pager" && echo "CENTOSSTREAMLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_NGINX_TEST_STATUS=$CENTOSSTREAMLINUX_NGINX_TEST_STATUS"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+        continue-on-error: true
+  
+      - name: Inspect MariaDB setup
+        id: mariadb_test
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status mariadb.service --no-pager" && echo "CENTOSSTREAMLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_MARIADB_TEST_STATUS=$CENTOSSTREAMLINUX_MARIADB_TEST_STATUS"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "mysqladmin var | tr -s ' '"
+        continue-on-error: true
+  
+      - name: Inspect Python3 setup
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "python3 --version"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "pip --version"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+        continue-on-error: true
+  
+      - name: Inspect Redis Server setup
+        id: redis_test
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "redis-cli info"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status redis" && echo "CENTOSSTREAMLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_REDIS_TEST_STATUS=$CENTOSSTREAMLINUX_REDIS_TEST_STATUS"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "php --ri redis"
+        continue-on-error: true
+  
+      - name: Inspect pure-ftpd setup
+        id: pureftpd_test
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS=$CENTOSSTREAMLINUX_PUREFTPD_TEST_STATUS"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+        continue-on-error: true
+  
+      - name: Inspect chronyd setup
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
+        continue-on-error: true
+  
+      - name: Inspect CSF Firewall setup
+        id: csf_test
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "csf -v"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "csf -ra"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "cat /etc/csf/csf.allow"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status csf.service --no-pager" && echo "CENTOSSTREAMLINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "CENTOSSTREAMLINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "CENTOSSTREAMLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "CENTOSSTREAMLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "CENTOSSTREAMLINUX_CSF_TEST_STATUS=$CENTOSSTREAMLINUX_CSF_TEST_STATUS"
+        continue-on-error: true
+  
+      - name: Inspect logrotation setup
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+        continue-on-error: true
+  
+      - name: Inspect Sysstat and systemd-journald service
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status sysstat.service --no-pager"
+          docker exec cmm_centosstreamlinux8 bash -c "systemctl status systemd-journald.service --no-pager"
+        continue-on-error: true
+      
+      - name: Check permissions of /var/log/journal
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
+        continue-on-error: true
+      
+      - name: Show recent systemd-journald logs
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+        continue-on-error: true
+  
+      - name: Run cminfo
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+        continue-on-error: true
+  
+      - name: Run addons/golang.sh
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/nodejs.sh
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+        continue-on-error: true
+  
+      - name: Run addons/opendkim.sh
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+        continue-on-error: true
+  
+      - name: Run tools/csfcf.sh
+        run: |
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          sleep 1
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+        continue-on-error: true
+  
+      - name: Create Nginx HTTPS vhost
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+        continue-on-error: true
+  
+      - name: Test mysqladmin_shell.sh MySQL Database Management
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'multidb'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'createuserdb'"
+          docker exec cmm_centosstreamlinux8 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'showgrants'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_centosstreamlinux8 bash -c "echo '---'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo 'setpass'"
+          docker exec cmm_centosstreamlinux8 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+  
+      - name: centmin.sh menu option 4 Nginx upgrade test
+        run: |
+          docker exec cmm_centosstreamlinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+  
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "cmupdate"
+        continue-on-error: true
+  
+      - name: YUM History Info
+        run: |
+          docker exec cmm_centosstreamlinux8 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
+        continue-on-error: true
+
+      - name: Generate CentOS Stream 8 Linux package and repo lists
+        run: |
+          mkdir artifacts
+          docker exec cmm_centosstreamlinux8 yum list installed | sort | tr -s ' ' | tee artifacts/centosstreamlinux_packages.txt
+          docker exec cmm_centosstreamlinux8 yum list installed | sort | tr -s ' ' | awk '{print $1 " " $2}' | tee artifacts/centosstreamlinux_packages_filtered.txt
+          docker exec cmm_centosstreamlinux8 yum repolist all | tee artifacts/centosstreamlinux_repos.txt
+          docker exec cmm_centosstreamlinux8 repoquery --queryformat='%{buildtime} %{name}-%{version}-%{release}' --all 2>&1 | sort -k3 | sed '1d' | tee artifacts/centosstreamlinux_repoquery.txt
+          docker exec cmm_centosstreamlinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/centosstreamlinux_kernel-version.txt
+
+      - name: Upload CentOS Stream 8 Linux package and repo lists
+        uses: actions/upload-artifact@v3
+        with:
+          name: centosstreamlinux_lists
+          path: artifacts/*
+
+      - name: Copy CentOS Stream 8 Linux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker cp cmm_centosstreamlinux8:/root/centminlogs ./centminlogs
+
+      - name: Upload CentOS Stream 8 Linux Centmin Mod Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: centosstreamlinux_logs
+          path: centminlogs/*
+
+  compare:
+    needs: [almalinux, rockylinux, oraclelinux, centosstreamlinux]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Download almalinux package and repo lists
+        uses: actions/download-artifact@v3
+        with:
+          name: almalinux_lists
+          path: almalinux
+  
+      - name: Download rockylinux package and repo lists
+        uses: actions/download-artifact@v3
+        with:
+          name: rockylinux_lists
+          path: rockylinux
+
+      - name: Download oraclelinux package and repo lists
+        uses: actions/download-artifact@v3
+        with:
+          name: oraclelinux_lists
+          path: oraclelinux
+
+      - name: Download centosstreamlinux package and repo lists
+        uses: actions/download-artifact@v3
+        with:
+          name: centosstreamlinux_lists
+          path: centosstreamlinux
+
+      - name: Download AlmaLinux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: almalinux_logs
+          path: almalinux_logs
+
+      - name: Download Rocky Linux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: rockylinux_logs
+          path: rockylinux_logs
+
+      - name: Download Oracle Linux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: oraclelinux_logs
+          path: oraclelinux_logs
+
+      - name: Download CentOS Stream Linux Centmin Mod log
+        uses: actions/download-artifact@v3
+        with:
+          name: centosstreamlinux_logs
+          path: centosstreamlinux_logs
+
+      - name: Compare AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8 Linux installed packages and repos
+        run: |
+          set -x
+          echo "Creating artifacts directory"
+          mkdir -p artifacts
+          echo "Installing diffutils"
+          sudo apt-get update && sudo apt-get install -y diffutils || true
+          echo "List artifacts"
+          echo "ls -lAh almalinux"
+          ls -lAh almalinux
+          echo "ls -lAh rockylinux"
+          ls -lAh rockylinux
+          echo "ls -lAh oraclelinux"
+          ls -lAh oraclelinux
+          echo "ls -lAh centosstreamlinux"
+          ls -lAh centosstreamlinux
+          echo "ls -lAh almalinux_logs"
+          ls -lAh almalinux_logs
+          echo "ls -lAh rockylinux_logs"
+          ls -lAh rockylinux_logs
+          echo "ls -lAh oraclelinux_logs"
+          ls -lAh oraclelinux_logs
+          echo "ls -lAh centosstreamlinux_logs"
+          ls -lAh centosstreamlinux_logs
+          
+          echo "Running diff on package lists - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_diff_almalinux8-vs-rockylinux8.txt || true        
+          echo "Running diff on filtered package lists - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_packages_filtered.txt rockylinux/rockylinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_almalinux8-vs-rockylinux8.txt || true
+          echo "Running sdiff on package lists - AlmaLinux 8 vs Rocky Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_sdiff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running sdiff on filtered package lists - AlmaLinux 8 vs Rocky Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages_filtered.txt rockylinux/rockylinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_almalinux8-vs-rockylinux8.txt || true         
+          echo "Running diff on repo lists - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt | tee artifacts/repos_diff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running sdiff on repo lists - AlmaLinux 8 vs Rocky Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt | tee artifacts/repos_sdiff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running diff on repoquery lists - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_repoquery.txt rockylinux/rockylinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running sdiff on repoquery lists - AlmaLinux 8 vs Rocky Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repoquery.txt rockylinux/rockylinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux8-vs-rockylinux8.txt || true
+          echo "Running diff latest kernel version - AlmaLinux 8 vs Rocky Linux 8"
+          diff almalinux/almalinux_kernel-version.txt rockylinux/rockylinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux8-vs-rockylinux8.txt || true
+          
+          echo "Running diff on package lists - Almalinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_packages.txt oraclelinux/oraclelinux_packages.txt | tee artifacts/packages_diff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on filtered package lists - Almalinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_packages_filtered.txt oraclelinux/oraclelinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on package lists - Almalinux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages.txt oraclelinux/oraclelinux_packages.txt | tee artifacts/packages_sdiff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on filtered package lists - Almalinux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages_filtered.txt oraclelinux/oraclelinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on repo lists - Almalinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_diff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on repo lists - Almalinux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_sdiff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on repoquery lists - Almalinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on repoquery lists - Almalinux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux8-vs-oraclelinux8.txt || true
+          echo "Running diff latest kernel version - AlmaLinux 8 vs Oracle Linux 8"
+          diff almalinux/almalinux_kernel-version.txt oraclelinux/oraclelinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux8-vs-oraclelinux8.txt || true
+
+          echo "Running diff on package lists - Almalinux 8 vs CentOS Stream Linux 8"
+          diff almalinux/almalinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_diff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on filtered package lists - Almalinux 8 vs CentOS Stream Linux 8"
+          diff almalinux/almalinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on package lists - Almalinux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_sdiff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on filtered package lists - Almalinux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repo lists - Almalinux 8 vs CentOS Stream Linux 8"
+          diff almalinux/almalinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_diff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repo lists - Almalinux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_sdiff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repoquery lists - Almalinux 8 vs CentOS Stream Linux 8"
+          diff almalinux/almalinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_diff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repoquery lists - Almalinux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 almalinux/almalinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_sdiff_almalinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff latest kernel version - AlmaLinux 8 vs CentOS Stream Linux 8"
+          diff almalinux/almalinux_kernel-version.txt centosstreamlinux/centosstreamlinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux8-vs-centosstreamlinux8.txt || true
+
+          echo "Running diff on package lists - Rocky Linux 8 vs Oracle Linux 8"
+          diff rockylinux/rockylinux_packages.txt oraclelinux/oraclelinux_packages.txt | tee artifacts/packages_diff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on filtered package lists - Rocky Linux 8 vs Oracle Linux 8"
+          diff rockylinux/rockylinux_packages_filtered.txt oraclelinux/oraclelinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on package lists - Rocky Linux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_packages.txt oraclelinux/oraclelinux_packages.txt | tee artifacts/packages_sdiff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on filtered package lists - Rocky Linux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_packages_filtered.txt oraclelinux/oraclelinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on repo lists - Rocky Linux 8 vs Oracle Linux 8"
+          diff rockylinux/rockylinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_diff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on repo lists - Rocky Linux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_repos.txt oraclelinux/oraclelinux_repos.txt | tee artifacts/repos_sdiff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running diff on repoquery lists - Rocky Linux 8 vs Oracle Linux 8"
+          diff rockylinux/rockylinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_diff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running sdiff on repoquery lists - Rocky Linux 8 vs Oracle Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_repoquery.txt oraclelinux/oraclelinux_repoquery.txt | tee artifacts/repoquery_sdiff_rockylinux8-vs-oraclelinux8.txt || true
+          echo "Running diff latest kernel version - Rocky Linux 8 vs Oracle Linux 8"
+          diff rockylinux/rockylinux_kernel-version.txt oraclelinux/oraclelinux_kernel-version.txt | tee artifacts/kernel-version_diff_rockylinux8-vs-oraclelinux8.txt || true
+
+          echo "Running diff on package lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          diff rockylinux/rockylinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_diff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on filtered package lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          diff rockylinux/rockylinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on package lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_sdiff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on filtered package lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repo lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          diff rockylinux/rockylinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_diff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repo lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_sdiff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repoquery lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          diff rockylinux/rockylinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_diff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repoquery lists - Rocky Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 rockylinux/rockylinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_sdiff_rockylinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff latest kernel version - Rocky Linux 8 vs CentOS Stream Linux 8"
+          diff rockylinux/rockylinux_kernel-version.txt centosstreamlinux/centosstreamlinux_kernel-version.txt | tee artifacts/kernel-version_diff_rockylinux8-vs-centosstreamlinux8.txt || true
+
+          echo "Running diff on package lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          diff oraclelinux/oraclelinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_diff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on filtered package lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          diff oraclelinux/oraclelinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_diff_filtered_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on package lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 oraclelinux/oraclelinux_packages.txt centosstreamlinux/centosstreamlinux_packages.txt | tee artifacts/packages_sdiff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on filtered package lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 oraclelinux/oraclelinux_packages_filtered.txt centosstreamlinux/centosstreamlinux_packages_filtered.txt | tee artifacts/packages_sdiff_filtered_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repo lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          diff oraclelinux/oraclelinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_diff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repo lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 oraclelinux/oraclelinux_repos.txt centosstreamlinux/centosstreamlinux_repos.txt | tee artifacts/repos_sdiff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff on repoquery lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          diff oraclelinux/oraclelinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_diff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running sdiff on repoquery lists - Oracle Linux 8 vs CentOS Stream Linux 8"
+          sdiff -s -w 220 oraclelinux/oraclelinux_repoquery.txt centosstreamlinux/centosstreamlinux_repoquery.txt | tee artifacts/repoquery_sdiff_oraclelinux8-vs-centosstreamlinux8.txt || true
+          echo "Running diff latest kernel version - Oracle Linux 8 vs CentOS Stream Linux 8"
+          diff oraclelinux/oraclelinux_kernel-version.txt centosstreamlinux/centosstreamlinux_kernel-version.txt | tee artifacts/kernel-version_diff_oraclelinux8-vs-centosstreamlinux8.txt || true
+
+      - name: Upload comparison artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: comparison_results
+          path: artifacts/
+
+      - name: Upload AlmaLinux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: almalinux_cmm_logs
+          path: almalinux_logs/
+
+      - name: Upload Rocky Linux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: rockylinux_cmm_logs
+          path: rockylinux_logs/
+
+      - name: Upload Oracle Linux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: oraclelinux_cmm_logs
+          path: oraclelinux_logs/
+
+  discordNotificationSuccess:
+    needs: [almalinux, rockylinux, centosstreamlinux, compare]
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify Discord Success
+      run: |
+        almalinux_php_test_emoji=$(if [ "${{ needs.almalinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php_test_emoji=$(if [ "${{ needs.rockylinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_php_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_nginx_test_emoji=$(if [ "${{ needs.almalinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_nginx_test_emoji=$(if [ "${{ needs.rockylinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_nginx_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_nginx_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_mariadb_test_emoji=$(if [ "${{ needs.almalinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_mariadb_test_emoji=$(if [ "${{ needs.rockylinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_mariadb_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_mariadb_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_csf_test_emoji=$(if [ "${{ needs.almalinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_csf_test_emoji=$(if [ "${{ needs.rockylinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_csf_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_csf_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_pureftpd_test_emoji=$(if [ "${{ needs.almalinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_pureftpd_test_emoji=$(if [ "${{ needs.rockylinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_pureftpd_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_pureftpd_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_redis_test_emoji=$(if [ "${{ needs.almalinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_redis_test_emoji=$(if [ "${{ needs.rockylinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_redis_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_redis_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully! \u2705\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\CentOS Stream 8 Linux PHP-FPM test returned: ${{ needs.centosstreamlinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\CentOS Stream 8 Linux Nginx test returned: ${{ needs.centosstreamlinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\CentOS Stream 8 Linux MariaDB test returned: ${{ needs.centosstreamlinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\CentOS Stream 8 Linux CSF test returned: ${{ needs.centosstreamlinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\CentOS Stream 8 Linux PUREFTPD test returned: ${{ needs.centosstreamlinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\\CentOS Stream 8 Linux REDIS test returned: ${{ needs.centosstreamlinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
+  
+  discordNotificationFailure:
+    needs: [almalinux, rockylinux, compare]
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notify Discord Failure
+      run: |
+        almalinux_php_test_emoji=$(if [ "${{ needs.almalinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php_test_emoji=$(if [ "${{ needs.rockylinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_php_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.php_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_nginx_test_emoji=$(if [ "${{ needs.almalinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_nginx_test_emoji=$(if [ "${{ needs.rockylinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_nginx_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_nginx_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.nginx_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_mariadb_test_emoji=$(if [ "${{ needs.almalinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_mariadb_test_emoji=$(if [ "${{ needs.rockylinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_mariadb_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_mariadb_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.mariadb_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_csf_test_emoji=$(if [ "${{ needs.almalinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_csf_test_emoji=$(if [ "${{ needs.rockylinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_csf_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_csf_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.csf_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_pureftpd_test_emoji=$(if [ "${{ needs.almalinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_pureftpd_test_emoji=$(if [ "${{ needs.rockylinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_pureftpd_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_pureftpd_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.pureftpd_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_redis_test_emoji=$(if [ "${{ needs.almalinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_redis_test_emoji=$(if [ "${{ needs.rockylinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_redis_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+
+        centosstreamlinux_redis_test_emoji=$(if [ "${{ needs.centosstreamlinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\u274C\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\CentOS Stream 8 Linux PHP-FPM test returned: ${{ needs.centosstreamlinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\CentOS Stream 8 Linux Nginx test returned: ${{ needs.centosstreamlinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\CentOS Stream 8 Linux MariaDB test returned: ${{ needs.centosstreamlinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\CentOS Stream 8 Linux CSF test returned: ${{ needs.centosstreamlinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\CentOS Stream 8 Linux PUREFTPD test returned: ${{ needs.centosstreamlinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\\CentOS Stream 8 Linux REDIS test returned: ${{ needs.centosstreamlinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
