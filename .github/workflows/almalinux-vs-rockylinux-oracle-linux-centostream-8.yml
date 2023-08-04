@@ -1557,6 +1557,12 @@ jobs:
           name: oraclelinux_cmm_logs
           path: oraclelinux_logs/
 
+      - name: Upload CentOS Stream 8 Linux Centmin Mod log artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: centosstreamlinux_cmm_logs
+          path: centosstreamlinux_logs/
+
   discordNotificationSuccess:
     needs: [almalinux, rockylinux, centosstreamlinux, compare]
     if: ${{ success() }}
