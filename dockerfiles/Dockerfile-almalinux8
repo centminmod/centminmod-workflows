@@ -5,7 +5,7 @@ ENV container=docker
 
 RUN dnf clean all && \
     dnf -y update && \
-    dnf install -y -skip-broken \
+    dnf install -y --skip-broken \
         initscripts \
         systemd-sysv \
         dos2unix \
