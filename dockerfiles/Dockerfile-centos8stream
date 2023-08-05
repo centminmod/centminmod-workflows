@@ -3,7 +3,8 @@ FROM quay.io/centos/centos:stream8
 ENV TERM=xterm-256color
 ENV container=docker
 
-RUN dnf -y update && \
+RUN dnf clean all && \
+    dnf -y update && \
     dnf install -y \
         initscripts \
         systemd-sysv \
