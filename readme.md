@@ -6,6 +6,8 @@ Centmin Mod Workflows:
 
 [![AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8.yml)
 
+[![AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8 + PHP 7.4](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8-php7.4.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-centostream-8-php7.4.yml)
+
 [![AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-8.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-8.yml)
 [![AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-9.yml/badge.svg)](https://github.com/centminmod/centminmod-workflows/actions/workflows/almalinux-vs-rockylinux-oracle-linux-9.yml)
 
@@ -26,7 +28,8 @@ Centmin Mod Workflows:
 ![GitHub Workflow last commit](https://img.shields.io/github/last-commit/centminmod/centminmod-workflows) ![GitHub contributors](https://img.shields.io/github/contributors/centminmod/centminmod-workflows) ![GitHub Workflow Repo stars](https://img.shields.io/github/stars/centminmod/centminmod-workflows) ![GitHub Workflow watchers](https://img.shields.io/github/watchers/centminmod/centminmod-workflows)
 
 
-* `AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS 8 Stream` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 8 vs Rocky Linux 8 and AlmaLinux 8 vs Oracle Linux 8 vs CentOS 8 Stream.
+* `AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS 8 Stream` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 8 vs Rocky Linux 8 and AlmaLinux 8 vs Oracle Linux 8 vs CentOS 8 Stream. With PHP 8.0 default
+* `AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS 8 Stream + PHP 7.4` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 8 vs Rocky Linux 8 and AlmaLinux 8 vs Oracle Linux 8 vs CentOS 8 Stream. With PHP 7.4 default
 * `AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 8 vs Rocky Linux 8 and AlmaLinux 8 vs Oracle Linux 8.
 * `AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9` - OS comparison tests for YUM repos available and their YUM package versions. Comparison is for AlmaLinux 9 vs Rocky Linux 9 and AlmaLinux 9 vs Oracle Linux 9.
 * `CentOS 8 Stream` - GCC 11 + default PHP 8.0 install + MariaDB 10.4 + Nginx 1.25.x with OpenSSL 1.1.1/PCRE
