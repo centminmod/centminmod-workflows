@@ -46,6 +46,12 @@ RUN chmod +x /home/centmin-option-4.sh
 COPY scripts/centmin-option-5.sh /home/centmin-option-5.sh
 RUN chmod +x /home/centmin-option-5.sh
 
+COPY scripts/centmin-option-5-php7.3.sh /home/centmin-option-5-php7.3.sh
+RUN chmod +x /home/centmin-option-5-php7.3.sh
+
+COPY scripts/centmin-option-5-php7.4.sh /home/centmin-option-5-php7.4.sh
+RUN chmod +x /home/centmin-option-5-php7.4.sh
+
 COPY scripts/centmin-option-5-php8.1.sh /home/centmin-option-5-php8.1.sh
 RUN chmod +x /home/centmin-option-5-php8.1.sh
 
