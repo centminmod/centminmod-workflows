@@ -303,6 +303,23 @@ jobs:
         run: |
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 /home/centmin-option-5.sh
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
   
       - name: Run cmupdate
         run: |
@@ -637,6 +654,23 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
   
       - name: Run cmupdate
         run: |
@@ -970,6 +1004,23 @@ jobs:
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip"
         continue-on-error: true
   
       - name: Run cmupdate
