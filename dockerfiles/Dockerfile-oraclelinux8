@@ -40,6 +40,8 @@ RUN dnf clean all && \
 
 RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service systemd-firstboot.service systemd-networkd-wait-online.service
 
+RUN mkdir -p /usr/src/kernels
+
 COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
 RUN chmod +x /home/centmin-option-4.sh
 
