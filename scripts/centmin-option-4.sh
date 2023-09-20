@@ -11,4 +11,5 @@ expect "Do you still want to continue?"
 send -- "y\r"
 expect "Enter option"
 send -- "24\r"
+after 30000
 expect eof

@@ -13,4 +13,5 @@ expect "Do you want to use Zend OPcache"
 send -- "\r"
 expect "Enter option"
 send -- "24\r"
+after 30000
 expect eof
