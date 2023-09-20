@@ -7,7 +7,7 @@ on:
 
 jobs:
   almalinux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -356,7 +356,7 @@ jobs:
           path: centminlogs/*
 
   rockylinux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -705,7 +705,7 @@ jobs:
           path: centminlogs/*
 
   oraclelinux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -1055,7 +1055,7 @@ jobs:
 
   compare:
     needs: [almalinux, rockylinux, oraclelinux]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Download almalinux package and repo lists
         uses: actions/download-artifact@v3
