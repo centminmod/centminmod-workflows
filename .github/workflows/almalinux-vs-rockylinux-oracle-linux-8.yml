@@ -19,10 +19,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      # - name: Install Sysbox
-      #   run: |
-      #     curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
-      #     sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -45,8 +45,7 @@ jobs:
   
       - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
         run: |
-          #docker run -d --name=cmm_almalinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
-          docker run -d --name=cmm_almalinux8 --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
+          docker run -d --name=cmm_almalinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
           sleep 4
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
         continue-on-error: true
@@ -371,10 +370,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      # - name: Install Sysbox
-      #   run: |
-      #     curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
-      #     sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -397,8 +396,7 @@ jobs:
   
       - name: Run container Centmmin Mod LEMP Rocky Linux 8 Install
         run: |
-          #docker run -d --name=cmm_rockylinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
-          docker run -d --name=cmm_rockylinux8 --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
+          docker run -d --name=cmm_rockylinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
           sleep 4
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
         continue-on-error: true
@@ -723,10 +721,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      # - name: Install Sysbox
-      #   run: |
-      #     curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
-      #     sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.2/sysbox-ce_0.6.2-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.2-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -749,8 +747,7 @@ jobs:
   
       - name: Run container Centmmin Mod LEMP Oracle Linux 8 Install
         run: |
-          #docker run -d --name=cmm_oraclelinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
-          docker run -d --name=cmm_oraclelinux8 --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
+          docker run -d --name=cmm_oraclelinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
           sleep 4
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
         continue-on-error: true
