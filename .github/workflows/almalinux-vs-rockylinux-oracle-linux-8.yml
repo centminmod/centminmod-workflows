@@ -7,7 +7,7 @@ on:
 
 jobs:
   almalinux:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     outputs:
       php_test_status: ${{ steps.php_test.outputs.ALMALINUX_PHP_TEST_STATUS }}
       nginx_test_status: ${{ steps.nginx_test.outputs.ALMALINUX_NGINX_TEST_STATUS }}
