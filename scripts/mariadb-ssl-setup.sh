@@ -77,15 +77,15 @@ openssl x509 -in server-cert.pem -text -noout
 
 # Output example MariaDB server and client configuration
 echo
-echo "Add the following lines to your MariaDB server's /etc/my.cnf file under [mysqld] section:"
+echo "Add the following lines to your MariaDB server's /etc/my.cnf file under [mariadb] section:"
 echo "ssl-key = /etc/mysql/ssl/server-key.pem"
 echo "ssl-cert = /etc/mysql/ssl/server-cert.pem"
 echo "ssl-ca = /etc/mysql/ssl/ca-cert.pem"
 # echo "tls_version = TLSv1.2,TLSv1.3"
 
 # insert into /etc/my.cnf
-# sed -i '/\[mysqld\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem\ntls_version = TLSv1.2,TLSv1.3' /etc/my.cnf
-sed -i '/\[mysqld\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem' /etc/my.cnf
+# sed -i '/\[mariadb\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem\ntls_version = TLSv1.2,TLSv1.3' /etc/my.cnf
+sed -i '/\[mariadb\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem' /etc/my.cnf
 
 echo
 echo "Check /etc/my.cnf"
