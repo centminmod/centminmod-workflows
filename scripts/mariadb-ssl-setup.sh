@@ -88,6 +88,10 @@ echo "ssl-ca = /etc/mysql/ssl/ca-cert.pem"
 sed -i '/\[mariadb\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem' /etc/my.cnf
 
 echo
+echo "Check /root/.my.cnf"
+cat /root/.my.cnf
+
+echo
 echo "Check /etc/my.cnf"
 cat /etc/my.cnf
 
@@ -97,13 +101,16 @@ systemctl restart mariadb
 mysqlrestart
 sleep 10
 echo
+echo "journalctl -u mariadb --no-pager"
 journalctl -u mariadb --no-pager
 echo
+echo "systemctl status mariadb --no-pager"
 systemctl status mariadb --no-pager
 
 echo
 echo "Check SSL setup in /etc/my.cnf"
 egrep -B1 'ssl|tls' /etc/my.cnf
+echo
 mysqladmin var | egrep 'tls|ssl' | tr -s ' '
 
 echo
