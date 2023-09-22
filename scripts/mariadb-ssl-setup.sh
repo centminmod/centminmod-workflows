@@ -50,6 +50,12 @@ chown -Rv mysql:root /etc/mysql/ssl/
 \cp -af /etc/mysql/ssl/* /usr/local/nginx/conf/ssl-mariadb
 chown -Rv nginx:nginx /usr/local/nginx/conf/ssl-mariadb
 
+mkdir -p /home/sysbench/mysql
+cp /etc/mysql/ssl/server-key.pem /home/sysbench/mysql/client-key.pem
+cp /etc/mysql/ssl/server-cert.pem /home/sysbench/mysql/client-cert.pem
+cp /etc/mysql/ssl/ca-cert.pem /home/sysbench/mysql/cacert.pem
+chmod 644 /home/sysbench/mysql/*.pem
+
 echo
 echo "Verify SSL Certificates"
 openssl x509 -in server-cert.pem -text -noout
@@ -87,7 +93,14 @@ echo "Add the following lines to your MariaDB client's /etc/my.cnf file under [m
 echo "ssl-key = /etc/mysql/ssl/server-key.pem"
 echo "ssl-cert = /etc/mysql/ssl/server-cert.pem"
 echo "ssl-ca = /etc/mysql/ssl/ca-cert.pem"
-echo "tls_version = TLSv1.2,TLSv1.3"
+sed -i '/\[mysql\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem' /etc/my.cnf
+
+echo
+echo "Add the following lines to your MariaDB client's /etc/my.cnf file under [client] section:"
+echo "ssl-key = /etc/mysql/ssl/server-key.pem"
+echo "ssl-cert = /etc/mysql/ssl/server-cert.pem"
+echo "ssl-ca = /etc/mysql/ssl/ca-cert.pem"
+sed -i '/\[client\]/a ssl-key = \/etc\/mysql\/ssl\/server-key.pem\nssl-cert = \/etc\/mysql\/ssl\/server-cert.pem\nssl-ca = \/etc\/mysql\/ssl\/ca-cert.pem' /etc/my.cnf
 
 # Output example CSF Firewall setup
 echo
