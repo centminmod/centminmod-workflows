@@ -323,7 +323,7 @@ jobs:
 
       - name: MariaDB SSL Setup test
         run: |
-          docker exec cmm_almalinux8 mariadb-ssl-setup.sh ecdsa 127.0.0.1
+          docker exec cmm_almalinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
         continue-on-error: true
   
       - name: Run cmupdate
@@ -679,7 +679,7 @@ jobs:
 
       - name: MariaDB SSL Setup test
         run: |
-          docker exec cmm_rockylinux8 mariadb-ssl-setup.sh ecdsa 127.0.0.1
+          docker exec cmm_rockylinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
         continue-on-error: true
   
       - name: Run cmupdate
@@ -1035,7 +1035,7 @@ jobs:
 
       - name: MariaDB SSL Setup test
         run: |
-          docker exec cmm_oraclelinux8 mariadb-ssl-setup.sh ecdsa 127.0.0.1
+          docker exec cmm_oraclelinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
         continue-on-error: true
   
       - name: Run cmupdate
