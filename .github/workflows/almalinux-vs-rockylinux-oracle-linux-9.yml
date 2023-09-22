@@ -320,6 +320,11 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip"
         continue-on-error: true
+
+      - name: MariaDB SSL Setup test
+        run: |
+          docker exec cmm_almalinux9 mariadb-ssl-setup.sh ecdsa 127.0.0.1
+        continue-on-error: true
   
       - name: Run cmupdate
         run: |
@@ -671,6 +676,11 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip"
         continue-on-error: true
+
+      - name: MariaDB SSL Setup test
+        run: |
+          docker exec cmm_rockylinux9 mariadb-ssl-setup.sh ecdsa 127.0.0.1
+        continue-on-error: true
   
       - name: Run cmupdate
         run: |
@@ -1021,6 +1031,11 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: MariaDB SSL Setup test
+        run: |
+          docker exec cmm_oraclelinux9 mariadb-ssl-setup.sh ecdsa 127.0.0.1
         continue-on-error: true
   
       - name: Run cmupdate
