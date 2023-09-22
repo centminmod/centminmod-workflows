@@ -14,7 +14,7 @@ if [[ -z "$SSL_CERT_METHOD" || ! "$SSL_CERT_METHOD" =~ ^(rsa|ecdsa)$ ]]; then
 fi
 
 # Create necessary directories
-mkdir -p /etc/mysql/ssl
+mkdir -p /etc/mysql/ssl /usr/local/nginx/conf/ssl-mariadb
 
 # Change to the SSL directory
 cd /etc/mysql/ssl
