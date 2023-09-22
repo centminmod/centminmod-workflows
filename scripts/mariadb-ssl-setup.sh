@@ -25,28 +25,29 @@ echo "Generate SSL Certificates"
 if [ "$SSL_CERT_METHOD" == "rsa" ]; then
     # Generate CA key
     openssl genpkey -algorithm RSA -out ca-key.pem
-    # Generate CA certificate
-    openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=CA" -nodes
+    # Generate CA certificate with 10 year expiry
+    openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=CA" -nodes -days 3650
     # Generate Server key
     openssl genpkey -algorithm RSA -out server-key.pem
     # Generate Server certificate request
     openssl req -new -key server-key.pem -out server-csr.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=server" -nodes
-    # Generate Server certificate using the CA
-    openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem
+    # Generate Server certificate using the CA with 10 year expiry
+    openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 3650
 else
     # Generate CA key
     openssl ecparam -genkey -name prime256v1 -out ca-key.pem
-    # Generate CA certificate
-    openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=CA" -nodes
+    # Generate CA certificate with 10 year expiry
+    openssl req -new -x509 -key ca-key.pem -out ca-cert.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=CA" -nodes -days 3650
     # Generate Server key
     openssl ecparam -genkey -name prime256v1 -out server-key.pem
     # Generate Server certificate request
     openssl req -new -key server-key.pem -out server-csr.pem -subj "/C=US/ST=State/L=Location/O=Organization/OU=Unit/CN=server" -nodes
-    # Generate Server certificate using the CA
-    openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem
+    # Generate Server certificate using the CA with 10 year expiry
+    openssl x509 -req -in server-csr.pem -CA ca-cert.pem -CAkey ca-key.pem -CAcreateserial -out server-cert.pem -days 3650
 fi
+
 chmod 600 *.pem
-chown -Rv mysql:root /etc/mysql/ssl/
+chown -Rv mysql:mysql /etc/mysql
 \cp -af /etc/mysql/ssl/* /usr/local/nginx/conf/ssl-mariadb
 chown -Rv nginx:nginx /usr/local/nginx/conf/ssl-mariadb
 
@@ -58,6 +59,17 @@ chmod 644 /home/sysbench/mysql/*.pem
 
 echo
 echo "Verify SSL Certificates"
+echo
+echo "openssl verify -CAfile /etc/mysql/ssl/ca-cert.pem /etc/mysql/ssl/server-cert.pem"
+openssl verify -CAfile /etc/mysql/ssl/ca-cert.pem /etc/mysql/ssl/server-cert.pem
+echo
+echo "openssl verify -CAfile /usr/local/nginx/conf/ssl-mariadb/ca-cert.pem /usr/local/nginx/conf/ssl-mariadb/server-cert.pem"
+openssl verify -CAfile /usr/local/nginx/conf/ssl-mariadb/ca-cert.pem /usr/local/nginx/conf/ssl-mariadb/server-cert.pem
+echo
+echo "openssl verify -CAfile /home/sysbench/mysql/cacert.pem /home/sysbench/mysql/client-cert.pem"
+openssl verify -CAfile /home/sysbench/mysql/cacert.pem /home/sysbench/mysql/client-cert.pem
+echo
+echo "openssl x509 -in server-cert.pem -text -noout"
 openssl x509 -in server-cert.pem -text -noout
 
 # Backup /etc/my.cnf
@@ -82,6 +94,8 @@ cat /etc/my.cnf
 echo
 echo "Restart MariaDB MySQL server"
 systemctl restart mariadb
+mysqlrestart
+sleep 10
 echo
 journalctl -u mariadb --no-pager
 echo
@@ -89,7 +103,7 @@ systemctl status mariadb --no-pager
 
 echo
 echo "Check SSL setup in /etc/my.cnf"
-egrep 'ssl|tls' /etc/my.cnf
+egrep -B1 'ssl|tls' /etc/my.cnf
 mysqladmin var | egrep 'tls|ssl' | tr -s ' '
 
 echo
