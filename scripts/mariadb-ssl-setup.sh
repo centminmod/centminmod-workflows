@@ -145,6 +145,7 @@ if [ -f /usr/local/src/centminmod/addons/mysqladmin_shell.sh ]; then
     echo "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb databasenossl_name localnossl_username password"
     /usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb databasenossl_name localnossl_username password
 fi
+mysql -e "GRANT ALL PRIVILEGES ON database_name.* TO 'local_username'@'localhost' IDENTIFIED BY 'password' REQUIRE SSL; FLUSH PRIVILEGES;"
 mysql -e "GRANT ALL PRIVILEGES ON database_name.* TO 'local_username'@'127.0.0.1' IDENTIFIED BY 'password' REQUIRE SSL; FLUSH PRIVILEGES;"
 echo
 
