@@ -147,6 +147,7 @@ if [ -f /usr/local/src/centminmod/addons/mysqladmin_shell.sh ]; then
 fi
 mysql -e "GRANT ALL PRIVILEGES ON database_name.* TO 'local_username'@'localhost' IDENTIFIED BY 'password' REQUIRE SSL; FLUSH PRIVILEGES;"
 mysql -e "GRANT ALL PRIVILEGES ON database_name.* TO 'local_username'@'127.0.0.1' IDENTIFIED BY 'password' REQUIRE SSL; FLUSH PRIVILEGES;"
+mysql -e "SELECT USER,HOST,SSL_TYPE FROM mysql.user;"
 echo
 
 # Generate PHP MySQL SSL test script

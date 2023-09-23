@@ -39,7 +39,7 @@ RUN dnf clean all && \
 
 RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service systemd-firstboot.service systemd-networkd-wait-online.service
 
-RUN mkdir -p /usr/src/kernels
+RUN mkdir -p /usr/src/kernels /usr/share/sysbench
 
 COPY scripts/sysbench-run.sh /home/sysbench-run.sh
 RUN chmod +x /home/sysbench-run.sh
