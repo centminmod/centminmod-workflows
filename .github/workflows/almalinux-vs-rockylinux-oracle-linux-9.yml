@@ -304,7 +304,7 @@ jobs:
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+      - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
@@ -329,6 +329,90 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_almalinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.2 setup
+        id: php82_test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "php-config || true"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.3 setup
+        id: php83_test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "php-config || true"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
   
       - name: Run cmupdate
@@ -665,7 +749,7 @@ jobs:
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+      - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
@@ -690,6 +774,90 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_rockylinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.2 setup
+        id: php82_test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "php-config || true"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.3 setup
+        id: php83_test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "php-config || true"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
   
       - name: Run cmupdate
@@ -1026,11 +1194,11 @@ jobs:
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM upgrade test
+      - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1051,6 +1219,90 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_oraclelinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.2 setup
+        id: php82_test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "php-config || true"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.3 setup
+        id: php83_test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "php-config || true"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
   
       - name: Run cmupdate
