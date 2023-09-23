@@ -304,6 +304,35 @@ jobs:
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'NGINX_QUIC_SUPPORT='y'' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx HTTP/3 QuicTLS setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINXQUIC_TEST_STATUS=$ALMALINUX_NGINXQUIC_TEST_STATUS"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
@@ -749,6 +778,35 @@ jobs:
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'NGINX_QUIC_SUPPORT='y'' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx HTTP/3 QuicTLS setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_NGINXQUIC_TEST_STATUS=$ROCKYLINUX_NGINXQUIC_TEST_STATUS"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
@@ -1192,6 +1250,35 @@ jobs:
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'NGINX_QUIC_SUPPORT='y'' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx HTTP/3 QuicTLS setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXQUIC_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXQUIC_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_NGINXQUIC_TEST_STATUS=$ORACLELINUX_NGINXQUIC_TEST_STATUS"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
