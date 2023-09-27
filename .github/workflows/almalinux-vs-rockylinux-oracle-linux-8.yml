@@ -148,8 +148,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V" | tee cmm-nginxver.log
-          output=$(cat cmm-nginxver.log)
-          echo "AlmaLinux $output" >> $GITHUB_STEP_SUMMARY
+          outputver=$(cat cmm-nginxver.log)
+          echo "AlmaLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -680,8 +680,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V" | tee cmm-nginxver.log
-          output=$(cat cmm-nginxver.log)
-          echo "RockyLinux $output" >> $GITHUB_STEP_SUMMARY
+          outputver=$(cat cmm-nginxver.log)
+          echo "RockyLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -1212,8 +1212,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V" | tee cmm-nginxver.log
-          output=$(cat cmm-nginxver.log)
-          echo "OracleLinux $output" >> $GITHUB_STEP_SUMMARY
+          outputver=$(cat cmm-nginxver.log)
+          echo "OracleLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
