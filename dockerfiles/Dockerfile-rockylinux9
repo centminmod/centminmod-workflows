@@ -8,6 +8,7 @@ RUN dnf clean all && \
     dnf install -y --skip-broken \
         initscripts \
         systemd-sysv \
+        systemd-devel \
         dos2unix \
         python3 \
         iptables   \

@@ -135,7 +135,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -155,6 +155,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_almalinux9 bash -c "mysqladmin ver"
         continue-on-error: true
   
       - name: Inspect Python3 setup
@@ -327,7 +328,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -609,7 +610,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -629,6 +630,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_rockylinux9 bash -c "mysqladmin ver"
         continue-on-error: true
   
       - name: Inspect Python3 setup
@@ -801,7 +803,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1083,7 +1085,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1103,6 +1105,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_oraclelinux9 bash -c "mysqladmin ver"
         continue-on-error: true
   
       - name: Inspect Python3 setup
@@ -1275,7 +1278,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
