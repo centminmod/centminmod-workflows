@@ -47,7 +47,9 @@ jobs:
         run: |
           docker run -d --name=cmm_almalinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux9:latest
           sleep 4
-          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -70,7 +72,9 @@ jobs:
       - name: YUM repolist all
         run: |
           sleep 1
-          docker exec cmm_almalinux9 bash -c "yum repolist all"
+          docker exec cmm_almalinux9 bash -c "yum repolist all" | tee cmm-yumrepolist.log
+          output=$(cat cmm-yumrepolist.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect wget install
@@ -78,13 +82,17 @@ jobs:
           sleep 1
           docker exec cmm_almalinux9 bash -c "/usr/bin/wget -V"
           sleep 1
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/wget -V"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          output=$(cat cmm-wget.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect ccache install
         run: |
           sleep 1
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/ccache -V"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/ccache -V" | tee cmm-ccache.log
+          output=$(cat cmm-ccache.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/ccache -s"
           sleep 1
@@ -100,7 +108,9 @@ jobs:
           docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS"
+          echo "ALMALINUX_PHP_TEST_STATUS=$ALMALINUX_PHP_TEST_STATUS" | tee cmm-phpstatus.log
+          output=$(cat cmm-phpstatus.log)
+          echo "AlmaLinux PHP Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "php-config || true"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -129,13 +139,17 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ps aux | grep nginx"
           sleep 1
           docker exec cmm_almalinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINX_TEST_STATUS=$ALMALINUX_NGINX_TEST_STATUS"
+          echo "ALMALINUX_NGINX_TEST_STATUS=$ALMALINUX_NGINX_TEST_STATUS" | tee cmm-nginxstatus.log
+          output=$(cat cmm-nginxstatus.log)
+          echo "AlmaLinux Nginx Status: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_almalinux9 bash -c "curl -I http://localhost"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxver.log
+          outputver=$(cat cmm-nginxver.log)
+          echo "AlmaLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -146,7 +160,9 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "systemctl status mariadb.service --no-pager" && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_MARIADB_TEST_STATUS=$ALMALINUX_MARIADB_TEST_STATUS"
+          echo "ALMALINUX_MARIADB_TEST_STATUS=$ALMALINUX_MARIADB_TEST_STATUS" | tee cmm-mariadbstat.log
+          output=$(cat cmm-mariadbstat.log)
+          echo "AlmaLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "cat /etc/my.cnf"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -155,13 +171,17 @@ jobs:
           docker exec cmm_almalinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "mysqladmin var | tr -s ' '"
-          docker exec cmm_almalinux9 bash -c "mysqladmin ver"
+          docker exec cmm_almalinux9 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
+          output=$(cat cmm-mariadbver.log)
+          echo "AlmaLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect Python3 setup
         run: |
           sleep 1
-          docker exec cmm_almalinux9 bash -c "python3 --version"
+          docker exec cmm_almalinux9 bash -c "python3 --version" | tee cmm-pythonver.log
+          output=$(cat cmm-pythonver.log)
+          echo "AlmaLinux Python Version: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_almalinux9 bash -c "pip --version"
           sleep 1
@@ -191,7 +211,9 @@ jobs:
           docker exec cmm_almalinux9 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_PUREFTPD_TEST_STATUS=$ALMALINUX_PUREFTPD_TEST_STATUS"
+          echo "ALMALINUX_PUREFTPD_TEST_STATUS=$ALMALINUX_PUREFTPD_TEST_STATUS" | tee cmm-pureftpdtest.log
+          output=$(cat cmm-pureftpdtest.log)
+          echo "AlmaLinux Pure-FTPD Status Test: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -219,7 +241,9 @@ jobs:
           docker exec cmm_almalinux9 bash -c "cat /etc/csf/csf.allow"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "systemctl status csf.service --no-pager" && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_CSF_TEST_STATUS=$ALMALINUX_CSF_TEST_STATUS"
+          echo "ALMALINUX_CSF_TEST_STATUS=$ALMALINUX_CSF_TEST_STATUS" | tee cmm-csftest.log
+          output=$(cat cmm-csftest.log)
+          echo "AlmaLinux CSF Firewall Status Test: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -328,7 +352,9 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxquicver.log
+          output=$(cat cmm-nginxquicver.log)
+          echo "AlmaLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -522,7 +548,9 @@ jobs:
         run: |
           docker run -d --name=cmm_rockylinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux9:latest
           sleep 4
-          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -545,7 +573,9 @@ jobs:
       - name: YUM repolist all
         run: |
           sleep 1
-          docker exec cmm_rockylinux9 bash -c "yum repolist all"
+          docker exec cmm_rockylinux9 bash -c "yum repolist all" | tee cmm-yumrepolist.log
+          output=$(cat cmm-yumrepolist.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect wget install
@@ -553,13 +583,17 @@ jobs:
           sleep 1
           docker exec cmm_rockylinux9 bash -c "/usr/bin/wget -V"
           sleep 1
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/wget -V"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          output=$(cat cmm-wget.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect ccache install
         run: |
           sleep 1
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/ccache -V"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/ccache -V" | tee cmm-ccache.log
+          output=$(cat cmm-ccache.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/ccache -s"
           sleep 1
@@ -575,7 +609,9 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"
+          echo "ROCKYLINUX_PHP_TEST_STATUS=$ROCKYLINUX_PHP_TEST_STATUS"| tee cmm-phpstatus.log
+          output=$(cat cmm-phpstatus.log)
+          echo "RockyLinux PHP Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "php-config || true"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -604,13 +640,17 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ps aux | grep nginx"
           sleep 1
           docker exec cmm_rockylinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_NGINX_TEST_STATUS=$ROCKYLINUX_NGINX_TEST_STATUS"
+          echo "ROCKYLINUX_NGINX_TEST_STATUS=$ROCKYLINUX_NGINX_TEST_STATUS" | tee cmm-nginxstatus.log
+          output=$(cat cmm-nginxstatus.log)
+          echo "RockyLinux Nginx Status: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_rockylinux9 bash -c "curl -I http://localhost"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxver.log
+          outputver=$(cat cmm-nginxver.log)
+          echo "RockyLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -621,7 +661,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "systemctl status mariadb.service --no-pager" && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_MARIADB_TEST_STATUS=$ROCKYLINUX_MARIADB_TEST_STATUS"
+          echo "ROCKYLINUX_MARIADB_TEST_STATUS=$ROCKYLINUX_MARIADB_TEST_STATUS" | tee cmm-mariadbstat.log
+          output=$(cat cmm-mariadbstat.log)
+          echo "RockyLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "cat /etc/my.cnf"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -630,13 +672,17 @@ jobs:
           docker exec cmm_rockylinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "mysqladmin var | tr -s ' '"
-          docker exec cmm_rockylinux9 bash -c "mysqladmin ver"
+          docker exec cmm_rockylinux9 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
+          outputver=$(cat cmm-mariadbver.log)
+          echo "RockyLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect Python3 setup
         run: |
           sleep 1
-          docker exec cmm_rockylinux9 bash -c "python3 --version"
+          docker exec cmm_rockylinux9 bash -c "python3 --version" | tee cmm-pythonver.log
+          output=$(cat cmm-pythonver.log)
+          echo "RockyLinux Python Version: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_rockylinux9 bash -c "pip --version"
           sleep 1
@@ -666,7 +712,9 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$ROCKYLINUX_PUREFTPD_TEST_STATUS"
+          echo "ROCKYLINUX_PUREFTPD_TEST_STATUS=$ROCKYLINUX_PUREFTPD_TEST_STATUS" | tee cmm-pureftpdtest.log
+          output=$(cat cmm-pureftpdtest.log)
+          echo "RockyLinux Pure-FTPD Status Test: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -694,7 +742,9 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "cat /etc/csf/csf.allow"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "systemctl status csf.service --no-pager" && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_CSF_TEST_STATUS=$ROCKYLINUX_CSF_TEST_STATUS"
+          echo "ROCKYLINUX_CSF_TEST_STATUS=$ROCKYLINUX_CSF_TEST_STATUS" | tee cmm-csftest.log
+          output=$(cat cmm-csftest.log)
+          echo "RockyLinux CSF Firewall Status Test: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -803,7 +853,9 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxquicver.log
+          output=$(cat cmm-nginxquicver.log)
+          echo "RockyLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -997,7 +1049,9 @@ jobs:
         run: |
           docker run -d --name=cmm_oraclelinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux9:latest
           sleep 4
-          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash"
+          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -1020,7 +1074,9 @@ jobs:
       - name: YUM repolist all
         run: |
           sleep 1
-          docker exec cmm_oraclelinux9 bash -c "yum repolist all"
+          docker exec cmm_oraclelinux9 bash -c "yum repolist all" | tee cmm-yumrepolist.log
+          output=$(cat cmm-yumrepolist.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect wget install
@@ -1028,13 +1084,17 @@ jobs:
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "/usr/bin/wget -V"
           sleep 1
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/wget -V"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          output=$(cat cmm-wget.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect ccache install
         run: |
           sleep 1
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/ccache -V"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/ccache -V" | tee cmm-ccache.log
+          output=$(cat cmm-ccache.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/ccache -s"
           sleep 1
@@ -1050,7 +1110,9 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS"
+          echo "ORACLELINUX_PHP_TEST_STATUS=$ORACLELINUX_PHP_TEST_STATUS" | tee cmm-phpstatus.log
+          output=$(cat cmm-phpstatus.log)
+          echo "OracleLinux PHP Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "php-config || true"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1079,13 +1141,17 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ps aux | grep nginx"
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINX_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINX_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_NGINX_TEST_STATUS=$ORACLELINUX_NGINX_TEST_STATUS"
+          echo "ORACLELINUX_NGINX_TEST_STATUS=$ORACLELINUX_NGINX_TEST_STATUS" | tee cmm-nginxstatus.log
+          output=$(cat cmm-nginxstatus.log)
+          echo "OracleLinux Nginx Status: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "curl -I http://localhost"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxver.log
+          outputver=$(cat cmm-nginxver.log)
+          echo "OracleLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1096,7 +1162,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "systemctl status mariadb.service --no-pager" && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_MARIADB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_MARIADB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS"
+          echo "ORACLELINUX_MARIADB_TEST_STATUS=$ORACLELINUX_MARIADB_TEST_STATUS" | tee cmm-mariadbstat.log
+          output=$(cat cmm-mariadbstat.log)
+          echo "OracleLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "cat /etc/my.cnf"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1105,13 +1173,17 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "mysqladmin var | tr -s ' '"
-          docker exec cmm_oraclelinux9 bash -c "mysqladmin ver"
+          docker exec cmm_oraclelinux9 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
+          outputver=$(cat cmm-mariadbver.log)
+          echo "OracleLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect Python3 setup
         run: |
           sleep 1
-          docker exec cmm_oraclelinux9 bash -c "python3 --version"
+          docker exec cmm_oraclelinux9 bash -c "python3 --version" | tee cmm-pythonver.log
+          output=$(cat cmm-pythonver.log)
+          echo "OracleLinux Python Version: $output" >> $GITHUB_STEP_SUMMARY
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "pip --version"
           sleep 1
@@ -1141,7 +1213,9 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "systemctl status pure-ftpd.service --no-pager" && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PUREFTPD_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$ORACLELINUX_PUREFTPD_TEST_STATUS"
+          echo "ORACLELINUX_PUREFTPD_TEST_STATUS=$ORACLELINUX_PUREFTPD_TEST_STATUS" | tee cmm-pureftpdtest.log
+          output=$(cat cmm-pureftpdtest.log)
+          echo "OracleLinux Pure-FTPD Status Test: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -1169,7 +1243,9 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "cat /etc/csf/csf.allow"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "systemctl status csf.service --no-pager" && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_CSF_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_CSF_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_CSF_TEST_STATUS=$ORACLELINUX_CSF_TEST_STATUS"
+          echo "ORACLELINUX_CSF_TEST_STATUS=$ORACLELINUX_CSF_TEST_STATUS" | tee cmm-csftest.log
+          output=$(cat cmm-csftest.log)
+          echo "OracleLinux CSF Firewall Status Test: $output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect logrotation setup
@@ -1278,7 +1354,9 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxquicver.log
+          output=$(cat cmm-nginxquicver.log)
+          echo "OracleLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
