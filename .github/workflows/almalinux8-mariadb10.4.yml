@@ -41,7 +41,9 @@ jobs:
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-mariadb10.4.sh | bash"
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer-el8x-mariadb10.4.sh | bash" | tee cmm-install.log
+        output=$(tail -20 cmm-install.log)
+        echo "$output" >> $GITHUB_STEP_SUMMARY
       continue-on-error: true
 
     - name: Disk Usage Analysis

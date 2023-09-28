@@ -59,7 +59,9 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "cat /etc/centminmod/custom_config.inc"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "bash installer-el8x.sh"
+        docker exec cmm_el89 bash -c "bash installer-el8x.sh" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "cat /etc/centminmod/custom_config.inc"
       continue-on-error: false
