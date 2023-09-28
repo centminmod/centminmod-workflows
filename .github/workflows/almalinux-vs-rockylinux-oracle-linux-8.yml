@@ -175,8 +175,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_almalinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
-          output=$(cat cmm-mariadbver.log)
-          echo "AlmaLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
+          outputver=$(cat cmm-mariadbver.log)
+          echo "AlmaLinux MariaDB Version: $outputver" >> $GITHUB_STEP_SUMMARY
 
         continue-on-error: true
   
@@ -732,7 +732,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_rockylinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
           outputver=$(cat cmm-mariadbver.log)
-          echo "RockyLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
+          echo "RockyLinux MariaDB Version: $outputver" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect Python3 setup
@@ -1287,7 +1287,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_oraclelinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
           outputver=$(cat cmm-mariadbver.log)
-          echo "OracleLinux MariaDB Version: $output" >> $GITHUB_STEP_SUMMARY
+          echo "OracleLinux MariaDB Version: $outputver" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Inspect Python3 setup
