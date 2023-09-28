@@ -48,8 +48,7 @@ jobs:
           docker run -d --name=cmm_almalinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
           sleep 4
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
-          output=$(tail -20 cmm-install.log)
-          echo "$output" >> $GITHUB_STEP_SUMMARY 
+          output=$(tail -20 cmm-install.log) && echo -e "```\n$output\n```" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -115,13 +114,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "AlmaLinux PHP Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "php-config || true"
+          docker exec cmm_almalinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -154,7 +153,7 @@ jobs:
           outputver=$(cat cmm-nginxver.log)
           echo "AlmaLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
   
@@ -167,11 +166,11 @@ jobs:
           output=$(cat cmm-mariadbstat.log)
           echo "AlmaLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_almalinux8 bash -c "cat /etc/my.cnf" | tee cmm-mycnf.log && outputmycnf=$(cat cmm-mycnf.log) && echo -e "```\n$outputmycnf\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"' | tee cmm-mariadbplugins1.log && outputmariadbplugins1=$(cat cmm-mariadbplugins1.log) && echo -e "```\n$outputmariadbplugins1\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_almalinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"' | tee cmm-mariadbplugins2.log && outputmariadbplugins2=$(cat cmm-mariadbplugins2.log) && echo -e "```\n$outputmariadbplugins2\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_almalinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
@@ -196,12 +195,12 @@ jobs:
         id: redis_test
         run: |
           sleep 1
-          docker exec cmm_almalinux8 bash -c "redis-cli info"
+          docker exec cmm_almalinux8 bash -c "redis-cli info" | tee cmm-redisinfo.log && outputredisinfo=$(cat cmm-redisinfo.log) && echo "$outputredisinfo" >> $GITHUB_STEP_SUMMARY 
           sleep 1
           docker exec cmm_almalinux8 bash -c "systemctl status redis" && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ALMALINUX_REDIS_TEST_STATUS=$ALMALINUX_REDIS_TEST_STATUS"
           sleep 1
-          docker exec cmm_almalinux8 bash -c "php --ri redis"
+          docker exec cmm_almalinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -238,7 +237,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "csf -v"
+          docker exec cmm_almalinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "csf -ra"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -276,7 +275,7 @@ jobs:
   
       - name: Run cminfo
         run: |
-          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run addons/golang.sh
@@ -291,7 +290,7 @@ jobs:
   
       - name: Run addons/opendkim.sh
         run: |
-          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+          docker exec cmm_almalinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh" | tee cmm-opendkim.log && outputopendkim=$(cat cmm-opendkim.log) && echo -e "```\n$outputopendkim\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run tools/csfcf.sh
@@ -306,7 +305,7 @@ jobs:
   
       - name: Create Nginx HTTPS vhost
         run: |
-          docker exec cmm_almalinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+          docker exec cmm_almalinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Test mysqladmin_shell.sh MySQL Database Management
@@ -360,7 +359,7 @@ jobs:
           output=$(cat cmm-nginxquicver.log)
           echo "AlmaLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
 
@@ -370,15 +369,15 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: MariaDB SSL Setup test
@@ -395,15 +394,15 @@ jobs:
         run: |
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -420,13 +419,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "AlmaLinux PHP 8.1 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "php-config || true"
+          docker exec cmm_almalinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -440,15 +439,15 @@ jobs:
         run: |
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.2 setup
@@ -465,13 +464,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "AlmaLinux PHP 8.2 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "php-config || true"
+          docker exec cmm_almalinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -485,15 +484,15 @@ jobs:
         run: |
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -510,13 +509,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "AlmaLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "php-config || true"
+          docker exec cmm_almalinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -604,8 +603,7 @@ jobs:
           docker run -d --name=cmm_rockylinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
           sleep 4
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
-          output=$(tail -20 cmm-install.log)
-          echo "$output" >> $GITHUB_STEP_SUMMARY 
+          output=$(tail -20 cmm-install.log) && echo -e "```\n$output\n```" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -671,13 +669,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "RockyLinux PHP Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "php-config || true"
+          docker exec cmm_rockylinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -710,7 +708,7 @@ jobs:
           outputver=$(cat cmm-nginxver.log)
           echo "RockyLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
   
@@ -723,11 +721,11 @@ jobs:
           output=$(cat cmm-mariadbstat.log)
           echo "RockyLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/my.cnf" | tee cmm-mycnf.log && outputmycnf=$(cat cmm-mycnf.log) && echo -e "```\n$outputmycnf\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"' | tee cmm-mariadbplugins1.log && outputmariadbplugins1=$(cat cmm-mariadbplugins1.log) && echo -e "```\n$outputmariadbplugins1\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_rockylinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"' | tee cmm-mariadbplugins2.log && outputmariadbplugins2=$(cat cmm-mariadbplugins2.log) && echo -e "```\n$outputmariadbplugins2\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_rockylinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
@@ -751,12 +749,12 @@ jobs:
         id: redis_test
         run: |
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "redis-cli info"
+          docker exec cmm_rockylinux8 bash -c "redis-cli info" | tee cmm-redisinfo.log && outputredisinfo=$(cat cmm-redisinfo.log) && echo "$outputredisinfo" >> $GITHUB_STEP_SUMMARY 
           sleep 1
           docker exec cmm_rockylinux8 bash -c "systemctl status redis" && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ROCKYLINUX_REDIS_TEST_STATUS=$ROCKYLINUX_REDIS_TEST_STATUS"
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "php --ri redis"
+          docker exec cmm_rockylinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -793,7 +791,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "csf -v"
+          docker exec cmm_rockylinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "csf -ra"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -831,7 +829,7 @@ jobs:
   
       - name: Run cminfo
         run: |
-          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run addons/golang.sh
@@ -846,7 +844,7 @@ jobs:
   
       - name: Run addons/opendkim.sh
         run: |
-          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh" | tee cmm-opendkim.log && outputopendkim=$(cat cmm-opendkim.log) && echo -e "```\n$outputopendkim\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run tools/csfcf.sh
@@ -861,7 +859,7 @@ jobs:
   
       - name: Create Nginx HTTPS vhost
         run: |
-          docker exec cmm_rockylinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+          docker exec cmm_rockylinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Test mysqladmin_shell.sh MySQL Database Management
@@ -915,7 +913,7 @@ jobs:
           output=$(cat cmm-nginxquicver.log)
           echo "RockyLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
 
@@ -925,15 +923,15 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: MariaDB SSL Setup test
@@ -950,15 +948,15 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -975,13 +973,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "RockyLinux PHP 8.1 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "php-config || true"
+          docker exec cmm_rockylinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -995,15 +993,15 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.2 setup
@@ -1020,13 +1018,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "RockyLinux PHP 8.2 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "php-config || true"
+          docker exec cmm_rockylinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -1040,15 +1038,15 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -1065,13 +1063,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "RockyLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "php-config || true"
+          docker exec cmm_rockylinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -1159,8 +1157,7 @@ jobs:
           docker run -d --name=cmm_oraclelinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
           sleep 4
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
-          output=$(tail -20 cmm-install.log)
-          echo "$output" >> $GITHUB_STEP_SUMMARY 
+          output=$(tail -20 cmm-install.log) && echo -e "```\n$output\n```" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
       - name: Disk Usage Analysis
@@ -1224,17 +1221,15 @@ jobs:
           echo "OracleLinux PHP Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "php -v" | tee cmm-phpver.log
           outputver=$(cat cmm-phpver.log)
-          echo "OracleLinux PHP Version: $outputver" >> $GITHUB_STEP_SUMMARY | tee cmm-phpver.log
-          outputver=$(cat cmm-phpver.log)
           echo "OracleLinux PHP Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "php-config || true"
+          docker exec cmm_oraclelinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1267,7 +1262,7 @@ jobs:
           outputver=$(cat cmm-nginxver.log)
           echo "OracleLinux $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
   
@@ -1280,11 +1275,11 @@ jobs:
           output=$(cat cmm-mariadbstat.log)
           echo "OracleLinux MariaDB Status: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/my.cnf" | tee cmm-mycnf.log && outputmycnf=$(cat cmm-mycnf.log) && echo -e "```\n$outputmycnf\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"' | tee cmm-mariadbplugins1.log && outputmariadbplugins1=$(cat cmm-mariadbplugins1.log) && echo -e "```\n$outputmariadbplugins1\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_oraclelinux8 bash -c 'mysql -t -e "SHOW PLUGINS;"' | tee cmm-mariadbplugins2.log && outputmariadbplugins2=$(cat cmm-mariadbplugins2.log) && echo -e "```\n$outputmariadbplugins2\n```" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "mysqladmin var | tr -s ' '"
           docker exec cmm_oraclelinux8 bash -c "mysqladmin ver" | tee cmm-mariadbver.log
@@ -1308,12 +1303,12 @@ jobs:
         id: redis_test
         run: |
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "redis-cli info"
+          docker exec cmm_oraclelinux8 bash -c "redis-cli info" | tee cmm-redisinfo.log && outputredisinfo=$(cat cmm-redisinfo.log) && echo "$outputredisinfo" >> $GITHUB_STEP_SUMMARY 
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "systemctl status redis" && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_REDIS_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_REDIS_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ORACLELINUX_REDIS_TEST_STATUS=$ORACLELINUX_REDIS_TEST_STATUS"
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "php --ri redis"
+          docker exec cmm_oraclelinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -1350,7 +1345,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "csf -v"
+          docker exec cmm_oraclelinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "csf -ra"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1388,7 +1383,7 @@ jobs:
   
       - name: Run cminfo
         run: |
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run addons/golang.sh
@@ -1403,7 +1398,7 @@ jobs:
   
       - name: Run addons/opendkim.sh
         run: |
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/src/centminmod/addons/opendkim.sh" | tee cmm-opendkim.log && outputopendkim=$(cat cmm-opendkim.log) && echo -e "```\n$outputopendkim\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Run tools/csfcf.sh
@@ -1418,7 +1413,7 @@ jobs:
   
       - name: Create Nginx HTTPS vhost
         run: |
-          docker exec cmm_oraclelinux8 bash -c "/usr/bin/nv -d domain.com -s y"
+          docker exec cmm_oraclelinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
       - name: Test mysqladmin_shell.sh MySQL Database Management
@@ -1472,7 +1467,7 @@ jobs:
           output=$(cat cmm-nginxquicver.log)
           echo "OracleLinux Nginx HTTP/3 QUIC Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginx.log && outputlddnginx=$(cat cmm-lddnginx.log) && echo "$outputlddnginx" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
 
@@ -1482,15 +1477,15 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: MariaDB SSL Setup test
@@ -1507,15 +1502,15 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -1532,13 +1527,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "OracleLinux PHP 8.1 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "php-config || true"
+          docker exec cmm_oraclelinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1552,15 +1547,15 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.2 setup
@@ -1577,13 +1572,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "OracleLinux PHP 8.2 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "php-config || true"
+          docker exec cmm_oraclelinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -1597,15 +1592,15 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -1622,13 +1617,13 @@ jobs:
           outputver=$(cat cmm-phpver.log)
           echo "OracleLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "php-config || true"
+          docker exec cmm_oraclelinux8 bash -c "php-config || true" | tee cmm-phpconfig.log && outputphpconfig=$(cat cmm-phpconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ini" | tee cmm-phpini.log && outputphpini=$(cat cmm-phpini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
