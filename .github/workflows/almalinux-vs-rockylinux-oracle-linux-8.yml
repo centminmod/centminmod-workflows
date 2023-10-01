@@ -307,7 +307,7 @@ jobs:
       - name: Create Nginx HTTPS vhost
         run: |
           docker exec cmm_almalinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux8 bash -c "CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r '.ip') && echo "$CNIP domain.com" >> /etc/hosts"
+          docker exec cmm_almalinux8 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
           docker exec cmm_almalinux8 bash -c "cat /etc/hosts"
         continue-on-error: true
   
@@ -902,7 +902,7 @@ jobs:
       - name: Create Nginx HTTPS vhost
         run: |
           docker exec cmm_rockylinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux8 bash -c "CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r '.ip') && echo "$CNIP domain.com" >> /etc/hosts"
+          docker exec cmm_rockylinux8 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
           docker exec cmm_rockylinux8 bash -c "cat /etc/hosts"
         continue-on-error: true
   
@@ -1497,7 +1497,7 @@ jobs:
       - name: Create Nginx HTTPS vhost
         run: |
           docker exec cmm_oraclelinux8 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux8 bash -c "CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r '.ip') && echo "$CNIP domain.com" >> /etc/hosts"
+          docker exec cmm_oraclelinux8 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
           docker exec cmm_oraclelinux8 bash -c "cat /etc/hosts"
         continue-on-error: true
   
