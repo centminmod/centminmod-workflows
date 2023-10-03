@@ -307,7 +307,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
           # docker exec cmm_almalinux9 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
-          docker exec cmm_almalinux8 bash -c "echo \"$(hostname -i) domain.com\" >> /etc/hosts"
+          docker exec cmm_almalinux8 bash -c 'echo "$(hostname -i) domain.com" >> /etc/hosts'
           docker exec cmm_almalinux9 bash -c "cat /etc/hosts"
         continue-on-error: true
   
@@ -858,7 +858,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
           # docker exec cmm_rockylinux9 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
-          docker exec cmm_rockylinux9 bash -c "echo \"$(hostname -i) domain.com\" >> /etc/hosts"
+          docker exec cmm_rockylinux9 bash -c 'echo "$(hostname -i) domain.com" >> /etc/hosts'
           docker exec cmm_rockylinux9 bash -c "cat /etc/hosts"
         continue-on-error: true
   
@@ -1409,7 +1409,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "/usr/bin/nv -d domain.com -s y" | tee cmm-nginxvhost.log && outputnginxvhost=$(cat cmm-nginxvhost.log) && echo -e "```\n$outputnginxvhost\n```" >> $GITHUB_STEP_SUMMARY 
           # docker exec cmm_oraclelinux9 bash -c 'CNIP=$(curl -s -A "Centmin Mod Github workflow" https://geoip.centminmod.com/v4 | jq -r ".ip") && echo "$CNIP domain.com" >> /etc/hosts'
-          docker exec cmm_oraclelinux9 bash -c "echo \"$(hostname -i) domain.com\" >> /etc/hosts"
+          docker exec cmm_oraclelinux9 bash -c 'echo "$(hostname -i) domain.com" >> /etc/hosts'
           docker exec cmm_oraclelinux9 bash -c "cat /etc/hosts"
         continue-on-error: true
   
