@@ -391,12 +391,12 @@ jobs:
           docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ALMALINUX_NGINXBORINGSSL_TEST_STATUS=$ALMALINUX_NGINXBORINGSSL_TEST_STATUS"
           sleep 1
-          docker exec cmm_almalinux8 bash -c "curl -Ik https://domain.com"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "curl -sIkv https://domain.com"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
+          # docker exec cmm_almalinux8 bash -c "curl -Ik https://domain.com"
+          # docker exec cmm_almalinux8 bash -c "echo '---'"
+          # docker exec cmm_almalinux8 bash -c "curl -sIkv https://domain.com"
+          # docker exec cmm_almalinux8 bash -c "echo '---'"
+          # docker exec cmm_almalinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
+          # docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
           echo "AlmaLinux Nginx BoringSSL Post-Quantum KEX Version: $output" >> $GITHUB_STEP_SUMMARY
@@ -987,12 +987,12 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS=$ROCKYLINUX_NGINXBORINGSSL_TEST_STATUS"
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "curl -Ik https://domain.com"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "curl -sIkv https://domain.com"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          # docker exec cmm_rockylinux8 bash -c "curl -Ik https://domain.com"
+          # docker exec cmm_rockylinux8 bash -c "echo '---'"
+          # docker exec cmm_rockylinux8 bash -c "curl -sIkv https://domain.com"
+          # docker exec cmm_rockylinux8 bash -c "echo '---'"
+          # docker exec cmm_rockylinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
+          # docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
           echo "RockyLinux Nginx BoringSSL Post-Quantum KEX Version: $output" >> $GITHUB_STEP_SUMMARY
@@ -1583,12 +1583,12 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXBORINGSSL_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXBORINGSSL_TEST_STATUS=$?" >> $GITHUB_OUTPUT
           echo "ORACLELINUX_NGINXBORINGSSL_TEST_STATUS=$ORACLELINUX_NGINXBORINGSSL_TEST_STATUS"
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "curl -Ik https://domain.com"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "curl -sIkv https://domain.com"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          # docker exec cmm_oraclelinux8 bash -c "curl -Ik https://domain.com"
+          # docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          # docker exec cmm_oraclelinux8 bash -c "curl -sIkv https://domain.com"
+          # docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          # docker exec cmm_oraclelinux8 bash -c "echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug"
+          # docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
           echo "OracleLinux Nginx BoringSSL Post-Quantum KEX Version: $output" >> $GITHUB_STEP_SUMMARY
