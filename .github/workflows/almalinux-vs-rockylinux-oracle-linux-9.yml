@@ -342,7 +342,7 @@ jobs:
         continue-on-error: true
 
       - name: Inspect Nginx official zlib setup
-        id: nginxquic_test
+        id: nginxzlib_test
         run: |
           sleep 1
           docker exec cmm_almalinux9 bash -c "ls -lAh /usr/local/nginx/logs"
@@ -925,7 +925,7 @@ jobs:
         continue-on-error: true
 
       - name: Inspect Nginx official zlib setup
-        id: nginxquic_test
+        id: nginxzlib_test
         run: |
           sleep 1
           docker exec cmm_rockylinux9 bash -c "ls -lAh /usr/local/nginx/logs"
@@ -1508,7 +1508,7 @@ jobs:
         continue-on-error: true
 
       - name: Inspect Nginx official zlib setup
-        id: nginxquic_test
+        id: nginxzlib_test
         run: |
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "ls -lAh /usr/local/nginx/logs"
