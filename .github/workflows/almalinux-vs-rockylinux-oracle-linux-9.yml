@@ -394,7 +394,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "curl -sIkv https://domain.com"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "echo | bssl client -server-name domain.com -connect $(hostname -i):443 -curves X25519:X25519Kyber768Draft00 -debug"
+          docker exec cmm_almalinux9 bash -c 'echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug'
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
@@ -945,7 +945,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "curl -sIkv https://domain.com"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "echo | bssl client -server-name domain.com -connect $(hostname -i):443 -curves X25519:X25519Kyber768Draft00 -debug"
+          docker exec cmm_rockylinux9 bash -c 'echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug'
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
@@ -1496,7 +1496,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "curl -sIkv https://domain.com"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "echo | bssl client -server-name domain.com -connect $(hostname -i):443 -curves X25519:X25519Kyber768Draft00 -debug"
+          docker exec cmm_oraclelinux9 bash -c 'echo | bssl client -server-name domain.com -connect domain.com:443 -curves X25519:X25519Kyber768Draft00 -debug'
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxboringsslver.log
           output=$(cat cmm-nginxboringsslver.log)
