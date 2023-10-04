@@ -336,9 +336,41 @@ jobs:
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+        run: |
+          docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx official zlib setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$ALMALINUX_NGINXZLIB_TEST_STATUS"
+          sleep 1
+          docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+          output=$(cat cmm-nginxzlib.log)
+          echo "AlmaLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -932,9 +964,41 @@ jobs:
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx official zlib setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$ROCKYLINUX_NGINXZLIB_TEST_STATUS"
+          sleep 1
+          docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+          output=$(cat cmm-nginxzlib.log)
+          echo "RockyLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'NGINX_QUIC_SUPPORT='y'' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1528,9 +1592,41 @@ jobs:
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: Inspect Nginx official zlib setup
+        id: nginxquic_test
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$ORACLELINUX_NGINXZLIB_TEST_STATUS"
+          sleep 1
+          docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+          output=$(cat cmm-nginxzlib.log)
+          echo "OracleLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'NGINX_QUIC_SUPPORT='y'' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
