@@ -338,7 +338,8 @@ jobs:
 
       - name: OpenSSL default benchmarks test
         run: |
-          docker exec cmm_almalinux8 /home/openssltest.sh openssl111 || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -351,7 +352,8 @@ jobs:
 
       - name: OpenSSL 3.0 benchmarks test
         run: |
-          docker exec cmm_almalinux8 /home/openssltest.sh openssl30 || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -419,7 +421,8 @@ jobs:
 
       - name: OpenSSL QuicTLS benchmarks test
         run: |
-          docker exec cmm_almalinux8 /home/openssltest.sh opensslquic || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh opensslquic | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
@@ -460,7 +463,8 @@ jobs:
 
       - name: OpenSSL BoringSSL benchmarks test
         run: |
-          docker exec cmm_almalinux8 /home/openssltest.sh boringssl || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh boringssl | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -490,7 +494,12 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
+      - name: OpenSSL benchmark tests summary
+        run: |
+          docker exec cmm_almalinux8 bash -c "cat /home/nginxopenssl-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM upgrade test
         run: |
           docker exec cmm_almalinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
@@ -1019,7 +1028,8 @@ jobs:
 
       - name: OpenSSL default benchmarks test
         run: |
-          docker exec cmm_rockylinux8 /home/openssltest.sh openssl111 || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -1032,7 +1042,8 @@ jobs:
 
       - name: OpenSSL 3.0 benchmarks test
         run: |
-          docker exec cmm_rockylinux8 /home/openssltest.sh openssl30 || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -1100,7 +1111,8 @@ jobs:
 
       - name: OpenSSL QuicTLS benchmarks test
         run: |
-          docker exec cmm_rockylinux8 /home/openssltest.sh opensslquic || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh opensslquic | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
@@ -1141,7 +1153,8 @@ jobs:
 
       - name: OpenSSL BoringSSL benchmarks test
         run: |
-          docker exec cmm_rockylinux8 /home/openssltest.sh boringssl || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh boringssl | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -1169,6 +1182,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxboringssl.log && outputlddnginxboringssl=$(cat cmm-lddnginxboringssl.log) && echo "$outputlddnginxboringssl" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: OpenSSL benchmark tests summary
+        run: |
+          docker exec cmm_rockylinux8 bash -c "cat /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM upgrade test
@@ -1700,7 +1718,8 @@ jobs:
 
       - name: OpenSSL default benchmarks test
         run: |
-          docker exec cmm_oraclelinux8 /home/openssltest.sh openssl111 || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -1713,7 +1732,8 @@ jobs:
 
       - name: OpenSSL 3.0 benchmarks test
         run: |
-          docker exec cmm_oraclelinux8 /home/openssltest.sh openssl30 || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -1781,7 +1801,8 @@ jobs:
 
       - name: OpenSSL QuicTLS benchmarks test
         run: |
-          docker exec cmm_oraclelinux8 /home/openssltest.sh opensslquic || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh opensslquic | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
@@ -1822,7 +1843,8 @@ jobs:
 
       - name: OpenSSL BoringSSL benchmarks test
         run: |
-          docker exec cmm_oraclelinux8 /home/openssltest.sh boringssl || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh boringssl | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -1850,6 +1872,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxboringssl.log && outputlddnginxboringssl=$(cat cmm-lddnginxboringssl.log) && echo "$outputlddnginxboringssl" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: OpenSSL benchmark tests summary
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "cat /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM upgrade test
