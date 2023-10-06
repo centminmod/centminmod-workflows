@@ -336,12 +336,22 @@ jobs:
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL default benchmarks test
+        run: |
+          docker exec cmm_almalinux8 /home/openssltest.sh openssl111 || true
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL 3.0 benchmarks test
+        run: |
+          docker exec cmm_almalinux8 /home/openssltest.sh openssl30 || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -407,6 +417,11 @@ jobs:
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL QuicTLS benchmarks test
+        run: |
+          docker exec cmm_almalinux8 /home/openssltest.sh opensslquic || true
+        continue-on-error: true
+
       - name: Inspect Nginx HTTP/3 QuicTLS setup
         id: nginxquic_test
         run: |
@@ -441,6 +456,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_almalinux8 bash -c "nginx -t"
           docker exec cmm_almalinux8 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: OpenSSL BoringSSL benchmarks test
+        run: |
+          docker exec cmm_almalinux8 /home/openssltest.sh boringssl || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -997,12 +1017,22 @@ jobs:
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL default benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 /home/openssltest.sh openssl111 || true
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL default benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 /home/openssltest.sh openssl30 || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -1068,6 +1098,11 @@ jobs:
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL QuicTLS benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 /home/openssltest.sh opensslquic || true
+        continue-on-error: true
+
       - name: Inspect Nginx HTTP/3 QuicTLS setup
         id: nginxquic_test
         run: |
@@ -1102,6 +1137,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_rockylinux8 bash -c "nginx -t"
           docker exec cmm_rockylinux8 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: OpenSSL BoringSSL benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 /home/openssltest.sh boringssl || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -1658,12 +1698,22 @@ jobs:
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL default benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 /home/openssltest.sh openssl111 || true
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.11' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL default benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 /home/openssltest.sh openssl30 || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -1729,6 +1779,11 @@ jobs:
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
+      - name: OpenSSL QuicTLS benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 /home/openssltest.sh opensslquic || true
+        continue-on-error: true
+
       - name: Inspect Nginx HTTP/3 QuicTLS setup
         id: nginxquic_test
         run: |
@@ -1763,6 +1818,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_oraclelinux8 bash -c "nginx -t"
           docker exec cmm_oraclelinux8 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: OpenSSL BoringSSL benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 /home/openssltest.sh boringssl || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
