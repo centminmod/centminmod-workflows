@@ -41,6 +41,9 @@ RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service sy
 
 RUN mkdir -p /usr/src/kernels /usr/share/sysbench
 
+COPY scripts/openssltest.sh /home/openssltest.sh
+RUN chmod +x /home/openssltest.sh
+
 COPY scripts/sysbench-run.sh /home/sysbench-run.sh
 RUN chmod +x /home/sysbench-run.sh
 

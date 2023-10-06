@@ -14,6 +14,9 @@ rm -f /lib/systemd/system/basic.target.wants/*;\
 rm -f /lib/systemd/system/anaconda.target.wants/*;
 RUN mkdir -p /usr/src/kernels
 
+COPY scripts/openssltest.sh /home/openssltest.sh
+RUN chmod +x /home/openssltest.sh
+
 COPY scripts/sysbench-run.sh /home/sysbench-run.sh
 RUN chmod +x /home/sysbench-run.sh
 
