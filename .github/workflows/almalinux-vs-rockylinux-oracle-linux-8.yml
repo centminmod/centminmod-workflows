@@ -1711,7 +1711,7 @@ jobs:
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: OpenSSL default benchmarks test
+      - name: OpenSSL 3.0 benchmarks test
         run: |
           docker exec cmm_oraclelinux8 /home/openssltest.sh openssl30 || true
         continue-on-error: true
