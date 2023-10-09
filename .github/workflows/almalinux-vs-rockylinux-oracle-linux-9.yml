@@ -542,7 +542,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 /home/centmin-option-5.sh
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -655,6 +655,28 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
   
+      - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 /home/centmin-option-5.sh
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri pgsql"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/pgsql-16/bin/pg_config"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
       - name: Run cmupdate
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
@@ -1226,7 +1248,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1339,6 +1361,28 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
   
+      - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri pgsql"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/pgsql-16/bin/pg_config"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
       - name: Run cmupdate
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
@@ -1909,7 +1953,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1-php8.1.sh
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -2022,6 +2066,28 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
   
+      - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri pgsql"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/pgsql-16/bin/pg_config"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
       - name: Run cmupdate
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
