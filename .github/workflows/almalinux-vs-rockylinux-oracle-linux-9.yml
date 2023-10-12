@@ -52,7 +52,7 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
-      - name: Disk Usage Analysis
+      - name: Centmin Mod Disk Usage Analysis
         run: |
           docker exec cmm_almalinux9 bash -c "du -sh /svr-setup"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -797,7 +797,7 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
   
-      - name: Disk Usage Analysis
+      - name: Centmin Mod Disk Usage Analysis
         run: |
           docker exec cmm_rockylinux9 bash -c "du -sh /svr-setup"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1541,7 +1541,7 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
   
-      - name: Disk Usage Analysis
+      - name: Centmin Mod Disk Usage Analysis
         run: |
           docker exec cmm_oraclelinux9 bash -c "du -sh /svr-setup"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
