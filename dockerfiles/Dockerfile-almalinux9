@@ -53,6 +53,9 @@ RUN chmod +x /home/mariadb-ssl-setup.sh
 COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
 RUN chmod +x /home/centmin-option-4.sh
 
+COPY scripts/centmin-option-4-master.sh /home/centmin-option-4-master.sh
+RUN chmod +x /home/centmin-option-4-master.sh
+
 COPY scripts/centmin-option-5.sh /home/centmin-option-5.sh
 RUN chmod +x /home/centmin-option-5.sh
 
