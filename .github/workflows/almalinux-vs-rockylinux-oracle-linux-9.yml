@@ -382,7 +382,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
           docker exec cmm_almalinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
@@ -1127,7 +1127,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-     - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
           docker exec cmm_rockylinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
@@ -1871,7 +1871,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-     - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
           docker exec cmm_oraclelinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
