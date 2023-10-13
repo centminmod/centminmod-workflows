@@ -42,6 +42,9 @@ RUN dnf clean all && \
 RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service systemd-firstboot.service systemd-networkd-wait-online.service
 
 RUN mkdir -p /usr/src/kernels
+RUN mkdir -p /var/lib/pgsql/16/data/
+RUN chmod 0700 /var/lib/pgsql/16/data/
+RUN chown postgres /var/lib/pgsql/16/data/
 
 COPY scripts/openssltest.sh /home/openssltest.sh
 RUN chmod +x /home/openssltest.sh
