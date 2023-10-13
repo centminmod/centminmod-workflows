@@ -700,6 +700,10 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "chown postgres:postgres /var/lib/pgsql/16/data/" || true
+          docker exec cmm_almalinux9 bash -c "systemctl restart postgresql-16" || true
+          docker exec cmm_almalinux9 bash -c "systemctl status postgresql-16 --no-pager" || true
+          docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri pgsql" || true
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/pgsql-16/bin/pg_config" || true
@@ -1444,6 +1448,10 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "chown postgres:postgres /var/lib/pgsql/16/data/" || true
+          docker exec cmm_rockylinux9 bash -c "systemctl restart postgresql-16" || true
+          docker exec cmm_rockylinux9 bash -c "systemctl status postgresql-16 --no-pager" || true
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri pgsql" || true
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/pgsql-16/bin/pg_config" || true
@@ -2186,6 +2194,10 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgradepostgresql.log && outputphpverupgradepostgresql=$(cat cmm-phpverupgradepostgresql.log) && echo -e "php -v\n$outputphpverupgradepostgresql" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "chown postgres:postgres /var/lib/pgsql/16/data/" || true
+          docker exec cmm_oraclelinux9 bash -c "systemctl restart postgresql-16" || true
+          docker exec cmm_oraclelinux9 bash -c "systemctl status postgresql-16 --no-pager" || true
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri pgsql" || true
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
