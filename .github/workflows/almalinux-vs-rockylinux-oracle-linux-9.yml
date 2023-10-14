@@ -694,7 +694,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 /home/centmin-option-5.sh
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1442,7 +1442,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2189,7 +2189,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
