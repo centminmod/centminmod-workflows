@@ -26,7 +26,7 @@ DISABLE_PHP_SEVEN_THREE='y'
 DISABLE_PHP_SEVEN_FOUR='y'
 
 # PHP 8 JIT
-PHP_JIT='y'
+PHP_JIT='n'
 # JIT Tracing options
 # https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit-hot-loop
 # https://www.php.net/manual/en/opcache.configuration.php#ini.opcache.jit-hot-func
