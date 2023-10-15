@@ -15,7 +15,7 @@ OPCACHECLI='n'
 # function = 1205
 OPCACHE_JITCRTO='1254'
 CACHETOOL='n'
-RUNS=3
+RUNS=7
 SLEEP=3
 
 # Disable PHP version tests for quicker benchmarking
