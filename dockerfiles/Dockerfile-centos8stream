@@ -46,6 +46,18 @@ RUN mkdir -p /var/lib/pgsql/16/data/
 RUN chmod 0700 /var/lib/pgsql/16/data/
 #RUN chown postgres:postgres /var/lib/pgsql/16/data/
 
+COPY scripts/phpbench.php /home/phpbench.php
+RUN chmod +x /home/phpbench.php
+
+COPY scripts/bench.php /home/bench.php
+RUN chmod +x /home/bench.php
+
+COPY scripts/micro_bench.php /home/micro_bench.php
+RUN chmod +x /home/micro_bench.php
+
+COPY scripts/detailed_benchmark.php /home/detailed_benchmark.php
+RUN chmod +x /home/detailed_benchmark.php
+
 COPY scripts/openssltest.sh /home/openssltest.sh
 RUN chmod +x /home/openssltest.sh
 
