@@ -593,6 +593,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: MariaDB SSL Setup test
         run: |
           docker exec cmm_almalinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
@@ -616,6 +621,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.1 phpbench.php
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -663,6 +673,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.2 phpbench.php
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: Inspect PHP-FPM 8.2 setup
         id: php82_test
         run: |
@@ -706,6 +721,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.3 phpbench.php
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -764,6 +784,11 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Run cmupdate
@@ -1388,6 +1413,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: MariaDB SSL Setup test
         run: |
           docker exec cmm_rockylinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
@@ -1411,6 +1441,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.1 phpbench.php
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -1458,6 +1493,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.2 phpbench.php
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: Inspect PHP-FPM 8.2 setup
         id: php82_test
         run: |
@@ -1501,6 +1541,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.3 phpbench.php
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -1559,6 +1604,11 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Run cmupdate
@@ -2183,6 +2233,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: MariaDB SSL Setup test
         run: |
           docker exec cmm_oraclelinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
@@ -2206,6 +2261,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.1 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.1 setup
@@ -2253,6 +2313,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: PHP-FPM 8.2 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: Inspect PHP-FPM 8.2 setup
         id: php82_test
         run: |
@@ -2296,6 +2361,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.3 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Inspect PHP-FPM 8.3 setup
@@ -2354,6 +2424,11 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
       - name: Run cmupdate
