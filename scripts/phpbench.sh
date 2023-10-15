@@ -603,3 +603,15 @@ V=$(egrep '\[PHP|bench.php avg :|micro_bench.php avg :|detailed_benchmark.php to
 echo "|bench.php|micro_bench.php|detailed_benchmark.php|total"
 echo $V | xargs -n3 | while read x y z; do echo "|$x|$y|$z" | awk -F '|' '{print $0"|"$2+$3+$4}'; done
 echo
+
+# Extract data with egrep and transform it to markdown format using awk
+echo "| PHP Version | bench.php | micro_bench.php | detailed_benchmark.php |" > table.md
+echo "|-------------|-----------|-----------------|------------------------|" >> table.md
+
+egrep '\[PHP|bench.php avg :|micro_bench.php avg :|detailed_benchmark.php total avg :' "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log" | awk -F " : " '
+/PHP/ {gsub(/\[|\]/, "", $1); version=$1}
+/bench.php avg/ {bench=$3}
+/micro_bench.php avg/ {micro_bench=$3}
+/detailed_benchmark.php total avg/ {detailed_bench=$3; print "| " version " | " bench " | " micro_bench " | " detailed_bench " |"}
+' >> table.md
+cat table.md
