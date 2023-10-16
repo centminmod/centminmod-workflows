@@ -277,6 +277,11 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
+
+      - name: Run cminfo top
+        run: |
+          docker exec cmm_almalinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh top"
+        continue-on-error: true
   
       - name: Run addons/golang.sh
         run: |
@@ -1050,6 +1055,11 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
+
+      - name: Run cminfo top
+        run: |
+          docker exec cmm_rockylinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh top"
+        continue-on-error: true
   
       - name: Run addons/golang.sh
         run: |
@@ -1821,6 +1831,11 @@ jobs:
       - name: Run cminfo
         run: |
           docker exec cmm_oraclelinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh" | tee cmm-cminfo.log && outputcminfo=$(cat cmm-cminfo.log) && echo -e "```\n$outputcminfo\n```" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: Run cminfo top
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/src/centminmod/tools/cminfo.sh top"
         continue-on-error: true
   
       - name: Run addons/golang.sh
