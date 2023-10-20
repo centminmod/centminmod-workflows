@@ -824,6 +824,8 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM 8.1 PGO upgrade test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'PHP_PGO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'PHP_PGO_ALWAYS=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -976,6 +978,7 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'PHP_PGO=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1859,6 +1862,8 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM 8.1 PGO upgrade test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'PHP_PGO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'PHP_PGO_ALWAYS=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2011,6 +2016,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'PHP_PGO=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2894,6 +2900,8 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM 8.1 PGO upgrade test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'PHP_PGO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'PHP_PGO_ALWAYS=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -3046,6 +3054,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'PHP_PGO=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cat /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
