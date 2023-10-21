@@ -334,6 +334,11 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo 'setpass'"
           docker exec cmm_almalinux9 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
         continue-on-error: true
+
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_almalinux9 bash -c "cmupdate"
+        continue-on-error: true
   
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
@@ -805,7 +810,6 @@ jobs:
           docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
-
       - name: Run cmupdate
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
@@ -1169,6 +1173,11 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "echo 'setpass'"
           docker exec cmm_rockylinux9 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_rockylinux9 bash -c "cmupdate"
         continue-on-error: true
   
       - name: centmin.sh menu option 4 Nginx upgrade test
@@ -2004,6 +2013,11 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "echo 'setpass'"
           docker exec cmm_oraclelinux9 bash -c "echo -e 'db2username\nnewusername1newpass' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh setpass"
+        continue-on-error: true
+  
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "cmupdate"
         continue-on-error: true
   
       - name: centmin.sh menu option 4 Nginx upgrade test
