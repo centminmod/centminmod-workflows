@@ -339,7 +339,17 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
         continue-on-error: true
-  
+
+      - name: centmin.sh menu option 11 submenu 0 yes
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-11-submenu-0-y.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 11 submenu 0 no
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-11-submenu-0-n.sh
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
@@ -1179,7 +1189,17 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
         continue-on-error: true
-  
+
+      - name: centmin.sh menu option 11 submenu 0 yes
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-11-submenu-0-y.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 11 submenu 0 no
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-11-submenu-0-n.sh
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
@@ -2019,7 +2039,17 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
         continue-on-error: true
-  
+
+      - name: centmin.sh menu option 11 submenu 0 yes
+        run: |
+          docker exec cmm_oraclelinux9 /home/centmin-option-11-submenu-0-y.sh
+        continue-on-error: true
+
+      - name: centmin.sh menu option 11 submenu 0 no
+        run: |
+          docker exec cmm_oraclelinux9 /home/centmin-option-11-submenu-0-n.sh
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh

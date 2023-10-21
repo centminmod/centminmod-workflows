@@ -46,6 +46,12 @@ RUN mkdir -p /var/lib/pgsql/16/data/
 RUN chmod 0700 /var/lib/pgsql/16/data/
 #RUN chown postgres:postgres /var/lib/pgsql/16/data/
 
+COPY scripts/centmin-option-11-submenu-0-y.sh /home/centmin-option-11-submenu-0-y.sh
+RUN chmod +x /home/centmin-option-11-submenu-0-y.sh
+
+COPY scripts/centmin-option-11-submenu-0-n.sh /home/centmin-option-11-submenu-0-n.sh
+RUN chmod +x /home/centmin-option-11-submenu-0-n.sh
+
 COPY scripts/phpbench.sh /home/phpbench.sh
 RUN chmod +x /home/phpbench.sh
 
