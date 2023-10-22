@@ -2,7 +2,7 @@
 
 # Check if an argument is provided
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 {boringssl|openssl111|openssl30|openssl31|bssl|opensslquic}"
+    echo "Usage: $0 {boringssl|openssl111|openssl30|openssl31|bssl|opensslquic|opensslsys}"
     exit 1
 fi
 
@@ -63,8 +63,22 @@ case $LIB in
         ;;
     openssl111|openssl30|openssl31)
         BINARY="/opt/openssl/bin/openssl"
+        BINARY_VER=$($BINARY version 2>&1 | awk '{print $1,$2}')
         if [ -f "$BINARY" ]; then
-            echo "Benchmarking OpenSSL $LIB..."
+            echo "Benchmarking ${BINARY_VER} $LIB..."
+            RSA_OUTPUT=$($BINARY speed rsa2048 2>&1)
+            ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
+            process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
+            # Additional benchmarking for curves
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            process_curve_output "$CURVE_OUTPUT" "" ""
+        fi
+        ;;
+    opensslsys)
+        BINARY="/usr/bin/openssl"
+        BINARY_VER=$($BINARY version 2>&1 | awk '{print $1,$2}')
+        if [ -f "$BINARY" ]; then
+            echo "Benchmarking ${BINARY_VER} System..."
             RSA_OUTPUT=$($BINARY speed rsa2048 2>&1)
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
@@ -75,8 +89,9 @@ case $LIB in
         ;;
     opensslquic)
         BINARY="/opt/openssl-quic/bin/openssl"
+        BINARY_VER=$($BINARY version 2>&1 | awk '{print $1,$2}')
         if [ -f "$BINARY" ]; then
-            echo "Benchmarking OpenSSL-QUIC..."
+            echo "Benchmarking ${BINARY_VER}..."
             RSA_OUTPUT=$($BINARY speed rsa2048 2>&1)
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
@@ -86,7 +101,7 @@ case $LIB in
         fi
         ;;
     *)
-        echo "Invalid argument. Usage: $0 {boringssl|openssl111|openssl30|openssl31|bssl|opensslquic}"
+        echo "Invalid argument. Usage: $0 {boringssl|openssl111|openssl30|openssl31|bssl|opensslquic|opensslsys}"
         exit 1
         ;;
 esac
