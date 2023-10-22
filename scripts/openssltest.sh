@@ -35,12 +35,12 @@ function process_curve_output() {
 
     # For BoringSSL with filter X25519
     local bssl_x25519_output="$2"
-    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'Ed25519 signing operations|Ed25519 verify operations')
+    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'multiplication operations|Ed25519 signing operations|Ed25519 verify operations')
     echo "$bssl_x25519_lines"
 
     # For BoringSSL with filter P-256
     local bssl_p256_output="$3"
-    local bssl_p256_lines=$(echo "$bssl_p256_output" | grep -E 'ECDSA P-256 signing operations|ECDSA P-256 verify operations')
+    local bssl_p256_lines=$(echo "$bssl_p256_output" | grep -E 'ECDH P-256 operations|ECDSA P-256 signing operations|ECDSA P-256 verify operations')
     echo "$bssl_p256_lines"
 }
 
