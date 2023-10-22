@@ -9,8 +9,10 @@ fi
 LIB=$1
 
 function process_openssl_output() {
-    local rsa_line=$(echo "$1" | grep "rsa 2048 bits")
-    local ecdsa_line=$(echo "$2" | grep "256 bits ecdsa")
+    rsa_input="$1"
+    ecdsa_input="$2"
+    local rsa_line=$(echo "$rsa_input" 2>&1 | grep "rsa 2048 bits" | grep -v 'Doing ')
+    local ecdsa_line=$(echo "$ecdsa_input" 2>&1 | grep "256 bits ecdsa" | grep -v 'Doing ')
     
     if [[ ! -z $rsa_line ]]; then
         local rsa_sign=$(echo $rsa_line | awk '{print $6}')
@@ -49,13 +51,13 @@ case $LIB in
         BINARY="/opt/boringssl/bin/bssl"
         if [ -f "$BINARY" ]; then
             echo "Benchmarking BoringSSL..."
-            OUTPUTRSA=$($BINARY speed -filter RSA | grep 'RSA 2048')
+            OUTPUTRSA=$($BINARY speed -filter RSA | grep 'RSA 2048' 2>&1)
             echo "$OUTPUTRSA"
-            OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256')
+            OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256' 2>&1)
             echo "$OUTPUTECDSA"
             # Additional benchmarking for curves X25519 and P-256
-            OUTPUTX25519=$($BINARY speed -filter X25519)
-            OUTPUTP256=$($BINARY speed -filter P-256)
+            OUTPUTX25519=$($BINARY speed -filter X25519 2>&1)
+            OUTPUTP256=$($BINARY speed -filter P-256 2>&1)
             process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256"
          fi
         ;;
@@ -63,11 +65,11 @@ case $LIB in
         BINARY="/opt/openssl/bin/openssl"
         if [ -f "$BINARY" ]; then
             echo "Benchmarking OpenSSL $LIB..."
-            RSA_OUTPUT=$($BINARY speed rsa2048)
-            ECDSA_OUTPUT=$($BINARY speed ecdsap256)
+            RSA_OUTPUT=$($BINARY speed rsa2048 2>&1)
+            ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
             process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
@@ -75,11 +77,11 @@ case $LIB in
         BINARY="/opt/openssl-quic/bin/openssl"
         if [ -f "$BINARY" ]; then
             echo "Benchmarking OpenSSL-QUIC..."
-            RSA_OUTPUT=$($BINARY speed rsa2048)
-            ECDSA_OUTPUT=$($BINARY speed ecdsap256)
+            RSA_OUTPUT=$($BINARY speed rsa2048 2>&1)
+            ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
             process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
