@@ -27,6 +27,23 @@ function process_openssl_output() {
     fi
 }
 
+function process_curve_output() {
+    # For OpenSSL
+    local openssl_output="$1"
+    local openssl_curve_lines=$(echo "$openssl_output" | grep -E '256 bits ecdh \(nistp256\)|253 bits ecdh \(X25519\)')
+    echo "$openssl_curve_lines"
+
+    # For BoringSSL with filter X25519
+    local bssl_x25519_output="$2"
+    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'Ed25519 signing operations|Ed25519 verify operations')
+    echo "$bssl_x25519_lines"
+
+    # For BoringSSL with filter P-256
+    local bssl_p256_output="$3"
+    local bssl_p256_lines=$(echo "$bssl_p256_output" | grep -E 'ECDSA P-256 signing operations|ECDSA P-256 verify operations')
+    echo "$bssl_p256_lines"
+}
+
 case $LIB in
     boringssl|bssl)
         BINARY="/opt/boringssl/bin/bssl"
@@ -36,7 +53,11 @@ case $LIB in
             echo "$OUTPUTRSA"
             OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256')
             echo "$OUTPUTECDSA"
-        fi
+            # Additional benchmarking for curves X25519 and P-256
+            OUTPUTX25519=$($BINARY speed -filter X25519)
+            OUTPUTP256=$($BINARY speed -filter P-256)
+            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256"
+         fi
         ;;
     openssl111|openssl30|openssl31)
         BINARY="/opt/openssl/bin/openssl"
@@ -45,6 +66,9 @@ case $LIB in
             RSA_OUTPUT=$($BINARY speed rsa2048)
             ECDSA_OUTPUT=$($BINARY speed ecdsap256)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
+            # Additional benchmarking for curves
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256)
+            process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
     opensslquic)
@@ -54,6 +78,9 @@ case $LIB in
             RSA_OUTPUT=$($BINARY speed rsa2048)
             ECDSA_OUTPUT=$($BINARY speed ecdsap256)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
+            # Additional benchmarking for curves
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256)
+            process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
     *)
