@@ -3098,7 +3098,7 @@ jobs:
       # - name: PHP-FPM 8.0 phpbench.php
       #   run: |
       #     docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
-        continue-on-error: true
+        # continue-on-error: true
 
       - name: Run cmupdate
         run: |
