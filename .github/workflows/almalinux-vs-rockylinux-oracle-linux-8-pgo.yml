@@ -360,17 +360,17 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
-        run: |
-          docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
@@ -393,42 +393,42 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
-        run: |
-          docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.0 setup
-        id: nginxopensslthree_test
-        run: |
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.0 setup
+      #   id: nginxopensslthree_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "AlmaLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
@@ -451,80 +451,80 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
-        run: |
-          docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
-        id: nginxopensslthreeone_test
-        run: |
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.1 setup
+      #   id: nginxopensslthreeone_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "AlmaLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 /home/centmin-option-4.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+      #     docker exec cmm_almalinux8 /home/centmin-option-4.sh
+      #   continue-on-error: true
 
-      - name: Nginx HTTPS h2load - official zlib benchmarks test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx HTTPS h2load - official zlib benchmarks test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx official zlib setup
-        id: nginxzlib_test
-        run: |
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$ALMALINUX_NGINXZLIB_TEST_STATUS"
-          sleep 1
-          docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
-          output=$(cat cmm-nginxzlib.log)
-          echo "AlmaLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx official zlib setup
+      #   id: nginxzlib_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ALMALINUX_NGINXZLIB_TEST_STATUS=$ALMALINUX_NGINXZLIB_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_almalinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+      #     output=$(cat cmm-nginxzlib.log)
+      #     echo "AlmaLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #     docker exec cmm_almalinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
@@ -622,17 +622,17 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
-        run: |
-          docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
-        run: |
-          docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
+      #   run: |
+      #     docker exec cmm_almalinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
         run: |
@@ -1403,17 +1403,17 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
-        run: |
-          docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
@@ -1436,42 +1436,42 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
-        run: |
-          docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.0 setup
-        id: nginxopensslthree_test
-        run: |
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "RockyLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.0 setup
+      #   id: nginxopensslthree_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "RockyLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
@@ -1494,80 +1494,80 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
-        run: |
-          docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
-        id: nginxopensslthreeone_test
-        run: |
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "RockyLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.1 setup
+      #   id: nginxopensslthreeone_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ROCKYLINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "RockyLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 /home/centmin-option-4.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+      #     docker exec cmm_rockylinux8 /home/centmin-option-4.sh
+      #   continue-on-error: true
 
-      - name: Nginx HTTPS h2load - official zlib benchmarks test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx HTTPS h2load - official zlib benchmarks test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx official zlib setup
-        id: nginxzlib_test
-        run: |
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$ROCKYLINUX_NGINXZLIB_TEST_STATUS"
-          sleep 1
-          docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
-          output=$(cat cmm-nginxzlib.log)
-          echo "RockyLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx official zlib setup
+      #   id: nginxzlib_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ROCKYLINUX_NGINXZLIB_TEST_STATUS=$ROCKYLINUX_NGINXZLIB_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_rockylinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+      #     output=$(cat cmm-nginxzlib.log)
+      #     echo "RockyLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
@@ -1665,17 +1665,17 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
-        run: |
-          docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
-        run: |
-          docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
+      #   run: |
+      #     docker exec cmm_rockylinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
         run: |
@@ -1709,15 +1709,15 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_rockylinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_rockylinux8 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_rockylinux8 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
@@ -2446,17 +2446,17 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
-        run: |
-          docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL default benchmarks test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
@@ -2479,42 +2479,42 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
-        run: |
-          docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.0 setup
-        id: nginxopensslthree_test
-        run: |
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "OracleLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.0 setup
+      #   id: nginxopensslthree_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "OracleLinux Nginx OpenSSL 3.0 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
@@ -2537,80 +2537,80 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
-        run: |
-          docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
-        id: nginxopensslthreeone_test
-        run: |
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "OracleLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx OpenSSL 3.1 setup
+      #   id: nginxopensslthreeone_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ORACLELINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+      #     output=$(cat cmm-nginxopensslthree.log)
+      #     echo "OracleLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx official zlib upgrade test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx official zlib upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+      #     docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
+      #   continue-on-error: true
 
-      - name: Nginx HTTPS h2load - official zlib benchmarks test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx HTTPS h2load - official zlib benchmarks test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
-      - name: Inspect Nginx official zlib setup
-        id: nginxzlib_test
-        run: |
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$ORACLELINUX_NGINXZLIB_TEST_STATUS"
-          sleep 1
-          docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
-          output=$(cat cmm-nginxzlib.log)
-          echo "OracleLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-          docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux8 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect Nginx official zlib setup
+      #   id: nginxzlib_test
+      #   run: |
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ls -lAh /usr/local/nginx/logs"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "ps aux | grep nginx"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "systemctl status nginx.service --no-pager" && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ORACLELINUX_NGINXZLIB_TEST_STATUS=$ORACLELINUX_NGINXZLIB_TEST_STATUS"
+      #     sleep 1
+      #     docker exec cmm_oraclelinux8 bash -c "curl -I http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "curl -sIv http://localhost"
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxzlib.log
+      #     output=$(cat cmm-nginxzlib.log)
+      #     echo "OracleLinux Nginx official zlib Version: $output" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxzlib.log && outputlddnginxzlib=$(cat cmm-lddnginxzlib.log) && echo "$outputlddnginxzlib" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux8 bash -c "echo '---'"
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx HTTP/3 QuicTLS upgrade test
         run: |
@@ -2708,17 +2708,17 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
-        run: |
-          docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
-        continue-on-error: true
+      # - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
+      #   continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
-        run: |
-          docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
+      # - name: Nginx master branch HTTPS h2load - BoringSSL Post-Quantum KEX benchmarks test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+      #     docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+      #   continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
         run: |
@@ -2752,15 +2752,15 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_oraclelinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_oraclelinux8 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_oraclelinux8 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
