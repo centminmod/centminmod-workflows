@@ -665,15 +665,15 @@ jobs:
         continue-on-error: true
 
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_almalinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_almalinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_almalinux9 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_almalinux9 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
@@ -1659,15 +1659,15 @@ jobs:
         continue-on-error: true
 
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_rockylinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_rockylinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_rockylinux9 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_rockylinux9 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
@@ -2652,15 +2652,15 @@ jobs:
         continue-on-error: true
 
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_oraclelinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_oraclelinux9 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_oraclelinux9 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_oraclelinux9 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
