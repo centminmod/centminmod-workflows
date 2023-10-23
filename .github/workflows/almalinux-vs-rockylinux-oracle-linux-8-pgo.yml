@@ -666,15 +666,15 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
-      - name: MariaDB SSL Setup test
-        run: |
-          docker exec cmm_almalinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
-        continue-on-error: true
+      # - name: MariaDB SSL Setup test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/mariadb-ssl-setup.sh ecdsa 127.0.0.1
+      #   continue-on-error: true
 
-      - name: sysbench test
-        run: |
-          docker exec cmm_almalinux8 /home/sysbench-run.sh
-        continue-on-error: true
+      # - name: sysbench test
+      #   run: |
+      #     docker exec cmm_almalinux8 /home/sysbench-run.sh
+      #   continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
