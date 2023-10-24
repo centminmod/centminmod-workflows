@@ -880,55 +880,55 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
-        run: |
-          docker exec cmm_almalinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
+      # - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
+      #   run: |
+      #     docker exec cmm_almalinux9 /home/centmin-option-5-php8.3.sh
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+      #   continue-on-error: true
 
-      - name: PHP-FPM 8.3 PGO phpbench.php
-        run: |
-          docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
-        continue-on-error: true
+      # - name: PHP-FPM 8.3 PGO phpbench.php
+      #   run: |
+      #     docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
+      #   continue-on-error: true
 
-      - name: Inspect PHP-FPM 8.3 PGO setup
-        id: php83pgo_test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "systemctl restart php-fpm.service"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_PHPPGO_TEST_STATUS=$ALMALINUX_PHPPGO_TEST_STATUS"
-          docker exec cmm_almalinux9 bash -c "php -v" | tee cmm-phppgpver.log
-          outputver=$(cat cmm-phppgpver.log)
-          echo "AlmaLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect PHP-FPM 8.3 PGO setup
+      #   id: php83pgo_test
+      #   run: |
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "systemctl restart php-fpm.service"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ALMALINUX_PHPPGO_TEST_STATUS=$ALMALINUX_PHPPGO_TEST_STATUS"
+      #     docker exec cmm_almalinux9 bash -c "php -v" | tee cmm-phppgpver.log
+      #     outputver=$(cat cmm-phppgpver.log)
+      #     echo "AlmaLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #     docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+      #     docker exec cmm_almalinux9 bash -c "echo '---'"
+      #   continue-on-error: true
   
       # - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
       #   run: |
@@ -1874,55 +1874,55 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
-        run: |
-          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
+      # - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
+      #   run: |
+      #     docker exec cmm_rockylinux9 /home/centmin-option-5-php8.3.sh
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+      #   continue-on-error: true
 
-      - name: PHP-FPM 8.3 PGO phpbench.php
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
-        continue-on-error: true
+      # - name: PHP-FPM 8.3 PGO phpbench.php
+      #   run: |
+      #     docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
+      #   continue-on-error: true
 
-      - name: Inspect PHP-FPM 8.3 PGO setup
-        id: php83pgo_test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "systemctl restart php-fpm.service"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$ROCKYLINUX_PHPPGO_TEST_STATUS"
-          docker exec cmm_rockylinux9 bash -c "php -v" | tee cmm-phppgpver.log
-          outputver=$(cat cmm-phppgpver.log)
-          echo "RockyLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect PHP-FPM 8.3 PGO setup
+      #   id: php83pgo_test
+      #   run: |
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "systemctl restart php-fpm.service"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ROCKYLINUX_PHPPGO_TEST_STATUS=$ROCKYLINUX_PHPPGO_TEST_STATUS"
+      #     docker exec cmm_rockylinux9 bash -c "php -v" | tee cmm-phppgpver.log
+      #     outputver=$(cat cmm-phppgpver.log)
+      #     echo "RockyLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #     docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+      #     docker exec cmm_rockylinux9 bash -c "echo '---'"
+      #   continue-on-error: true
   
       # - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
       #   run: |
@@ -2867,55 +2867,55 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
+      # - name: centmin.sh menu option 5 PHP-FPM 8.3 PGO upgrade test
+      #   run: |
+      #     docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.3.sh
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+      #   continue-on-error: true
 
-      - name: PHP-FPM 8.3 PGO phpbench.php
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
-        continue-on-error: true
+      # - name: PHP-FPM 8.3 PGO phpbench.php
+      #   run: |
+      #     docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
+      #   continue-on-error: true
 
-      - name: Inspect PHP-FPM 8.3 PGO setup
-        id: php83pgo_test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "systemctl restart php-fpm.service"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ORACLELINUX_PHPPGO_TEST_STATUS=$ORACLELINUX_PHPPGO_TEST_STATUS"
-          docker exec cmm_oraclelinux9 bash -c "php -v" | tee cmm-phppgpver.log
-          outputver=$(cat cmm-phppgpver.log)
-          echo "OracleLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-        continue-on-error: true
+      # - name: Inspect PHP-FPM 8.3 PGO setup
+      #   id: php83pgo_test
+      #   run: |
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "systemctl restart php-fpm.service"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHPPGO_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHPPGO_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+      #     echo "ORACLELINUX_PHPPGO_TEST_STATUS=$ORACLELINUX_PHPPGO_TEST_STATUS"
+      #     docker exec cmm_oraclelinux9 bash -c "php -v" | tee cmm-phppgpver.log
+      #     outputver=$(cat cmm-phppgpver.log)
+      #     echo "OracleLinux PHP 8.3 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "php-config || true" | tee cmm-phppgoconfig.log && outputphpconfig=$(cat cmm-phppgoconfig.log) && echo "$outputphpconfig" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-phppgoini.log && outputphpini=$(cat cmm-phppgoini.log) && echo "$outputphpini" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppgo.log && outputlddphp=$(cat cmm-lddphppgo.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phppgoverupgrade.log && outputphpverupgrade=$(cat cmm-phppgoverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #     docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+      #     docker exec cmm_oraclelinux9 bash -c "echo '---'"
+      #   continue-on-error: true
   
       # - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
       #   run: |
