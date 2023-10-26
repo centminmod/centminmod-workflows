@@ -678,7 +678,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
         run: |
-          docker exec cmm_almalinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_almalinux9 /home/centmin-option-5.sh
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1585,7 +1585,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
         run: |
-          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_rockylinux9 /home/centmin-option-5.sh
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2492,7 +2492,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
         run: |
-          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_oraclelinux9 /home/centmin-option-5.sh
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
