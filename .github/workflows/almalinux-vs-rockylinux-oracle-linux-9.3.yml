@@ -43,13 +43,16 @@ jobs:
       - name: Debug input (workflow_dispatch)
         run: echo ${{ github.event.inputs.release }}
   
-      - name: Run container Centmmin Mod LEMP AlmaLinux 9.3 Install
+      - name: Update AlmaLinux 9.2 to 9.3 Beta
         run: |
           docker run -d --name=cmm_almalinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux9:latest
           sleep 4
-          docker exec cmm_almalinux9 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-{release,repos,gpg-keys}-latest-9-beta.x86_64.rpm
+          docker exec cmm_almalinux9 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-{release,repos,gpg-keys}-latest-9-beta.x86_64.rpm"
           docker exec cmm_almalinux9 bash -c "dnf clean all"
           docker exec cmm_almalinux9 bash -c "dnf upgrade -y"
+
+      - name: Run container Centmmin Mod LEMP AlmaLinux 9.3 Install
+        run: |
           docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
