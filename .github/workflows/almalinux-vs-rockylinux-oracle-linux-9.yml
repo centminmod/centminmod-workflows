@@ -123,6 +123,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -652,6 +654,50 @@ jobs:
           docker exec cmm_almalinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
+      - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-5-php7.4.sh
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 7.4 phpbench.php
+        run: |
+          docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
+        run: |
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
@@ -661,6 +707,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -692,6 +740,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -728,6 +778,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -743,6 +795,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -779,6 +833,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -807,6 +863,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin" || true
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "cat /var/lib/pgsql/16/data/log/postgresql-*.log" || true
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -972,6 +1030,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1501,6 +1561,50 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
+      - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php7.4.sh
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 7.4 phpbench.php
+        run: |
+          docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
@@ -1510,6 +1614,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1541,6 +1647,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1577,6 +1685,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -1592,6 +1702,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1628,6 +1740,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -1656,6 +1770,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin" || true
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "cat /var/lib/pgsql/16/data/log/postgresql-*.log" || true
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -1822,6 +1938,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -2350,15 +2468,61 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
+      - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
-          docker exec cmm_oraclelinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1-php8.1.sh
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php7.4.sh
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 7.4 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.0 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.0.sh
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: PHP-FPM 8.0 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -2390,6 +2554,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -2426,6 +2592,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -2441,6 +2609,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -2477,6 +2647,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-phpverupgrade.log && outputphpverupgrade=$(cat cmm-phpverupgrade.log) && echo -e "php -v\n$outputphpverupgrade" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
@@ -2505,6 +2677,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "rpm -ql postgresql16-server postgresql16 | grep bin" || true
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "cat /var/lib/pgsql/16/data/log/postgresql-*.log" || true
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
