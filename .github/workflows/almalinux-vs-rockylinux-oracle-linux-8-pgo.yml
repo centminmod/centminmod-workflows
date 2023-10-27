@@ -239,6 +239,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "grep 'MM_LICENSE_KEY' /etc/csf/csf.conf"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "csf -ra"
@@ -1301,6 +1303,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "grep 'MM_LICENSE_KEY' /etc/csf/csf.conf"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "csf -ra"
@@ -2362,6 +2366,8 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "grep 'MM_LICENSE_KEY' /etc/csf/csf.conf"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "csf -v" | tee cmm-csfver.log && outputcsfver=$(cat cmm-csfver.log) && echo "$outputcsfver" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
