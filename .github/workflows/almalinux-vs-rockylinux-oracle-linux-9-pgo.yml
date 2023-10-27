@@ -1,4 +1,4 @@
-name: AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 with PHP PGO
+name: 0 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 with PHP PGO
 
 on:
   workflow_dispatch:
