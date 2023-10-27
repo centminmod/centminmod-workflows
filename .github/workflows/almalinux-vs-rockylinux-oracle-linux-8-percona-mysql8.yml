@@ -1,4 +1,4 @@
-name: 0 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Percona MySQL 8
+name: 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Percona MySQL 8
 
 on:
   workflow_dispatch:

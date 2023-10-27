@@ -1,4 +1,4 @@
-name: 0 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8 + PHP 7.4
+name: 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 vs CentOS Stream 8 + PHP 7.4
 
 on:
   workflow_dispatch:
