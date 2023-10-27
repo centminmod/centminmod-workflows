@@ -508,6 +508,66 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "cmupdate"
+          docker exec cmm_almalinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL 3.2 benchmarks test
+        run: |
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
+        run: |
+          docker exec cmm_almalinux9 bash -c "cmupdate"
+          docker exec cmm_almalinux9 /home/centmin-option-4-master.sh
+        continue-on-error: true
+
+      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Inspect Nginx OpenSSL 3.2 setup
+        id: nginxopensslthreetwo_test
+        run: |
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+          output=$(cat cmm-nginxopensslthree.log)
+          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx official zlib upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
@@ -1435,6 +1495,66 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "cmupdate"
+          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL 3.2 benchmarks test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "cmupdate"
+          docker exec cmm_rockylinux9 /home/centmin-option-4-master.sh
+        continue-on-error: true
+
+      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Inspect Nginx OpenSSL 3.2 setup
+        id: nginxopensslthreetwo_test
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+          output=$(cat cmm-nginxopensslthree.log)
+          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 4 Nginx official zlib upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
@@ -2357,6 +2477,66 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
           output=$(cat cmm-nginxopensslthree.log)
           echo "OracleLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "cmupdate"
+          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
+        continue-on-error: true
+
+      - name: OpenSSL 3.2 benchmarks test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "cmupdate"
+          docker exec cmm_oraclelinux9 /home/centmin-option-4-master.sh
+        continue-on-error: true
+
+      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Inspect Nginx OpenSSL 3.2 setup
+        id: nginxopensslthreetwo_test
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "ls -lAh /usr/local/nginx/logs"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "ps aux | grep nginx"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "curl -I http://localhost"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
+          output=$(cat cmm-nginxopensslthree.log)
+          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
