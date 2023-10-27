@@ -348,16 +348,19 @@ jobs:
 
       - name: centmin.sh menu option 11 submenu 0 yes
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-11-submenu-0-y.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 11 submenu 0 no
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-11-submenu-0-n.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -377,6 +380,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -392,6 +396,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -410,6 +415,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -450,6 +456,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -468,6 +475,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -506,6 +514,7 @@ jobs:
       - name: centmin.sh menu option 4 Nginx official zlib upgrade test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -545,6 +554,7 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -590,6 +600,7 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'BORINGSSL_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
           docker exec cmm_almalinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_almalinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
@@ -639,6 +650,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -663,6 +675,7 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -693,6 +706,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -743,6 +757,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -793,6 +808,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -844,6 +860,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1251,16 +1268,19 @@ jobs:
 
       - name: centmin.sh menu option 11 submenu 0 yes
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-11-submenu-0-y.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 11 submenu 0 no
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-11-submenu-0-n.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1280,6 +1300,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -1295,6 +1316,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1313,6 +1335,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -1353,6 +1376,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1371,6 +1395,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -1409,6 +1434,7 @@ jobs:
       - name: centmin.sh menu option 4 Nginx official zlib upgrade test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1448,6 +1474,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -1493,6 +1520,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'BORINGSSL_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
           docker exec cmm_rockylinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_rockylinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
@@ -1542,6 +1570,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -1566,6 +1595,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1596,6 +1626,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1646,6 +1677,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1696,6 +1728,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -1747,6 +1780,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2154,16 +2188,19 @@ jobs:
 
       - name: centmin.sh menu option 11 submenu 0 yes
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-11-submenu-0-y.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 11 submenu 0 no
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-11-submenu-0-n.sh
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -2183,6 +2220,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -2198,6 +2236,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -2216,6 +2255,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -2256,6 +2296,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -2274,6 +2315,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -2312,6 +2354,7 @@ jobs:
       - name: centmin.sh menu option 4 Nginx official zlib upgrade test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -2351,6 +2394,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'NGINX_QUIC_SUPPORT=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'CLOUDFLARE_ZLIB=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
 
@@ -2396,6 +2440,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'BORINGSSL_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
           docker exec cmm_oraclelinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_oraclelinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
@@ -2445,6 +2490,7 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx master branch BoringSSL Post-Quantum KEX upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4-master.sh
         continue-on-error: true
 
@@ -2469,6 +2515,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo '#LIBZIP_VER=1.7.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2499,6 +2546,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.1 upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.1.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2549,6 +2597,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.2.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2599,6 +2648,7 @@ jobs:
 
       - name: centmin.sh menu option 5 PHP-FPM 8.3 upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.3.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
@@ -2650,6 +2700,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
