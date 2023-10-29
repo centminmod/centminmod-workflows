@@ -44,8 +44,8 @@ RUN mkdir -p /var/run/postgresql
 RUN mkdir -p /usr/src/kernels
 RUN mkdir -p /var/lib/pgsql/16/data/
 RUN chmod 0700 /var/lib/pgsql/16/data/
-RUN chown postgres:postgres /var/lib/pgsql/16/data/
-RUN chown postgres:postgres /var/run/postgresql
+#RUN chown postgres:postgres /var/lib/pgsql/16/data/
+#RUN chown postgres:postgres /var/run/postgresql
 
 
 COPY scripts/centmin-option-11-submenu-0-y.sh /home/centmin-option-11-submenu-0-y.sh
