@@ -43,7 +43,6 @@ jobs:
         sleep 4
         docker exec cmm_el89 bash -c "cat /etc/os-release"
         docker exec cmm_el89 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-release-latest-8-beta.x86_64.rpm"
-        docker exec cmm_el89 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-repos-latest-9-beta.x86_64.rpm"
         docker exec cmm_el89 bash -c "dnf clean all"
         docker exec cmm_el89 bash -c "dnf upgrade -y"
         docker exec cmm_el89 bash -c "cat /etc/os-release"
