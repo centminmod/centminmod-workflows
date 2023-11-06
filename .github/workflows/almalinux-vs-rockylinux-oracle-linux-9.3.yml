@@ -57,7 +57,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_almalinux9 bash -c "echo 'DEVTOOLSETTWELVE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'DEVTOOLSETTHRITEEN=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'DEVTOOLSETTHIRTEEN=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
