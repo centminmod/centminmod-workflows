@@ -42,7 +42,7 @@ jobs:
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
         docker exec cmm_el89 bash -c "cat /etc/os-release"
-        docker exec cmm_el89 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-{release,repos,gpg-keys}-latest-9-beta.x86_64.rpm"
+        docker exec cmm_el89 bash -c "dnf install -y https://repo.almalinux.org/vault/almalinux-{release,repos,gpg-keys}-latest-8-beta.x86_64.rpm"
         docker exec cmm_el89 bash -c "dnf clean all"
         docker exec cmm_el89 bash -c "dnf upgrade -y"
         docker exec cmm_el89 bash -c "cat /etc/os-release"
