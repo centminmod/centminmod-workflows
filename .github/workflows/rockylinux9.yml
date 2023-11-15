@@ -26,7 +26,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-rockylinux8
+        file: ./dockerfiles/Dockerfile-rockylinux9
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
