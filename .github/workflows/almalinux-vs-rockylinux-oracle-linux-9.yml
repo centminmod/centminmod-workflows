@@ -512,9 +512,9 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
         run: |
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
         continue-on-error: true
@@ -1501,9 +1501,9 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
         run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
         continue-on-error: true
@@ -2490,9 +2490,9 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
         run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0-beta1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
         continue-on-error: true
