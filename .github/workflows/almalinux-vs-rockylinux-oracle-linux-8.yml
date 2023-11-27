@@ -128,6 +128,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -744,6 +746,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
@@ -774,6 +778,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -809,6 +815,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -825,6 +833,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -860,6 +870,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -876,6 +888,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -911,6 +925,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -940,6 +956,8 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri intl" || true
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -1106,6 +1124,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -1722,6 +1742,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
@@ -1752,6 +1774,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -1787,6 +1811,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -1803,6 +1829,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -1838,6 +1866,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -1854,6 +1884,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -1889,6 +1921,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -1918,6 +1952,8 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri intl" || true
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -2084,6 +2120,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -2700,6 +2738,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
@@ -2730,6 +2770,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -2765,6 +2807,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -2781,6 +2825,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -2816,6 +2862,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -2832,6 +2880,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -2867,6 +2917,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
@@ -2896,6 +2948,8 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri mysqli" || true
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri intl" || true
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
