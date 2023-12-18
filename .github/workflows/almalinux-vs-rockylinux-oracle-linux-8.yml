@@ -208,6 +208,15 @@ jobs:
           sleep 1
           docker exec cmm_almalinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
+
+      - name: Redis memtier benchmarks test
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
+          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
+        continue-on-error: true
   
       - name: Inspect pure-ftpd setup
         id: pureftpd_test
@@ -1222,6 +1231,15 @@ jobs:
           sleep 1
           docker exec cmm_rockylinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
+
+      - name: Redis memtier benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
+          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
+        continue-on-error: true
   
       - name: Inspect pure-ftpd setup
         id: pureftpd_test
@@ -2235,6 +2253,15 @@ jobs:
           echo "ORACLELINUX_REDIS_TEST_STATUS=$ORACLELINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: Redis memtier benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
+          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
