@@ -46,6 +46,9 @@ RUN chmod 0700 /var/lib/pgsql/16/data/
 #RUN chown postgres:postgres /var/lib/pgsql/16/data/
 #RUN chown postgres:postgres /var/run/postgresql
 
+COPY scripts/centminmod-keydb.sh /home/centminmod-keydb.sh
+RUN chmod +x /home/centminmod-keydb.sh
+
 COPY scripts/memtier_install.sh /home/memtier_install.sh
 RUN chmod +x /home/memtier_install.sh
 

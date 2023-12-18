@@ -211,11 +211,25 @@ jobs:
 
       - name: Redis memtier benchmarks test
         run: |
-          docker exec cmm_almalinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
-          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
-          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
+          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+        continue-on-error: true
+
+      - name: Install KeyDB server
+        run: |
+          docker exec cmm_almalinux8 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
+          docker exec cmm_almalinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
+        continue-on-error: true
+
+      - name: KeyDB memtier benchmarks test
+        run: |
+          docker exec cmm_almalinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_almalinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
+          docker exec cmm_almalinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -1234,11 +1248,25 @@ jobs:
 
       - name: Redis memtier benchmarks test
         run: |
-          docker exec cmm_rockylinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
-          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
-          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
+          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+        continue-on-error: true
+
+      - name: Install KeyDB server
+        run: |
+          docker exec cmm_rockylinux8 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
+          docker exec cmm_rockylinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
+        continue-on-error: true
+
+      - name: KeyDB memtier benchmarks test
+        run: |
+          docker exec cmm_rockylinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_rockylinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
+          docker exec cmm_rockylinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -2257,11 +2285,25 @@ jobs:
 
       - name: Redis memtier benchmarks test
         run: |
-          docker exec cmm_oraclelinux8 bash -c "/home/memtier_install.sh | tee -a /home/memtier_install.log" || true
-          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /home/redis-benchmark-summary2.log" || true
-          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /home/redis-benchmark-summary2.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
+          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
+        continue-on-error: true
+
+      - name: Install KeyDB server
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
+          docker exec cmm_oraclelinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
+        continue-on-error: true
+
+      - name: KeyDB memtier benchmarks test
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
+          docker exec cmm_oraclelinux8 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
+          docker exec cmm_oraclelinux8 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
