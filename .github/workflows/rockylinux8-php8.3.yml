@@ -3,7 +3,7 @@ name: Rocky Linux 8 with PHP 8.3
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-rockylinux-8-workflow-php82]
+    types: [run-rockylinux-8-workflow-php83]
 
 jobs:
   build:

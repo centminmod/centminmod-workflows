@@ -3,7 +3,7 @@ name: AlmaLinux 9 with PHP 8.3
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-9-workflow-php82]
+    types: [run-almalinux-9-workflow-php83]
 
 jobs:
   build:
