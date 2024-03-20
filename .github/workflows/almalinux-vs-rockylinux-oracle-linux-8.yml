@@ -195,6 +195,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "pip --version"
           sleep 1
           docker exec cmm_almalinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+          docker exec cmm_almalinux8 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -1297,6 +1298,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "pip --version"
           sleep 1
           docker exec cmm_rockylinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+          docker exec cmm_rockylinux8 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -2399,6 +2401,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "pip --version"
           sleep 1
           docker exec cmm_oraclelinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+          docker exec cmm_oraclelinux8 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
