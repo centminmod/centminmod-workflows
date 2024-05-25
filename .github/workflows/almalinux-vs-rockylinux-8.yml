@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Sysbox
         run: |
@@ -299,7 +299,7 @@ jobs:
           docker exec cmm_almalinux8 yum repolist all | tee artifacts/almalinux_repos.txt
 
       - name: Upload AlmaLinux package and repo lists
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: almalinux_lists
           path: artifacts/*
@@ -308,7 +308,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Sysbox
         run: |
@@ -597,7 +597,7 @@ jobs:
           docker exec cmm_rockylinux8 yum repolist all | tee artifacts/rockylinux_repos.txt
 
       - name: Upload Rocky Linux package and repo lists
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rockylinux_lists
           path: artifacts/*
@@ -644,7 +644,7 @@ jobs:
           sdiff -s -w 220 almalinux/almalinux_repos.txt rockylinux/rockylinux_repos.txt | tee artifacts/repos_sdiff.txt || true
 
       - name: Upload comparison artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: comparison_results
           path: artifacts/

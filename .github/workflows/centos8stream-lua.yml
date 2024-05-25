@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install Sysbox
       run: |
@@ -308,7 +308,7 @@ jobs:
         docker cp cmm_el89:/root/centminlogs ./centminlogs
 
     - name: Upload CentOS Stream 8 Centmin Mod Logs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: centos8stream_logs
         path: centminlogs/*
