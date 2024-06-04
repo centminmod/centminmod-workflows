@@ -49,9 +49,9 @@ jobs:
           sleep 4
           docker exec cmm_almalinux9 bash -c "cat /etc/os-release"
           docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.5' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -982,9 +982,9 @@ jobs:
           sleep 4
           docker exec cmm_rockylinux9 bash -c "cat /etc/os-release"
           docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.5' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1915,9 +1915,9 @@ jobs:
           sleep 4
           docker exec cmm_oraclelinux9 bash -c "cat /etc/os-release"
           docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.5' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.5' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
