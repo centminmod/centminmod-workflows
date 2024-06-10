@@ -47,6 +47,7 @@ jobs:
         run: |
           docker run -d --name=cmm_almalinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux8:latest
           sleep 4
+          docker exec cmm_almalinux8 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_almalinux8 bash -c "cat /etc/os-release"
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
@@ -1207,6 +1208,7 @@ jobs:
         run: |
           docker run -d --name=cmm_rockylinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux8:latest
           sleep 4
+          docker exec cmm_rockylinux8 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_rockylinux8 bash -c "cat /etc/os-release"
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
@@ -2366,6 +2368,7 @@ jobs:
         run: |
           docker run -d --name=cmm_oraclelinux8 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux8:latest
           sleep 4
+          docker exec cmm_oraclelinux8 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_oraclelinux8 bash -c "cat /etc/os-release"
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
