@@ -2,7 +2,7 @@
 
 # Check if an argument is provided
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 {boringssl|openssl111|openssl30|openssl31|openssl32|openssl33|bssl|opensslquic|opensslsys}"
+    echo "Usage: $0 {boringssl|awslc|openssl111|openssl30|openssl31|openssl32|openssl33|bssl|opensslquic|opensslsys}"
     exit 1
 fi
 
@@ -85,10 +85,24 @@ function process_curve_output32() {
 }
 
 case $LIB in
-    boringssl|bssl)
+    boringssl)
         BINARY="/opt/boringssl/bin/bssl"
         if [ -f "$BINARY" ]; then
             echo "Benchmarking BoringSSL..."
+            OUTPUTRSA=$($BINARY speed -filter RSA | grep 'RSA 2048' 2>&1)
+            echo "$OUTPUTRSA"
+            OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256' 2>&1)
+            echo "$OUTPUTECDSA"
+            # Additional benchmarking for curves X25519 and P-256
+            OUTPUTX25519=$($BINARY speed -filter X25519 2>&1)
+            OUTPUTP256=$($BINARY speed -filter P-256 2>&1)
+            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256"
+         fi
+        ;;
+    awslc)
+        BINARY="/opt/aws-lc-install/bin/bssl"
+        if [ -f "$BINARY" ]; then
+            echo "Benchmarking AWS-LC..."
             OUTPUTRSA=$($BINARY speed -filter RSA | grep 'RSA 2048' 2>&1)
             echo "$OUTPUTRSA"
             OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256' 2>&1)
