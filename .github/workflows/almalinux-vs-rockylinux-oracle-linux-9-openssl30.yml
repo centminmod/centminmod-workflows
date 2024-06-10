@@ -49,6 +49,8 @@ jobs:
           sleep 4
           docker exec cmm_almalinux9 bash -c "cat /etc/os-release"
           docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
@@ -456,6 +458,8 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
+          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.4' >> /etc/centminmod/custom_config.inc"
@@ -982,6 +986,8 @@ jobs:
           sleep 4
           docker exec cmm_rockylinux9 bash -c "cat /etc/os-release"
           docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
@@ -1389,6 +1395,8 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
+          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.4' >> /etc/centminmod/custom_config.inc"
@@ -1915,6 +1923,8 @@ jobs:
           sleep 4
           docker exec cmm_oraclelinux9 bash -c "cat /etc/os-release"
           docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
@@ -2322,6 +2332,8 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
         run: |
+          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.4' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.4' >> /etc/centminmod/custom_config.inc"
