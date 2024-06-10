@@ -836,12 +836,13 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
         run: |
+          docker exec cmm_almalinux8 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
           docker exec cmm_almalinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_almalinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
+          docker exec cmm_almalinux8 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_almalinux8 bash -c "nginx -t"
           docker exec cmm_almalinux8 bash -c "systemctl restart nginx"
         continue-on-error: true
@@ -1986,12 +1987,13 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
         run: |
+          docker exec cmm_rockylinux8 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
           docker exec cmm_rockylinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_rockylinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
+          docker exec cmm_rockylinux8 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_rockylinux8 bash -c "nginx -t"
           docker exec cmm_rockylinux8 bash -c "systemctl restart nginx"
         continue-on-error: true
@@ -3136,12 +3138,13 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
         run: |
+          docker exec cmm_oraclelinux8 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
           docker exec cmm_oraclelinux8 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_oraclelinux8 bash -c "sed -i '/ssl_prefer_server_ciphers   on;/a \  ssl_ecdh_curve X25519Kyber768Draft00:X25519;' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
+          docker exec cmm_oraclelinux8 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
           docker exec cmm_oraclelinux8 bash -c "nginx -t"
           docker exec cmm_oraclelinux8 bash -c "systemctl restart nginx"
         continue-on-error: true
