@@ -903,6 +903,16 @@ jobs:
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_almalinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "df -hT"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+          docker exec cmm_almalinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: PHP-FPM 8.0 phpbench.php
         run: |
           docker exec cmm_almalinux8 bash -c "/home/phpbench.sh" || true
@@ -2041,6 +2051,16 @@ jobs:
       - name: Nginx HTTPS h2load benchmark tests summary
         run: |
           docker exec cmm_rockylinux8 bash -c "cat /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_rockylinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "df -hT"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+          docker exec cmm_rockylinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM upgrade test
@@ -3203,6 +3223,16 @@ jobs:
       - name: Nginx HTTPS h2load benchmark tests summary
         run: |
           docker exec cmm_oraclelinux8 bash -c "cat /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "du -sh /svr-setup"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "df -hT"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+          docker exec cmm_oraclelinux8 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM upgrade test

@@ -814,6 +814,16 @@ jobs:
           docker exec cmm_almalinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_almalinux9 bash -c "du -sh /svr-setup"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "df -hT"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
@@ -1901,6 +1911,16 @@ jobs:
       - name: Nginx HTTPS h2load benchmark tests summary
         run: |
           docker exec cmm_rockylinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_rockylinux9 bash -c "du -sh /svr-setup"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "df -hT"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
@@ -2992,6 +3012,16 @@ jobs:
       - name: Nginx HTTPS h2load benchmark tests summary
         run: |
           docker exec cmm_oraclelinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: Centmin Mod Disk Usage Analysis
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "du -sh /svr-setup"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "df -hT"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
