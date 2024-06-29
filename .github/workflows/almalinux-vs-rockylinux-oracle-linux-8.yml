@@ -51,6 +51,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "cat /etc/os-release"
           docker exec cmm_almalinux8 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1239,6 +1240,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "cat /etc/os-release"
           docker exec cmm_rockylinux8 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -2426,6 +2428,7 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "cat /etc/os-release"
           docker exec cmm_oraclelinux8 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
