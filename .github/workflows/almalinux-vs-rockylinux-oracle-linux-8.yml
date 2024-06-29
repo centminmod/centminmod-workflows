@@ -887,6 +887,9 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -932,6 +935,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.1.sh
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -991,6 +997,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -1050,6 +1059,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -1110,6 +1122,9 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-5.sh
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -2069,6 +2084,9 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -2104,6 +2122,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.1.sh
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -2163,6 +2184,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -2222,6 +2246,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -2282,6 +2309,9 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-5.sh
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux8 bash -c "echo '---'"
@@ -3241,6 +3271,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -3276,6 +3309,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.1.sh
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -3335,6 +3371,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.2.sh
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -3394,6 +3433,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5-php8.3.sh
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
@@ -3454,6 +3496,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-5.sh
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux8 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
           docker exec cmm_oraclelinux8 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux8 bash -c "echo '---'"
