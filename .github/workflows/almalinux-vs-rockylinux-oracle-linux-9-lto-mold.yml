@@ -1,9 +1,9 @@
-name: 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 - LTO
+name: 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 - LTO + Mold
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-lto]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-lto-mold]
 
 jobs:
   almalinux:
@@ -52,6 +52,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1171,6 +1173,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -2290,6 +2294,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo 'NGINX_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'PHP_LTO_FORCE=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
