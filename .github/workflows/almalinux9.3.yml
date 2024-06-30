@@ -57,6 +57,14 @@ jobs:
         echo "$output" >> $GITHUB_STEP_SUMMARY
       continue-on-error: true
 
+    - name: Display Centmmin Mod LEMP Install Log
+      run: |
+        echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
+        echo "----------------------------------------"
+        tail -20 cmm-install.log
+        echo "----------------------------------------"
+      continue-on-error: true
+
     - name: Disk Usage Analysis
       run: |
         docker exec cmm_el89 bash -c "du -sh /svr-setup"

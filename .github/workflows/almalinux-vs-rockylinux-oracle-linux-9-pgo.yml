@@ -52,6 +52,14 @@ jobs:
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
+
+      - name: Display Centmmin Mod LEMP Install Log
+        run: |
+          echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
+          echo "----------------------------------------"
+          tail -20 cmm-install.log
+          echo "----------------------------------------"
+        continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
         run: |
@@ -1067,6 +1075,14 @@ jobs:
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
+
+      - name: Display Centmmin Mod LEMP Install Log
+        run: |
+          echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
+          echo "----------------------------------------"
+          tail -20 cmm-install.log
+          echo "----------------------------------------"
+        continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
         run: |
@@ -2080,6 +2096,14 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
+        continue-on-error: true
+
+      - name: Display Centmmin Mod LEMP Install Log
+        run: |
+          echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
+          echo "----------------------------------------"
+          tail -20 cmm-install.log
+          echo "----------------------------------------"
         continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
