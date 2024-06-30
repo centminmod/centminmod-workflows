@@ -427,7 +427,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL default benchmarks test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -477,7 +477,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -552,7 +552,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -651,7 +651,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
         run: |
           docker exec cmm_almalinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -1625,7 +1625,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL default benchmarks test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -1675,7 +1675,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -1750,7 +1750,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -1849,7 +1849,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
         run: |
           docker exec cmm_rockylinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -2823,7 +2823,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL default benchmarks test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -2873,7 +2873,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.0 default benchmarks test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -2948,7 +2948,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
@@ -3047,7 +3047,7 @@ jobs:
       - name: Nginx angie branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
         run: |
           docker exec cmm_oraclelinux8 bash -c "echo 'Nginx angie branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n4 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux8 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
