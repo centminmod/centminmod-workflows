@@ -54,7 +54,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
@@ -1183,7 +1183,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
@@ -2312,7 +2312,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo 'PHP_LTO=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'PHP_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'NGX_LDMOLD=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/installer-el8x.sh | bash" | tee cmm-install.log
+          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
