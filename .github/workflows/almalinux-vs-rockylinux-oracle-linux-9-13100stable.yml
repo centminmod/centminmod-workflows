@@ -427,7 +427,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "pip3 install psrecord; cd /home; git clone https://github.com/centminmod/h2load-benchmarks" || true
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
@@ -440,7 +440,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -464,7 +464,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
@@ -477,7 +477,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -526,7 +526,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
@@ -539,7 +539,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.1 setup
@@ -588,7 +588,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
@@ -612,7 +612,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
@@ -625,7 +625,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.2 setup
@@ -663,7 +663,7 @@ jobs:
       - name: Nginx HTTPS h2load - official zlib benchmarks test
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx official zlib setup
@@ -709,7 +709,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL QuicTLS benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
@@ -759,7 +759,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load BoringSSL benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -799,7 +799,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
@@ -825,7 +825,7 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
@@ -1569,7 +1569,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "pip3 install psrecord; cd /home; git clone https://github.com/centminmod/h2load-benchmarks" || true
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
@@ -1582,7 +1582,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -1606,7 +1606,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
@@ -1619,7 +1619,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -1668,7 +1668,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
@@ -1681,7 +1681,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.1 setup
@@ -1730,7 +1730,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
@@ -1754,7 +1754,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
@@ -1767,7 +1767,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.2 setup
@@ -1805,7 +1805,7 @@ jobs:
       - name: Nginx HTTPS h2load - official zlib benchmarks test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx official zlib setup
@@ -1851,7 +1851,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL QuicTLS benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
         id: nginxquic_test
@@ -1900,7 +1900,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load BoringSSL benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -1940,7 +1940,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
@@ -1966,7 +1966,7 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
@@ -2713,7 +2713,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "pip3 install psrecord; cd /home; git clone https://github.com/centminmod/h2load-benchmarks" || true
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL default upgrade test
@@ -2726,7 +2726,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
@@ -2750,7 +2750,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.0 default upgrade test
@@ -2763,7 +2763,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.0 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.0 setup
@@ -2812,7 +2812,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
@@ -2825,7 +2825,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.1 setup
@@ -2874,7 +2874,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
@@ -2898,7 +2898,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
@@ -2911,7 +2911,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx OpenSSL 3.2 setup
@@ -2949,7 +2949,7 @@ jobs:
       - name: Nginx HTTPS h2load - official zlib benchmarks test
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load official zlib benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
 
       - name: Inspect Nginx official zlib setup
         id: nginxzlib_test
@@ -2994,7 +2994,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL QuicTLS benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
 
       - name: Inspect Nginx HTTP/3 QuicTLS setup
         id: nginxquic_test
@@ -3043,7 +3043,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load BoringSSL benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: Inspect Nginx BoringSSL Post-Quantum KEX setup
@@ -3083,7 +3083,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load BoringSSL Post-Quantum KEX benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
@@ -3109,7 +3109,7 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -oP '{.*}' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
       - name: OpenSSL benchmark tests summary
