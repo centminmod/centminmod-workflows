@@ -61,6 +61,24 @@ jobs:
           tail -20 cmm-install.log
           echo "----------------------------------------"
         continue-on-error: true
+
+     - name: Nginx Configure
+        run: |
+          docker exec cmm_almalinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Nginx Patches
+        run: |
+          docker exec cmm_almalinux8 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: PHP-FPM Patches
+        run: |
+          docker exec cmm_almalinux8 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_almalinux8 bash -c "echo '---'"
+        continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
         run: |
@@ -1255,6 +1273,24 @@ jobs:
           tail -20 cmm-install.log
           echo "----------------------------------------"
         continue-on-error: true
+
+     - name: Nginx Configure
+        run: |
+          docker exec cmm_rockylinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Nginx Patches
+        run: |
+          docker exec cmm_rockylinux8 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: PHP-FPM Patches
+        run: |
+          docker exec cmm_rockylinux8 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_rockylinux8 bash -c "echo '---'"
+        continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
         run: |
@@ -2447,6 +2483,24 @@ jobs:
           echo "----------------------------------------"
           tail -20 cmm-install.log
           echo "----------------------------------------"
+        continue-on-error: true
+
+     - name: Nginx Configure
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Nginx Patches
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: PHP-FPM Patches
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_oraclelinux8 bash -c "echo '---'"
         continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis

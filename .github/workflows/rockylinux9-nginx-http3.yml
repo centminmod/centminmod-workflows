@@ -57,6 +57,24 @@ jobs:
         echo "----------------------------------------"
       continue-on-error: true
 
+    - name: Nginx Configure
+      run: |
+        docker exec cmm_el89 bash -c "cat /root/centminlogs/nginx-configure-*"
+        docker exec cmm_el89 bash -c "echo '---'"
+      continue-on-error: true
+
+    - name: Nginx Patches
+      run: |
+        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+        docker exec cmm_el89 bash -c "echo '---'"
+      continue-on-error: true
+
+    - name: PHP-FPM Patches
+      run: |
+        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_php-*"
+        docker exec cmm_el89 bash -c "echo '---'"
+      continue-on-error: true
+
     - name: Disk Usage Analysis
       run: |
         docker exec cmm_el89 bash -c "du -sh /svr-setup"
