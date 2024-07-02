@@ -1204,7 +1204,7 @@ jobs:
           echo "----------------------------------------"
         continue-on-error: true
 
-     - name: Nginx Configure
+      - name: Nginx Configure
         run: |
           docker exec cmm_rockylinux9 bash -c "cat /root/centminlogs/nginx-configure-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2346,7 +2346,7 @@ jobs:
           echo "----------------------------------------"
         continue-on-error: true
 
-     - name: Nginx Configure
+      - name: Nginx Configure
         run: |
           docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/nginx-configure-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
