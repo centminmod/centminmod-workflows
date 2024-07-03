@@ -1,9 +1,9 @@
-name: AlmaLinux 9 with MariaDB 10.6 Default
+name: AlmaLinux 8 with MariaDB 11.4 Default
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-9-mariadb-10.6-workflow]
+    types: [run-almalinux-8-mariadb-11.4-workflow]
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-almalinux9
+        file: ./dockerfiles/Dockerfile-almalinux8
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
@@ -37,12 +37,12 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 9 + MariaDB 10.6 Default Install
+    - name: Run container Centmmin Mod LEMP AlmaLinux 8 + MariaDB 10.11 Default Install
       run: |
-        docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
         docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
-        docker exec cmm_el89 bash -c "echo 'MARIADB_INSTALLTENSIX=y' >> /etc/centminmod/custom_config.inc"
+        docker exec cmm_el89 bash -c "echo 'MARIADB_INSTALLELEVENFOUR=y' >> /etc/centminmod/custom_config.inc"
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
         output=$(tail -20 cmm-install.log)
         echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -169,6 +169,12 @@ jobs:
         docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
+      continue-on-error: true
+
+    - name: Inspect MariaDB 10.11 Logs
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "journalctl -u mariadb --no-pager"
       continue-on-error: true
 
     - name: Inspect Python3 setup
