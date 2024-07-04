@@ -5,13 +5,13 @@ GITHUB_USERNAME='centminmod'
 REPO_NAME='centminmod-workflows'
 GITHUB_TOKEN="your_personal_access_token"
 
-# Function to cancel in-progress workflow runs
-cancel_in_progress_workflow_runs() {
+cancel_workflow_runs() {
+  local status=$1
   local page=1
   while :; do
     response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
       -H "Accept: application/vnd.github.v3+json" \
-      "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs?status=in_progress&per_page=100&page=$page")
+      "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs?status=$status&per_page=100&page=$page")
 
     run_ids=$(echo "$response" | jq -r '.workflow_runs[].id')
 
@@ -31,5 +31,5 @@ cancel_in_progress_workflow_runs() {
   done
 }
 
-# Cancel all in-progress workflow runs
-cancel_in_progress_workflow_runs
+# Cancel all queued workflow runs
+cancel_workflow_runs "in_progress"
