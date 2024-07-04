@@ -9,7 +9,7 @@ cancel_workflow_runs() {
   local status=$1
   local page=1
   while :; do
-    response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    response=$(curl -sL -H "Authorization: Bearer $GITHUB_TOKEN" \
       -H "Accept: application/vnd.github.v3+json" \
       "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs?status=$status&per_page=100&page=$page")
 
@@ -21,8 +21,9 @@ cancel_workflow_runs() {
     fi
 
     for run_id in $run_ids; do
-      curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+      curl -sL -X POST -H "Authorization: Bearer $GITHUB_TOKEN" \
         -H "Accept: application/vnd.github.v3+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
         "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs/$run_id/cancel"
     done
 
