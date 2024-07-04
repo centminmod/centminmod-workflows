@@ -5,14 +5,31 @@ GITHUB_USERNAME='centminmod'
 REPO_NAME='centminmod-workflows'
 GITHUB_TOKEN="your_personal_access_token"
 
-# List all in-progress workflow runs
-in_progress_runs=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-  -H "Accept: application/vnd.github.v3+json" \
-  https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs?status=in_progress | jq -r '.workflow_runs[].id')
+# Function to cancel in-progress workflow runs
+cancel_in_progress_workflow_runs() {
+  local page=1
+  while :; do
+    response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs?status=in_progress&per_page=100&page=$page")
 
-# Cancel each in-progress workflow run
-for run_id in $in_progress_runs; do
-  curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs/$run_id/cancel
-done
+    run_ids=$(echo "$response" | jq -r '.workflow_runs[].id')
+
+    # Break if no more runs
+    if [[ -z "$run_ids" ]]; then
+      break
+    fi
+
+    for run_id in $run_ids; do
+      curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "https://api.github.com/repos/$GITHUB_USERNAME/$REPO_NAME/actions/runs/$run_id/cancel"
+    done
+
+    # Increment page number
+    page=$((page + 1))
+  done
+}
+
+# Cancel all in-progress workflow runs
+cancel_in_progress_workflow_runs
