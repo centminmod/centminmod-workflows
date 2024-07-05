@@ -2,8 +2,6 @@ name: CentOS 9 Stream
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-centosstream-9-workflow]
 
 jobs:
   build:

@@ -2,8 +2,6 @@ name: Oracle Linux 8
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-oraclelinux-8-workflow]
 
 jobs:
   build:
