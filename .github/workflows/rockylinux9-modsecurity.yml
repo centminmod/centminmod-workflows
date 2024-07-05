@@ -2,8 +2,6 @@ name: Rocky Linux 9 + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-rockylinux-9-workflow-modsecurity]
 
 jobs:
   build:
