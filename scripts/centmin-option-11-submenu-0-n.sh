@@ -10,7 +10,7 @@ send -- "y\r"
 expect "Do you know the existing MySQL root password set in /root/.my.cnf?"
 send -- "n\r"
 expect "Enter option"
-send -- "11\r"
+send -- "14\r"
 expect "Enter option"
 send -- "24\r"
 after 30000
