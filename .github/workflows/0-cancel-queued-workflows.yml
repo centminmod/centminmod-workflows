@@ -12,7 +12,7 @@ jobs:
 
       - name: Cancel Queued Workflows
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           queued_runs=$(gh api -H "Accept: application/vnd.github.v3+json" /repos/${{ github.repository }}/actions/runs?status=queued | jq -r '.workflow_runs[].id')
           for run_id in $queued_runs; do

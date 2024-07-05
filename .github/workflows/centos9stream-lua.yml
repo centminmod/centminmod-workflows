@@ -341,7 +341,7 @@ jobs:
       run: |
         curl -X POST \
         -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -H "Authorization: token ${{ secrets.PAT }}" \
         https://api.github.com/repos/${{ github.repository }}/actions/workflows/centos9stream-modsecurity.yml/dispatches \
         -d '{"ref":"140.00beta01"}'
 
