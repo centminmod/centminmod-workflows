@@ -2,8 +2,6 @@ name: 131.00stable Rocky Linux 9 + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-rockylinux-9-workflow-modsecurity-13100stable]
 
 jobs:
   build:

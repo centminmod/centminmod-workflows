@@ -2,8 +2,6 @@ name: 131.00stable AlmaLinux 8 + Nginx Hardened Off
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-almalinux-8-workflow-hardenedoff-13100stable]
 
 jobs:
   build:
@@ -329,6 +327,14 @@ jobs:
       with:
         name: almalinux8_logs
         path: centminlogs/*
+
+    - name: Trigger MariaDB 10.6 default Workflow
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.PAT }}" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-mariadb10.6-13100stable.yml/dispatches \
+        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build

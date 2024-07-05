@@ -2,8 +2,6 @@ name: 131.00stable AlmaLinux 9 with MariaDB 10.11 Default
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-almalinux-9-mariadb-10.11-workflow-13100stable]
 
 jobs:
   build:
@@ -334,6 +332,14 @@ jobs:
       with:
         name: almalinux_logs
         path: centminlogs/*
+
+    - name: Trigger MariaDB 11.4 default Workflow
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.PAT }}" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux9-mariadb11.4-13100stable.yml/dispatches \
+        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build

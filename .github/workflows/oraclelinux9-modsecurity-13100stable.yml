@@ -2,8 +2,6 @@ name: 131.00stable Oracle Linux 9 + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-oraclelinux-9-workflow-modsecurity-13100stable]
 
 jobs:
   build:

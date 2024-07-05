@@ -2,8 +2,6 @@ name: 131.00stable Rocky Linux 8 + Nginx Lua Enabled
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-rockylinux-8-workflow-lua-13100stable]
 
 jobs:
   build:
@@ -338,6 +336,14 @@ jobs:
       with:
         name: rockylinux8_logs
         path: centminlogs/*
+
+    - name: Trigger ModSecurity Workflow
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.PAT }}" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/rockylinux8-modsecurity-13100stable.yml/dispatches \
+        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build

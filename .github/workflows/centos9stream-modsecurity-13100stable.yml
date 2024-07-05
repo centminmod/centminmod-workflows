@@ -2,8 +2,6 @@ name: 131.00stable CentOS 9 Stream + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-centosstream-9-workflow-modsecurity-13100stable]
 
 jobs:
   build:
