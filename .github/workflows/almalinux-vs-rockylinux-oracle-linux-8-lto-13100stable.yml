@@ -65,6 +65,12 @@ jobs:
           echo "----------------------------------------"
         continue-on-error: true
 
+      - name: Inspect nginx uid/gid
+        run: |
+          docker exec cmm_almalinux8 bash -c "id nginx; echo"
+          docker exec cmm_almalinux8 bash -c "ls -lahn /home/nginx"
+        continue-on-error: true
+
       - name: Nginx Configure
         run: |
           docker exec cmm_almalinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -111,9 +117,8 @@ jobs:
       - name: Inspect wget install
         run: |
           sleep 1
-          docker exec cmm_almalinux8 bash -c "/usr/bin/wget -V"
-          sleep 1
           docker exec cmm_almalinux8 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          docker exec cmm_almalinux8 bash -c "/usr/bin/wget -V"
           output=$(cat cmm-wget.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
@@ -1280,6 +1285,12 @@ jobs:
           echo "----------------------------------------"
         continue-on-error: true
 
+      - name: Inspect nginx uid/gid
+        run: |
+          docker exec cmm_rockylinux8 bash -c "id nginx; echo"
+          docker exec cmm_rockylinux8 bash -c "ls -lahn /home/nginx"
+        continue-on-error: true
+
       - name: Nginx Configure
         run: |
           docker exec cmm_rockylinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -1326,9 +1337,8 @@ jobs:
       - name: Inspect wget install
         run: |
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "/usr/bin/wget -V"
-          sleep 1
           docker exec cmm_rockylinux8 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          docker exec cmm_rockylinux8 bash -c "/usr/bin/wget -V"
           output=$(cat cmm-wget.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
@@ -2494,6 +2504,12 @@ jobs:
           echo "----------------------------------------"
         continue-on-error: true
 
+      - name: Inspect nginx uid/gid
+        run: |
+          docker exec cmm_oraclelinux8 bash -c "id nginx; echo"
+          docker exec cmm_oraclelinux8 bash -c "ls -lahn /home/nginx"
+        continue-on-error: true
+
       - name: Nginx Configure
         run: |
           docker exec cmm_oraclelinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -2540,9 +2556,8 @@ jobs:
       - name: Inspect wget install
         run: |
           sleep 1
-          docker exec cmm_oraclelinux8 bash -c "/usr/bin/wget -V"
-          sleep 1
           docker exec cmm_oraclelinux8 bash -c "/usr/local/bin/wget -V" | tee cmm-wget.log
+          docker exec cmm_oraclelinux8 bash -c "/usr/bin/wget -V"
           output=$(cat cmm-wget.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true

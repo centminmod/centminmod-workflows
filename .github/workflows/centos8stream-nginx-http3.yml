@@ -57,6 +57,12 @@ jobs:
         echo "----------------------------------------"
       continue-on-error: true
 
+    - name: Inspect nginx uid/gid
+      run: |
+        docker exec cmm_el89 bash -c "id nginx; echo"
+        docker exec cmm_el89 bash -c "ls -lahn /home/nginx"
+      continue-on-error: true
+
     - name: Nginx Configure
       run: |
         docker exec cmm_el89 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -101,9 +107,8 @@ jobs:
     - name: Inspect wget install
       run: |
         sleep 1
-        docker exec cmm_el89 bash -c "/usr/bin/wget -V"
-        sleep 1
         docker exec cmm_el89 bash -c "/usr/local/bin/wget -V"
+        docker exec cmm_el89 bash -c "/usr/bin/wget -V"
       continue-on-error: true
 
     - name: Inspect ccache install
