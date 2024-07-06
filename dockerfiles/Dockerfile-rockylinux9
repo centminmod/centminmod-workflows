@@ -79,6 +79,9 @@ RUN chmod +x /home/sysbench-run.sh
 COPY scripts/mariadb-ssl-setup.sh /home/mariadb-ssl-setup.sh
 RUN chmod +x /home/mariadb-ssl-setup.sh
 
+COPY scripts/centmin-option-24.sh /home/centmin-option-24.sh
+RUN chmod +x /home/centmin-option-24.sh
+
 COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
 RUN chmod +x /home/centmin-option-4.sh
 
