@@ -54,13 +54,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Sysbox
+      - name: Cache Sysbox .deb
         uses: actions/cache@v3
         with:
           path: sysbox-ce_0.6.4-0.linux_amd64.deb
-          key: sysbox-${{ runner.os }}-${{ hashFiles('sysbox-ce_0.6.4-0.linux_amd64.deb') }}
-          restore-keys: |
-            sysbox-${{ runner.os }}-
+          key: sysbox-deb-v0.6.4
 
       - name: Install Sysbox
         run: |
@@ -86,8 +84,6 @@ jobs:
           file: ./dockerfiles/Dockerfile-almalinux9
           platforms: linux/amd64
           load: true
-          cache-from: type=local,src=/home/runner/.cache/docker
-          cache-to: type=local,dest=/home/runner/.cache/docker
           tags: cmm_el89:latest
 
       - name: Debug payload (repository_dispatch)
