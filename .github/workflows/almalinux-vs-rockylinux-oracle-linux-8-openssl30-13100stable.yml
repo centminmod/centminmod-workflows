@@ -116,6 +116,17 @@ jobs:
           docker exec cmm_almalinux8 bash -c "ls -lahn /home/nginx"
         continue-on-error: true
 
+      - name: Check pure-ftpd virtual FTP user login
+        run: |
+          # Add pure-ftpd virtual user
+          docker exec cmm_almalinux8 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
+          docker exec cmm_almalinux8 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Install lftp
+          docker exec cmm_almalinux8 bash -c 'yum -q -y install lftp'
+          # Test FTP login using lftp
+          docker exec cmm_almalinux8 bash -c 'lftp -e "set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$(echo $SSH_CONNECTION | awk '\''{print $3}'\''); ls"'
+        continue-on-error: true
+
       - name: Nginx Configure
         run: |
           docker exec cmm_almalinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -1074,6 +1085,17 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "ls -lahn /home/nginx"
         continue-on-error: true
 
+      - name: Check pure-ftpd virtual FTP user login
+        run: |
+          # Add pure-ftpd virtual user
+          docker exec cmm_rockylinux8 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
+          docker exec cmm_rockylinux8 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Install lftp
+          docker exec cmm_rockylinux8 bash -c 'yum -q -y install lftp'
+          # Test FTP login using lftp
+          docker exec cmm_rockylinux8 bash -c 'lftp -e "set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$(echo $SSH_CONNECTION | awk '\''{print $3}'\''); ls"'
+        continue-on-error: true
+
       - name: Nginx Configure
         run: |
           docker exec cmm_rockylinux8 bash -c "cat /root/centminlogs/nginx-configure-*"
@@ -2029,6 +2051,17 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "id nginx; echo"
           docker exec cmm_oraclelinux8 bash -c "ls -lahn /home/nginx"
+        continue-on-error: true
+
+      - name: Check pure-ftpd virtual FTP user login
+        run: |
+          # Add pure-ftpd virtual user
+          docker exec cmm_oraclelinux8 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
+          docker exec cmm_oraclelinux8 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Install lftp
+          docker exec cmm_oraclelinux8 bash -c 'yum -q -y install lftp'
+          # Test FTP login using lftp
+          docker exec cmm_oraclelinux8 bash -c 'lftp -e "set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$(echo $SSH_CONNECTION | awk '\''{print $3}'\''); ls"'
         continue-on-error: true
 
       - name: Nginx Configure
