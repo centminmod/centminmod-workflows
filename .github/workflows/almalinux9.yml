@@ -54,27 +54,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Sysbox .deb
+      - name: Restore Sysbox cache
+        id: cache-sysbox
         uses: actions/cache@v3
         with:
           path: sysbox-ce_0.6.4-0.linux_amd64.deb
           key: sysbox-deb-v0.6.4
+          enableCrossOsArchive: false
+          fail-on-cache-miss: true
 
-      - name: Install Sysbox
+      - name: Download and install Sysbox if cache miss
+        if: steps.cache-sysbox.outputs.cache-hit != 'true'
         run: |
-          if [ ! -f sysbox-ce_0.6.4-0.linux_amd64.deb ]; then
-            curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.4/sysbox-ce_0.6.4-0.linux_amd64.deb
-          fi
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.4/sysbox-ce_0.6.4-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.6.4-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Save Sysbox cache
+        if: steps.cache-sysbox.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        with:
+          path: sysbox-ce_0.6.4-0.linux_amd64.deb
+          key: sysbox-deb-v0.6.4
+          enableCrossOsArchive: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
+      - name: Restore Docker cache
+        id: cache-docker
         uses: actions/cache@v3
         with:
           path: /home/runner/.cache/docker
           key: docker-${{ github.sha }}
+          enableCrossOsArchive: false
+          fail-on-cache-miss: true
 
       - name: Build 
         id: docker_build
