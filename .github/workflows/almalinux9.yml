@@ -15,8 +15,11 @@ jobs:
           curl -s -H "Accept: application/vnd.github.v3+json" \
                -H "Authorization: token ${{ secrets.PAT }}" \
                https://api.github.com/repos/${{ github.repository }}/actions/runs?status=queued,in_progress > runs.json
+          cat runs.json
           jq -r --arg workflow_name "${{ github.workflow }}" --arg current_run_id "${{ github.run_id }}" '
             .workflow_runs | map(select(.name == $workflow_name and .id != ($current_run_id|tonumber))) | .[].id' runs.json > runs_to_cancel.txt
+          echo "Runs to cancel:"
+          cat runs_to_cancel.txt
 
       - name: Cancel previous runs
         if: ${{ always() }}
