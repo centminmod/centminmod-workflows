@@ -124,10 +124,12 @@ jobs:
           # Add pure-ftpd virtual user
           docker exec cmm_almalinux9 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
           docker exec cmm_almalinux9 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Get container IP address
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_almalinux9)         
           # Install lftp
           docker exec cmm_almalinux9 bash -c 'yum -q -y install lftp'
           # Test FTP login using lftp
-          docker exec cmm_almalinux9 bash -c 'lftp -e "set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$(echo $SSH_CONNECTION | awk '\''{print $3}'\''); ls"'
+          docker exec cmm_almalinux9 bash -c "lftp -e 'set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls'"
         continue-on-error: true
 
       - name: Nginx Configure
@@ -1077,10 +1079,12 @@ jobs:
           # Add pure-ftpd virtual user
           docker exec cmm_rockylinux9 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
           docker exec cmm_rockylinux9 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Get container IP address
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_rockylinux9)         
           # Install lftp
           docker exec cmm_rockylinux9 bash -c 'yum -q -y install lftp'
           # Test FTP login using lftp
-          docker exec cmm_rockylinux9 bash -c 'lftp -e "set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$(echo $SSH_CONNECTION | awk '\''{print $3}'\''); ls"'
+          docker exec cmm_rockylinux9 bash -c "lftp -e 'set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls'"
         continue-on-error: true
 
       - name: Nginx Configure
