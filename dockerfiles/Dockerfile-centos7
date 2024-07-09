@@ -83,5 +83,8 @@ RUN chmod +x /home/centmin-option-5-php8.2.sh
 
 COPY scripts/centmin-option-5-php8.3.sh /home/centmin-option-5-php8.3.sh
 RUN chmod +x /home/centmin-option-5-php8.3.sh
+
+COPY scripts/centmin-option-5-php8.4.sh /home/centmin-option-5-php8.4.sh
+RUN chmod +x /home/centmin-option-5-php8.4.sh
 VOLUME [ "/sys/fs/cgroup", "/run", "/tmp" ]
 CMD ["/usr/sbin/init"]
