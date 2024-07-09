@@ -385,6 +385,14 @@ jobs:
         name: almalinux_logs
         path: centminlogs/*
 
+    - name: Trigger RockyLinux8 PHP 7.4 workflow
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token ${{ secrets.PAT }}" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/rockylinux8-php7.4-13100stable.yml/dispatches \
+        -d '{"ref":"master"}'
+
   discordNotificationSuccess:
     needs: build
     if: ${{ success() }} # Only run this job if the previous job was successful
