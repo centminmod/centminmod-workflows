@@ -2,8 +2,6 @@ name: 131.00stable Oracle Linux 8
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-oraclelinux-8-workflow-13100stable]
 
 jobs:
   cancel_previous:
