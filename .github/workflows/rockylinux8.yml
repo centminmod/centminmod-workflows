@@ -2,8 +2,8 @@ name: Rocky Linux 8
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-rockylinux-8-workflow]
+  # repository_dispatch:
+  #   types: [run-rockylinux-8-workflow]
 
 jobs:
   cancel_previous:
