@@ -2,8 +2,6 @@ name: 131.00stable Rocky Linux 8 with PHP 8.2
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-rockylinux-8-workflow-php82-13100stable]
 
 jobs:
   cancel_previous:
