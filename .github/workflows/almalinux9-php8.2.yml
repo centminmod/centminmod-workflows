@@ -2,8 +2,8 @@ name: AlmaLinux 9 with PHP 8.2
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-almalinux-9-workflow-php82]
+  # repository_dispatch:
+  #   types: [run-almalinux-9-workflow-php82]
 
 jobs:
   cancel_previous:
