@@ -1,4 +1,4 @@
-name: AlmaLinux 8 + Nginx HTTP/3
+name: AlmaLinux 8 with Postfix 3.9 Update
 
 on:
   workflow_dispatch:
@@ -81,9 +81,6 @@ jobs:
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
-        docker exec cmm_el89 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
-        docker exec cmm_el89 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
         output=$(tail -20 cmm-install.log)
         echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -149,6 +146,27 @@ jobs:
         sleep 1
         docker exec cmm_el89 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
         docker exec cmm_el89 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+      continue-on-error: true
+
+    - name: Postfix 3.9 Update
+      run: |
+        docker exec cmm_el89 /home/postfix39.sh
+      continue-on-error: true
+
+    - name: Postfix 3.9 Update Inspection
+      run: |
+        docker exec cmm_el89 bash -c "postconf mail_version"
+        docker exec cmm_el89 bash -c "systemctl status postfix --no-pager"
+      continue-on-error: true
+
+    - name: Postfix 3.9 journalctl Log Inspection
+      run: |
+        docker exec cmm_el89 bash -c "journalctl -u postfix --no-pager | tail -20"
+      continue-on-error: true
+
+    - name: Postfix 3.9 postfixlog Alias Output
+      run: |
+        docker exec cmm_el89 bash -c "pflogsumm -d today --verbose_msg_detail /var/log/maillog"
       continue-on-error: true
 
     - name: YUM repolist all
@@ -387,22 +405,6 @@ jobs:
       with:
         name: almalinux8_logs
         path: centminlogs/*
-
-    - name: Trigger Lua Workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-lua.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger Postfix 3.9 Update Workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-postfix39.yml/dispatches \
-        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build
