@@ -166,7 +166,7 @@ jobs:
 
     - name: Postfix 3.9 postfixlog Alias Output
       run: |
-        docker exec cmm_el89 bash -c "postfixlog"
+        docker exec cmm_el89 bash -c "pflogsumm -d today --verbose_msg_detail /var/log/maillog"
       continue-on-error: true
 
     - name: YUM repolist all
