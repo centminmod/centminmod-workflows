@@ -1,4 +1,4 @@
-name: 131.00stable 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx OpenSSL 3.0 default
+name: 131.00stable (1) 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx OpenSSL 3.0 default
 
 on:
   workflow_dispatch:

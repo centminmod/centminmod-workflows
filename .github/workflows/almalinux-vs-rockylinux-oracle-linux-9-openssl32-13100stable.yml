@@ -1,4 +1,4 @@
-name: 131.00stable 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 + Nginx OpenSSL 3.2 default
+name: 131.00stable (1) 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 + Nginx OpenSSL 3.2 default
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: 131.00stable AlmaLinux 8 + Nginx Lua Enabled
+name: 131.00stable (1) AlmaLinux 8 + Nginx Lua Enabled
 
 on:
   workflow_dispatch:

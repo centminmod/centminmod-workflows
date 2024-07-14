@@ -1,4 +1,4 @@
-name: 131.00stable AlmaLinux 8 Edge with PHP 8.1 + Advance Options
+name: 131.00stable (1) AlmaLinux 8 Edge with PHP 8.1 + Advance Options
 
 on:
   workflow_dispatch:

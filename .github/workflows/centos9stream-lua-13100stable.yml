@@ -1,4 +1,4 @@
-name: 131.00stable CentOS 9 Stream + Nginx Lua Enabled
+name: 131.00stable (1) CentOS 9 Stream + Nginx Lua Enabled
 
 on:
   workflow_dispatch:
