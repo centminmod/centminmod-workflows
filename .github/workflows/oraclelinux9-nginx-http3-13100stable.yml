@@ -206,14 +206,16 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status nginx.service"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "curl -I http://localhost"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "curl -sIv http://localhost"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "/usr/local/sbin/nginx -V"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ldd /usr/local/sbin/nginx"
-        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "curl -I http://localhost" || true
+        docker exec cmm_el89 bash -c "echo '---'" || true
+        docker exec cmm_el89 bash -c "curl -sIv http://localhost" || true
+        docker exec cmm_el89 bash -c "echo '---'" || true
+        docker exec cmm_el89 bash -c "/usr/local/sbin/nginx -V" || true
+        docker exec cmm_el89 bash -c "echo '---'" || true
+        docker exec cmm_el89 bash -c "ldd /usr/local/sbin/nginx" || true
+        docker exec cmm_el89 bash -c "echo '---'" || true
+        docker exec cmm_el89 bash -c "nginx -t" || true
+        docker exec cmm_el89 bash -c "echo '---'" || true
       continue-on-error: true
 
     - name: Inspect MariaDB setup
