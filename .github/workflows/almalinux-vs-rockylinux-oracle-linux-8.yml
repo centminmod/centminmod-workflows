@@ -596,9 +596,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -671,9 +671,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -695,9 +695,9 @@ jobs:
         run: |
           docker exec cmm_almalinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "cmupdate"
           docker exec cmm_almalinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -1826,9 +1826,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -1901,9 +1901,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -1925,9 +1925,9 @@ jobs:
         run: |
           docker exec cmm_rockylinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "cmupdate"
           docker exec cmm_rockylinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -3056,9 +3056,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -3131,9 +3131,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true
@@ -3155,9 +3155,9 @@ jobs:
         run: |
           docker exec cmm_oraclelinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.1' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.1' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "cmupdate"
           docker exec cmm_oraclelinux8 /home/centmin-option-4.sh
         continue-on-error: true

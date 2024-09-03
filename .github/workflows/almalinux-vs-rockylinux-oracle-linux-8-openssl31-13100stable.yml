@@ -94,9 +94,9 @@ jobs:
           docker exec cmm_almalinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/installer.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1068,9 +1068,9 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/installer.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -2041,9 +2041,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.6' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.6' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/installer.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
