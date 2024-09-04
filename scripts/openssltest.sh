@@ -65,6 +65,16 @@ function process_curve_output() {
     local bssl_p256_output="$3"
     local bssl_p256_lines=$(echo "$bssl_p256_output" | grep -E 'ECDH P-256 operations|ECDSA P-256 signing operations|ECDSA P-256 verify operations')
     echo "$bssl_p256_lines"
+
+    # For BoringSSL with filter Kyber768_R3
+    local bssl_kyber768_output="$4"
+    local bssl_kyber768_lines=$(echo "$bssl_kyber768_output" | grep -E 'Kyber')
+    echo "$bssl_kyber768_lines"
+
+    # For BoringSSL with filter ML-KEM-768
+    local bssl_mlkem768_output="$5"
+    local bssl_mlkem768_lines=$(echo "$bssl_mlkem768_output" | grep -E 'ML-KEM')
+    echo "$bssl_mlkem768_lines"
 }
 
 function process_curve_output32() {
@@ -96,7 +106,9 @@ case $LIB in
             # Additional benchmarking for curves X25519 and P-256
             OUTPUTX25519=$($BINARY speed -filter X25519 2>&1)
             OUTPUTP256=$($BINARY speed -filter P-256 2>&1)
-            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256"
+            OUTPUTPKYBER768=$($BINARY speed -filter Kyber 2>&1)
+            OUTPUTPML=$($BINARY speed -filter ML-KEM-768 2>&1)
+            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256" "$OUTPUTPKYBER768" "$OUTPUTPML"
          fi
         ;;
     awslc)
@@ -110,7 +122,8 @@ case $LIB in
             # Additional benchmarking for curves X25519 and P-256
             OUTPUTX25519=$($BINARY speed -filter X25519 2>&1)
             OUTPUTP256=$($BINARY speed -filter P-256 2>&1)
-            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256"
+            OUTPUTPKYBER768=$($BINARY speed -filter Kyber768_R3 2>&1)
+            process_curve_output "" "$OUTPUTX25519" "$OUTPUTP256" "$OUTPUTPKYBER768"
          fi
         ;;
     openssl111|openssl30|openssl31)
