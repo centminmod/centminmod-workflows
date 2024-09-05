@@ -57,8 +57,8 @@ function process_curve_output() {
     echo "$openssl_curve_lines"
 
     # Extract Ed25519 sign and verify operations, handling both formats
-    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
-    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8/10}')
+    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8/10}')
     
     if [[ ! -z $ed25519_sign ]]; then
         echo "253 bits Ed25519 sign/s: $ed25519_sign"
@@ -121,8 +121,8 @@ function process_curve_output32() {
     echo "$openssl_curve_lines"
 
     # Extract Ed25519 sign and verify operations for OpenSSL
-    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
-    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8/10}')
+    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8/10}')
     
     if [[ ! -z $ed25519_sign ]]; then
         echo "253 bits Ed25519 sign/s: $ed25519_sign"
