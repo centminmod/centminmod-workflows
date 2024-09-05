@@ -51,30 +51,67 @@ function process_openssl_output32() {
 }
 
 function process_curve_output() {
-    # For OpenSSL
+    # For OpenSSL (handles X25519 and P-256)
     local openssl_output="$1"
     local openssl_curve_lines=$(echo "$openssl_output" | grep -E '256 bits ecdh \(nistp256\)|253 bits ecdh \(X25519\)')
     echo "$openssl_curve_lines"
 
-    # For BoringSSL with filter X25519
-    local bssl_x25519_output="$2"
-    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'multiplication operations|Ed25519 signing operations|Ed25519 verify operations')
-    echo "$bssl_x25519_lines"
+    # Extract Ed25519 sign and verify operations, handling both formats
+    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    
+    if [[ ! -z $ed25519_sign ]]; then
+        echo "253 bits Ed25519 sign/s: $ed25519_sign"
+    fi
+    
+    if [[ ! -z $ed25519_verify ]]; then
+        echo "253 bits Ed25519 verify/s: $ed25519_verify"
+    fi
 
-    # For BoringSSL with filter P-256
+    # For AWS-LC or BoringSSL, handle X25519, Curve25519, and Ed25519
+    local bssl_x25519_output="$2"
+
+    # Extract X25519 (ECDH) operations from both EVP and ECDH X25519 sections
+    local x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'X25519 operations')
+    echo "$x25519_lines"
+
+    # Extract Curve25519 operations (base-point and arbitrary point multiplication)
+    local curve25519_lines=$(echo "$bssl_x25519_output" | grep -E 'Curve25519')
+    if [ ! -z "$curve25519_lines" ]; then
+        echo "Curve25519 Output:"
+        echo "$curve25519_lines"
+    fi
+
+    # Extract Ed25519 operations (key generation, signing, verifying)
+    local ed25519_lines=$(echo "$bssl_x25519_output" | grep -E 'Ed25519')
+    if [ ! -z "$ed25519_lines" ]; then
+        echo "Ed25519 Output:"
+        echo "$ed25519_lines"
+    fi
+
+    # For BoringSSL with filter P-256 (if applicable)
     local bssl_p256_output="$3"
     local bssl_p256_lines=$(echo "$bssl_p256_output" | grep -E 'ECDH P-256 operations|ECDSA P-256 signing operations|ECDSA P-256 verify operations')
-    echo "$bssl_p256_lines"
+    if [ ! -z "$bssl_p256_lines" ]; then
+        echo "P-256 Output:"
+        echo "$bssl_p256_lines"
+    fi
 
     # For BoringSSL with filter Kyber768_R3
     local bssl_kyber768_output="$4"
     local bssl_kyber768_lines=$(echo "$bssl_kyber768_output" | grep -E 'Kyber')
-    echo "$bssl_kyber768_lines"
+    if [ ! -z "$bssl_kyber768_lines" ]; then
+        echo "Kyber Output:"
+        echo "$bssl_kyber768_lines"
+    fi
 
     # For BoringSSL with filter ML-KEM-768
     local bssl_mlkem768_output="$5"
     local bssl_mlkem768_lines=$(echo "$bssl_mlkem768_output" | grep -E 'ML-KEM')
-    echo "$bssl_mlkem768_lines"
+    if [ ! -z "$bssl_mlkem768_lines" ]; then
+        echo "ML-KEM Output:"
+        echo "$bssl_mlkem768_lines"
+    fi
 }
 
 function process_curve_output32() {
@@ -83,9 +120,21 @@ function process_curve_output32() {
     local openssl_curve_lines=$(echo "$openssl_output" | grep -E '256 bits ecdh \(nistp256\)|253 bits ecdh \(X25519\)')
     echo "$openssl_curve_lines"
 
+    # Extract Ed25519 sign and verify operations for OpenSSL
+    local ed25519_sign=$(echo "$openssl_output" | grep "Doing 253 bits sign Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    local ed25519_verify=$(echo "$openssl_output" | grep "Doing 253 bits verify Ed25519" | sed "s/ops//" | sed "s/'s//" | awk '{print $8}')
+    
+    if [[ ! -z $ed25519_sign ]]; then
+        echo "253 bits Ed25519 sign/s: $ed25519_sign"
+    fi
+    
+    if [[ ! -z $ed25519_verify ]]; then
+        echo "253 bits Ed25519 verify/s: $ed25519_verify"
+    fi
+
     # For BoringSSL with filter X25519
     local bssl_x25519_output="$2"
-    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'multiplication operations|Ed25519 signing operations|Ed25519 verify operations')
+    local bssl_x25519_lines=$(echo "$bssl_x25519_output" | grep -E 'X25519')
     echo "$bssl_x25519_lines"
 
     # For BoringSSL with filter P-256
@@ -135,7 +184,7 @@ case $LIB in
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ed25519 ecdhp256 2>&1)
             process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
@@ -148,7 +197,7 @@ case $LIB in
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output32 "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ed25519 ecdhp256 2>&1)
             process_curve_output32 "$CURVE_OUTPUT" "" ""
         fi
         ;;
@@ -161,7 +210,7 @@ case $LIB in
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output32 "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ed25519 ecdhp256 2>&1)
             process_curve_output32 "$CURVE_OUTPUT" "" ""
         fi
         ;;
@@ -174,7 +223,7 @@ case $LIB in
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ed25519 ecdhp256 2>&1)
             process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
@@ -187,7 +236,7 @@ case $LIB in
             ECDSA_OUTPUT=$($BINARY speed ecdsap256 2>&1)
             process_openssl_output "$RSA_OUTPUT" "$ECDSA_OUTPUT"
             # Additional benchmarking for curves
-            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ecdhp256 2>&1)
+            CURVE_OUTPUT=$($BINARY speed ecdhx25519 ed25519 ecdhp256 2>&1)
             process_curve_output "$CURVE_OUTPUT" "" ""
         fi
         ;;
