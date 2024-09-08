@@ -888,6 +888,22 @@ jobs:
           docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
+      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "cmupdate"
+          docker exec cmm_almalinux9 /home/centmin-option-4.sh
+          docker exec cmm_almalinux9 bash -c "nginx -t"
+          docker exec cmm_almalinux9 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
       - name: OpenSSL benchmark tests summary
         run: |
           docker exec cmm_almalinux9 bash -c "cat /home/nginxopenssl-summary.log" || true
@@ -2044,6 +2060,22 @@ jobs:
       - name: Nginx HTTPS h2load - AWS-LC benchmarks test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "cmupdate"
+          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
+          docker exec cmm_rockylinux9 bash -c "nginx -t"
+          docker exec cmm_rockylinux9 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
@@ -3206,6 +3238,22 @@ jobs:
       - name: Nginx HTTPS h2load - AWS-LC benchmarks test
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "cmupdate"
+          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
+          docker exec cmm_oraclelinux9 bash -c "nginx -t"
+          docker exec cmm_oraclelinux9 bash -c "systemctl restart nginx"
+        continue-on-error: true
+
+      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true

@@ -153,7 +153,7 @@ case $LIB in
             OUTPUTECDSA=$($BINARY speed -filter ECDSA | grep 'ECDSA P-256' 2>&1)
             echo "$OUTPUTECDSA"
             # Additional benchmarking for curves X25519 and P-256
-            OUTPUTX25519=$($BINARY speed -filter X25519 2>&1)
+            OUTPUTX25519=$($BINARY speed -filter CURVE25519 2>&1)
             OUTPUTP256=$($BINARY speed -filter P-256 2>&1)
             OUTPUTPKYBER768=$($BINARY speed -filter Kyber 2>&1)
             OUTPUTPML=$($BINARY speed -filter ML-KEM-768 2>&1)
