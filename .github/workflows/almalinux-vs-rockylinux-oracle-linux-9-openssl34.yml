@@ -1,9 +1,9 @@
-name: 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9
+name: 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 + Nginx OpenSSL 3.4 default
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-openssl33]
 
 jobs:
   cancel_previous:
@@ -89,13 +89,19 @@ jobs:
         run: |
           docker run -d --name=cmm_almalinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux9:latest
           sleep 4
-          docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_almalinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_almalinux9 bash -c "touch /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
-  
+
       - name: Display Centmmin Mod LEMP Install Log
         run: |
           echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
@@ -140,7 +146,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "cat /root/centminlogs/patch_php-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
-
+  
       - name: Centmin Mod Disk Usage Analysis
         run: |
           docker exec cmm_almalinux9 bash -c "du -sh /svr-setup"
@@ -217,9 +223,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -281,7 +285,6 @@ jobs:
           docker exec cmm_almalinux9 bash -c "pip --version"
           sleep 1
           docker exec cmm_almalinux9 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
-          docker exec cmm_almalinux9 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -294,29 +297,6 @@ jobs:
           echo "ALMALINUX_REDIS_TEST_STATUS=$ALMALINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_almalinux9 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
-
-      - name: Redis memtier benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
-          docker exec cmm_almalinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_almalinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_almalinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-          docker exec cmm_almalinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-        continue-on-error: true
-
-      - name: Install KeyDB server
-        run: |
-          docker exec cmm_almalinux9 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
-          docker exec cmm_almalinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
-        continue-on-error: true
-
-      - name: KeyDB memtier benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_almalinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_almalinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
-          docker exec cmm_almalinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -479,7 +459,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -505,11 +485,12 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
+          docker exec cmm_almalinux9 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
         continue-on-error: true
@@ -565,44 +546,42 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
+      - name: centmin.sh menu option 4 Nginx OpenSSL 1.1.1 upgrade test
         run: |
-          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: OpenSSL 3.1 benchmarks test
+      - name: OpenSSL 1.1.1 benchmarks test
         run: |
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
-      - name: Nginx HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx master branch HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
+      - name: Inspect Nginx OpenSSL 1.1.1 setup
         id: nginxopensslthreeone_test
         run: |
           sleep 1
@@ -621,117 +600,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
           output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
-        run: |
-          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.2 benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl32 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
-        run: |
-          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.3 benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl33 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.3 default benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.4 upgrade test
-        run: |
-          docker exec cmm_almalinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.4 benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.4 default benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.4 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
-        run: |
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4-master.sh
-        continue-on-error: true
-
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: Inspect Nginx OpenSSL 3.2 setup
-        id: nginxopensslthreetwo_test
-        run: |
-          sleep 1
-          docker exec cmm_almalinux9 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_almalinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_almalinux9 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_almalinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_almalinux9 bash -c "curl -I http://localhost"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "curl -sIv http://localhost"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
+          echo "AlmaLinux Nginx OpenSSL 1.1.1 Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -886,48 +755,6 @@ jobs:
           docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
-        run: |
-          docker exec cmm_almalinux9 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4.sh
-          docker exec cmm_almalinux9 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_almalinux9 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_almalinux9 bash -c "nginx -t"
-          docker exec cmm_almalinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: OpenSSL AWS-LC benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh awslc | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux9 bash -c "cmupdate"
-          docker exec cmm_almalinux9 /home/centmin-option-4.sh
-          docker exec cmm_almalinux9 bash -c "nginx -t"
-          docker exec cmm_almalinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
-        run: |
-          docker exec cmm_almalinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
       - name: OpenSSL benchmark tests summary
         run: |
           docker exec cmm_almalinux9 bash -c "cat /home/nginxopenssl-summary.log" || true
@@ -938,23 +765,10 @@ jobs:
           docker exec cmm_almalinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Centmin Mod Disk Usage Analysis
-        run: |
-          docker exec cmm_almalinux9 bash -c "du -sh /svr-setup"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "df -hT"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-        continue-on-error: true
-
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5-php7.4.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -966,9 +780,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 7.4 phpbench.php
@@ -980,9 +792,6 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -994,9 +803,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.0 phpbench.php
@@ -1010,9 +817,6 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1024,9 +828,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.1 phpbench.php
@@ -1049,9 +851,6 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5-php8.2.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1063,9 +862,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.2 phpbench.php
@@ -1102,9 +899,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
@@ -1112,9 +907,6 @@ jobs:
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1126,9 +918,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.3 phpbench.php
@@ -1165,9 +955,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -1176,9 +964,6 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux9 bash -c "cmupdate"
           docker exec cmm_almalinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -1202,9 +987,7 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli" || true
           docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli" || true
-          docker exec cmm_almalinux9 bash -c "echo '---'"
-          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.1 phpbench.php
@@ -1290,8 +1073,14 @@ jobs:
         run: |
           docker run -d --name=cmm_rockylinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux9:latest
           sleep 4
-          docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_rockylinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_rockylinux9 bash -c "touch /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1418,9 +1207,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -1482,7 +1269,6 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "pip --version"
           sleep 1
           docker exec cmm_rockylinux9 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
-          docker exec cmm_rockylinux9 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -1495,29 +1281,6 @@ jobs:
           echo "ROCKYLINUX_REDIS_TEST_STATUS=$ROCKYLINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_rockylinux9 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
-
-      - name: Redis memtier benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
-          docker exec cmm_rockylinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-          docker exec cmm_rockylinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-        continue-on-error: true
-
-      - name: Install KeyDB server
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
-          docker exec cmm_rockylinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
-        continue-on-error: true
-
-      - name: KeyDB memtier benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_rockylinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
-          docker exec cmm_rockylinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -1680,7 +1443,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -1706,11 +1469,12 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
+          docker exec cmm_rockylinux9 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
         continue-on-error: true
@@ -1766,44 +1530,42 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
+      - name: centmin.sh menu option 4 Nginx OpenSSL 1.1.1 upgrade test
         run: |
-          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: OpenSSL 3.1 benchmarks test
+      - name: OpenSSL 1.1.1 benchmarks test
         run: |
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
-      - name: Nginx HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx master branch HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
+      - name: Inspect Nginx OpenSSL 1.1.1 setup
         id: nginxopensslthreeone_test
         run: |
           sleep 1
@@ -1822,117 +1584,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
           output=$(cat cmm-nginxopensslthree.log)
-          echo "RockyLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.2 benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl32 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.3 benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl33 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.3 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.4 upgrade test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.4 benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.4 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.4 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4-master.sh
-        continue-on-error: true
-
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: Inspect Nginx OpenSSL 3.2 setup
-        id: nginxopensslthreetwo_test
-        run: |
-          sleep 1
-          docker exec cmm_rockylinux9 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_rockylinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_rockylinux9 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_rockylinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_rockylinux9 bash -c "curl -I http://localhost"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "curl -sIv http://localhost"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
+          echo "RockyLinux Nginx OpenSSL 1.1.1 Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2086,48 +1738,6 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
-          docker exec cmm_rockylinux9 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_rockylinux9 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_rockylinux9 bash -c "nginx -t"
-          docker exec cmm_rockylinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: OpenSSL AWS-LC benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh awslc | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux9 bash -c "cmupdate"
-          docker exec cmm_rockylinux9 /home/centmin-option-4.sh
-          docker exec cmm_rockylinux9 bash -c "nginx -t"
-          docker exec cmm_rockylinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
-        run: |
-          docker exec cmm_rockylinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
       - name: OpenSSL benchmark tests summary
         run: |
           docker exec cmm_rockylinux9 bash -c "cat /home/nginxopenssl-summary.log" || true
@@ -2138,23 +1748,10 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Centmin Mod Disk Usage Analysis
-        run: |
-          docker exec cmm_rockylinux9 bash -c "du -sh /svr-setup"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "df -hT"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-        continue-on-error: true
-
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5-php7.4.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2166,9 +1763,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 7.4 phpbench.php
@@ -2180,9 +1775,6 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2194,9 +1786,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.0 phpbench.php
@@ -2210,9 +1800,6 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2224,9 +1811,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.1 phpbench.php
@@ -2249,9 +1834,6 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5-php8.2.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2263,9 +1845,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.2 phpbench.php
@@ -2302,9 +1882,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
@@ -2312,9 +1890,6 @@ jobs:
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2326,9 +1901,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.3 phpbench.php
@@ -2365,9 +1938,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -2376,9 +1947,6 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux9 bash -c "cmupdate"
           docker exec cmm_rockylinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -2402,9 +1970,7 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli" || true
           docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli" || true
-          docker exec cmm_rockylinux9 bash -c "echo '---'"
-          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
 
       - name: PHP-FPM 8.1 phpbench.php
@@ -2491,56 +2057,17 @@ jobs:
         run: |
           docker run -d --name=cmm_oraclelinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux9:latest
           sleep 4
-          docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
           docker exec cmm_oraclelinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_oraclelinux9 bash -c "touch /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
-
-      - name: Display Centmmin Mod LEMP Install Log
-        run: |
-          echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
-          echo "----------------------------------------"
-          tail -20 cmm-install.log
-          echo "----------------------------------------"
-        continue-on-error: true
-
-      - name: Inspect nginx uid/gid
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "id nginx; echo"
-          docker exec cmm_oraclelinux9 bash -c "ls -lahn /home/nginx"
-        continue-on-error: true
-
-      - name: Check pure-ftpd virtual FTP user login
-        run: |
-          # Add pure-ftpd virtual user
-          docker exec cmm_oraclelinux9 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
-          docker exec cmm_oraclelinux9 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
-          # Get container IP address
-          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_oraclelinux9)         
-          # Install lftp
-          docker exec cmm_oraclelinux9 bash -c 'yum -q -y install lftp'
-          # Test FTP login using lftp
-          docker exec cmm_oraclelinux9 bash -c "lftp -e 'set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls'"
-        continue-on-error: true
-
-      - name: Nginx Configure
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/nginx-configure-*"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-        continue-on-error: true
-
-      - name: Nginx Patches
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_patchnginx-*"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-        continue-on-error: true
-
-      - name: PHP-FPM Patches
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_php-*"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
   
       - name: Centmin Mod Disk Usage Analysis
@@ -2619,10 +2146,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
@@ -2685,7 +2208,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "pip --version"
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
-          docker exec cmm_oraclelinux9 bash -c "ls -lah /usr/bin/pip' || echo 'No match for /usr/bin/pip'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -2698,29 +2220,6 @@ jobs:
           echo "ORACLELINUX_REDIS_TEST_STATUS=$ORACLELINUX_REDIS_TEST_STATUS"
           sleep 1
           docker exec cmm_oraclelinux9 bash -c "php --ri redis" | tee cmm-phpredis.log && outputphpredis=$(cat cmm-phpredis.log) && echo "$outputphpredis" >> $GITHUB_STEP_SUMMARY 
-        continue-on-error: true
-
-      - name: Redis memtier benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/home/memtier_install.sh | tee -a /svr-setup/memtier_install.log" || true
-          docker exec cmm_oraclelinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux9 bash -c "redis-cli -h 127.0.0.1 -p 6379 info | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-          docker exec cmm_oraclelinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/redis-benchmark-summary2.log" || true
-        continue-on-error: true
-
-      - name: Install KeyDB server
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/home/centminmod-keydb.sh install | tee -a /svr-setup/keydb_install.log" || true
-          docker exec cmm_oraclelinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info || true
-        continue-on-error: true
-
-      - name: KeyDB memtier benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary1.log" || true
-          docker exec cmm_oraclelinux9 bash -c "keydb-cli -h 127.0.0.1 -p 7379 info | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
-          docker exec cmm_oraclelinux9 bash -c "memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 | tee -a /svr-setup/keydb-benchmark-summary2.log" || true
         continue-on-error: true
   
       - name: Inspect pure-ftpd setup
@@ -2883,7 +2382,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -2909,11 +2408,12 @@ jobs:
 
       - name: centmin.sh menu option 4 Nginx OpenSSL 3.0 upgrade test
         run: |
+          docker exec cmm_oraclelinux9 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.14' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.14' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.0.12' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.0.12' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
         continue-on-error: true
@@ -2969,44 +2469,42 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.1 upgrade test
+      - name: centmin.sh menu option 4 Nginx OpenSSL 1.1.1 upgrade test
         run: |
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=1.1.1w' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=1.1.1w' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
         continue-on-error: true
 
-      - name: OpenSSL 3.1 benchmarks test
+      - name: OpenSSL 1.1.1 benchmarks test
         run: |
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl30 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
-      - name: Nginx HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.1 default upgrade test
+      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 1.1.1 default upgrade test
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-4-master.sh
         continue-on-error: true
 
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.1 default benchmarks test
+      - name: Nginx master branch HTTPS h2load - OpenSSL 1.1.1 default benchmarks test
         run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 1.1.1 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
           docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Inspect Nginx OpenSSL 3.1 setup
+      - name: Inspect Nginx OpenSSL 1.1.1 setup
         id: nginxopensslthreeone_test
         run: |
           sleep 1
@@ -3025,117 +2523,7 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
           output=$(cat cmm-nginxopensslthree.log)
-          echo "OracleLinux Nginx OpenSSL 3.1 Version: $output" >> $GITHUB_STEP_SUMMARY
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.2 upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.2.3' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.2 benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl32 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.3 upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.3.2' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.3 benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl33 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.3 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.3 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx OpenSSL 3.4 upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
-        continue-on-error: true
-
-      - name: OpenSSL 3.4 benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - OpenSSL 3.4 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load OpenSSL 3.4 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx master branch OpenSSL 3.2 default upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4-master.sh
-        continue-on-error: true
-
-      - name: Nginx master branch HTTPS h2load - OpenSSL 3.2 default benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx master branch HTTPS h2load OpenSSL 3.2 default benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: Inspect Nginx OpenSSL 3.2 setup
-        id: nginxopensslthreetwo_test
-        run: |
-          sleep 1
-          docker exec cmm_oraclelinux9 bash -c "ls -lAh /usr/local/nginx/logs"
-          sleep 1
-          docker exec cmm_oraclelinux9 bash -c "cat /usr/local/nginx/logs/nginx.pid"
-          sleep 1
-          docker exec cmm_oraclelinux9 bash -c "ps aux | grep nginx"
-          sleep 1
-          docker exec cmm_oraclelinux9 bash -c "systemctl status nginx.service --no-pager" && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$?" >> $GITHUB_OUTPUT
-          echo "ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS=$ALMALINUX_NGINXOPENSSLTHREE_TEST_STATUS"
-          sleep 1
-          docker exec cmm_oraclelinux9 bash -c "curl -I http://localhost"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "curl -sIv http://localhost"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1" | tee cmm-nginxopensslthree.log
-          output=$(cat cmm-nginxopensslthree.log)
-          echo "AlmaLinux Nginx OpenSSL 3.2 Version: $output" >> $GITHUB_STEP_SUMMARY
+          echo "OracleLinux Nginx OpenSSL 1.1.1 Version: $output" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/sbin/nginx" | tee cmm-lddnginxopensslthree.log && outputlddnginxopensslthree=$(cat cmm-lddnginxopensslthree.log) && echo "$outputlddnginxopensslthree" >> $GITHUB_STEP_SUMMARY 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3288,48 +2676,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/^BORINGSSL_SWITCH=y$/d' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "echo 'AWS_LC_SWITCH=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "sed -i 's|NGINX_QUIC_SUPPORT=y|NGINX_QUIC_SUPPORT=n|' /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
-          docker exec cmm_oraclelinux9 bash -c "sed -i 's|listen 443 ssl;|listen 443 ssl default_server;|g' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_oraclelinux9 bash -c "sed -i '/ssl_ecdh_curve X25519Kyber768Draft00:X25519;/d' /usr/local/nginx/conf/conf.d/domain.com.ssl.conf"
-          docker exec cmm_oraclelinux9 bash -c "nginx -t"
-          docker exec cmm_oraclelinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: OpenSSL AWS-LC benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh awslc | tee -a /home/nginxopenssl-summary.log" || true
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
-      - name: centmin.sh menu option 4 Nginx AWS-LC upgrade test + Clang Compiler
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'CLANG=y' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux9 bash -c "cmupdate"
-          docker exec cmm_oraclelinux9 /home/centmin-option-4.sh
-          docker exec cmm_oraclelinux9 bash -c "nginx -t"
-          docker exec cmm_oraclelinux9 bash -c "systemctl restart nginx"
-        continue-on-error: true
-
-      - name: Nginx HTTPS h2load - AWS-LC benchmarks test + Clang Compiler
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "echo 'Nginx HTTPS h2load AWS-LC benchmarks test + Clang' | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxh2loadbench-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/h2load-benchmarks/h2load-bench.sh -t1 -c100 -n5000 -u https://domain.com | grep -iv 'running' | jq -r | tee -a /home/nginxh2loadbench-summary.log" || true
-        continue-on-error: true
-
       - name: OpenSSL benchmark tests summary
         run: |
           docker exec cmm_oraclelinux9 bash -c "cat /home/nginxopenssl-summary.log" || true
@@ -3340,23 +2686,10 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "cat /home/nginxh2loadbench-summary.log" || true
         continue-on-error: true
 
-      - name: Centmin Mod Disk Usage Analysis
-        run: |
-          docker exec cmm_oraclelinux9 bash -c "du -sh /svr-setup"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "df -hT"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-        continue-on-error: true
-
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5-php7.4.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3367,10 +2700,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -3384,9 +2713,6 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3397,10 +2723,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -3416,9 +2738,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo 'LIBZIP_VER=1.10.1' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3429,10 +2748,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -3457,9 +2772,6 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.2.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3470,10 +2782,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -3512,10 +2820,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
@@ -3524,9 +2828,6 @@ jobs:
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.3.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp.log && outputlddphp=$(cat cmm-lddphp.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3537,10 +2838,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzip.log && outputphpzip=$(cat cmm-phpzip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzip" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true
@@ -3579,10 +2876,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
@@ -3592,9 +2885,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
           docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.1.sh
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
-          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphppostgresql.log && outputlddphppostgresql=$(cat cmm-lddphppostgresql.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphppostgresql" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -3617,10 +2907,6 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd" || true
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli" || true
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
-          docker exec cmm_oraclelinux9 bash -c "echo '---'"
-          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-phpzippostgresql.log && outputphpzippostgresql=$(cat cmm-phpzippostgresql.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphpzippostgresql" >> $GITHUB_STEP_SUMMARY 
         continue-on-error: true

@@ -459,7 +459,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_almalinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux9 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -1443,7 +1443,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_rockylinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux9 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -2382,7 +2382,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_oraclelinux9 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl111 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux9 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test

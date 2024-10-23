@@ -1,9 +1,9 @@
-name: 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx OpenSSL 3.1 default
+name: 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx OpenSSL 3.4 default
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-8-workflow-openssl31]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-8-workflow-openssl34]
 
 jobs:
   cancel_previous:
@@ -94,9 +94,9 @@ jobs:
           docker exec cmm_almalinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_almalinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_almalinux8 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -458,7 +458,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_almalinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_almalinux8 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -1068,9 +1068,9 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_rockylinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_rockylinux8 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -1431,7 +1431,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_rockylinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_rockylinux8 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
@@ -2041,9 +2041,9 @@ jobs:
           docker exec cmm_oraclelinux8 bash -c "touch /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "sed -i '/^OPENSSL_SYSTEM_USE=n$/d' /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_SYSTEM_USE=n' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.1.7' >> /etc/centminmod/custom_config.inc"
-          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.1.7' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSIONFALLBACK=3.4.0' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_oraclelinux8 bash -c "echo 'OPENSSL_VERSION_OLDOVERRIDE=3.4.0' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_oraclelinux8 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -2404,7 +2404,7 @@ jobs:
       - name: OpenSSL default benchmarks test
         run: |
           docker exec cmm_oraclelinux8 bash -c "/usr/local/sbin/nginx -V 2>&1 | head -n3 | tee -a /home/nginxopenssl-summary.log" || true
-          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh openssl31 | tee -a /home/nginxopenssl-summary.log" || true
+          docker exec cmm_oraclelinux8 bash -c "/home/openssltest.sh openssl34 | tee -a /home/nginxopenssl-summary.log" || true
         continue-on-error: true
 
       - name: Nginx HTTPS h2load - OpenSSL default benchmarks test
