@@ -1,4 +1,4 @@
-name: 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9
+name: 0 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9
 
 on:
   workflow_dispatch:
