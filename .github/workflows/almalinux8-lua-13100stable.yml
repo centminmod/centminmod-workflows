@@ -1,9 +1,9 @@
-name: 131.00stable (1) AlmaLinux 8 + Nginx Lua Enabled
+name: 132.00stable (1) AlmaLinux 8 + Nginx Lua Enabled
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-8-workflow-lua-13100stable]
+    types: [run-almalinux-8-workflow-lua-13200stable]
 
 jobs:
   cancel_previous:

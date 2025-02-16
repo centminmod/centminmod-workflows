@@ -1,9 +1,9 @@
-name: 131.00stable (1) 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx System OpenSSL 1.1.1k
+name: 132.00stable (1) 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + Nginx System OpenSSL 1.1.1k
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-8-workflow-system-openssl-13100stable]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-8-workflow-system-openssl-13200stable]
 
 jobs:
   cancel_previous:

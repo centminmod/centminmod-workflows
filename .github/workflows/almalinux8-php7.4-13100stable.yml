@@ -1,9 +1,9 @@
-name: 131.00stable (1) AlmaLinux 8 with PHP 7.4
+name: 132.00stable (1) AlmaLinux 8 with PHP 7.4
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-8-workflow-php74-13100stable]
+    types: [run-almalinux-8-workflow-php74-13200stable]
 
 jobs:
   cancel_previous:

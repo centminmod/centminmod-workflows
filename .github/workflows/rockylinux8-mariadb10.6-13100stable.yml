@@ -1,4 +1,4 @@
-name: 131.00stable (1) Rocky Linux 8 with MariaDB 10.6 Default
+name: 132.00stable (1) Rocky Linux 8 with MariaDB 10.6 Default
 
 on:
   workflow_dispatch:

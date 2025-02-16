@@ -1,9 +1,9 @@
-name: 131.00stable (1) 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 - LTO + Mold
+name: 132.00stable (1) 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 - LTO + Mold
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-lto-mold-13100stable]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-lto-mold-13200stable]
 
 jobs:
   cancel_previous:

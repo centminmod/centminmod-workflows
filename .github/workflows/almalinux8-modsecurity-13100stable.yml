@@ -1,4 +1,4 @@
-name: 131.00stable (1) AlmaLinux 8 + Nginx Modsecurity Enabled
+name: 132.00stable (1) AlmaLinux 8 + Nginx Modsecurity Enabled
 
 on:
   workflow_dispatch:

@@ -1,9 +1,9 @@
-name: 131.00stable (1) 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 + Nginx OpenSSL 3.1 default
+name: 132.00stable (1) 1 - AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 + Nginx OpenSSL 3.1 default
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-openssl31-13100stable]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-9-workflow-openssl31-13200stable]
 
 jobs:
   cancel_previous:

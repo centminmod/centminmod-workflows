@@ -1,4 +1,4 @@
-name: 131.00stable (1) 0 - Manual AlmaLinux vs Rocky Linux vs Oracle Linux EL8/EL9 Workflow
+name: 132.00stable (1) 0 - Manual AlmaLinux vs Rocky Linux vs Oracle Linux EL8/EL9 Workflow
 
 on:
   workflow_dispatch:

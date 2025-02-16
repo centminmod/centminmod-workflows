@@ -1,9 +1,9 @@
-name: 131.00stable (1) Rocky Linux 9
+name: 132.00stable (1) Rocky Linux 9
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-rockylinux-9-workflow-13100stable]
+    types: [run-rockylinux-9-workflow-13200stable]
 
 jobs:
   cancel_previous:

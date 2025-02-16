@@ -1,4 +1,4 @@
-name: 131.00stable (1) Oracle Linux 9 + Nginx Lua Enabled
+name: 132.00stable (1) Oracle Linux 9 + Nginx Lua Enabled
 
 on:
   workflow_dispatch:

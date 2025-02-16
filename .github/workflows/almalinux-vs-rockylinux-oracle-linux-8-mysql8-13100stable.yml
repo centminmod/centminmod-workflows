@@ -1,9 +1,9 @@
-name: 131.00stable (1) 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + MySQL 8
+name: 132.00stable (1) 1 - AlmaLinux 8 vs Rocky Linux 8 vs Oracle Linux 8 + MySQL 8
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-vs-rockylinux-oraclelinux-8-mysql8-workflow-13100stable]
+    types: [run-almalinux-vs-rockylinux-oraclelinux-8-mysql8-workflow-13200stable]
 
 jobs:
   cancel_previous:

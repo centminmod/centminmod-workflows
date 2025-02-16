@@ -1,9 +1,9 @@
-name: 131.00stable (1) AlmaLinux 8 Edge with PHP 8.1 + Advance Options
+name: 132.00stable (1) AlmaLinux 8 Edge with PHP 8.1 + Advance Options
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-8-workflow-edge-13100stable]
+    types: [run-almalinux-8-workflow-edge-13200stable]
 
 jobs:
   cancel_previous:

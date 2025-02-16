@@ -1,4 +1,4 @@
-name: 131.00stable (1) CentOS 9 Stream
+name: 132.00stable (1) CentOS 9 Stream
 
 on:
   workflow_dispatch:

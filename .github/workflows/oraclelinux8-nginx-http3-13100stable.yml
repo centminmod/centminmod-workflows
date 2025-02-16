@@ -1,4 +1,4 @@
-name: 131.00stable (1) Oracle Linux 8 + Nginx HTTP/3
+name: 132.00stable (1) Oracle Linux 8 + Nginx HTTP/3
 
 on:
   workflow_dispatch:
