@@ -5,5 +5,5 @@ expect "Enter option"
 send -- "15\r"
 expect "Enter option"
 send -- "24\r"
-after 30000
+after 60000
 expect eof
