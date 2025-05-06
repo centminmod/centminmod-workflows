@@ -7,7 +7,7 @@ on:
 
 jobs:
   cancel_previous:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: List in_progress workflow runs
         id: list_in_progress
