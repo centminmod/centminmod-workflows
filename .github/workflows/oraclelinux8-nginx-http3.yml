@@ -382,7 +382,7 @@ jobs:
     - name: Copy Oracle Linux Centmin Mod logs from container
       run: |
         mkdir -p ./centminlogs
-        docker cp cmm_el89:/root/centminlogs ./centminlogs
+        docker cp cmm_el89:/root/centminlogs/. ./centminlogs
 
     - name: Upload Oracle Linux Centmin Mod Logs
       uses: actions/upload-artifact@v4
