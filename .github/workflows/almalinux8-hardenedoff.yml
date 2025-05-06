@@ -394,7 +394,7 @@ jobs:
         # check for the logs directory inside the container
         if docker exec cmm_el89 test -d /root/centminlogs; then
           echo "📂 Found /root/centminlogs – copying out…"
-          docker cp cmm_el89:/root/centminlogs/. ./centminlogs
+          docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
         else
           echo "⚠️ /root/centminlogs not present in container; skipping log copy"
         fi
