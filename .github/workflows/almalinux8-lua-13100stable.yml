@@ -126,13 +126,13 @@ jobs:
 
     - name: Nginx Patches
       run: |
-        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_patchnginx_*"
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
     - name: PHP-FPM Patches
       run: |
-        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_php-*"
+        docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_php_*"
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 

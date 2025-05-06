@@ -136,13 +136,13 @@ jobs:
 
       - name: Nginx Patches
         run: |
-          docker exec cmm_almalinux9 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_almalinux9 bash -c "cat /root/centminlogs/patch_patchnginx_*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: PHP-FPM Patches
         run: |
-          docker exec cmm_almalinux9 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_almalinux9 bash -c "cat /root/centminlogs/patch_php_*"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -1302,13 +1302,13 @@ jobs:
 
       - name: Nginx Patches
         run: |
-          docker exec cmm_rockylinux9 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_rockylinux9 bash -c "cat /root/centminlogs/patch_patchnginx_*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: PHP-FPM Patches
         run: |
-          docker exec cmm_rockylinux9 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_rockylinux9 bash -c "cat /root/centminlogs/patch_php_*"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
   
@@ -2468,13 +2468,13 @@ jobs:
 
       - name: Nginx Patches
         run: |
-          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_patchnginx-*"
+          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_patchnginx_*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
       - name: PHP-FPM Patches
         run: |
-          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_php-*"
+          docker exec cmm_oraclelinux9 bash -c "cat /root/centminlogs/patch_php_*"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
   
