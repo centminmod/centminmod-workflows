@@ -1126,7 +1126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: oraclelinux_lists
-           path: artifacts/*
+          path: artifacts/*
 
       - name: Copy Oracle Linux Centmin Mod logs from container
         # don’t fail the job if this step errors
