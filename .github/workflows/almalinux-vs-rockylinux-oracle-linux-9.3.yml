@@ -2895,7 +2895,7 @@ jobs:
           name: oraclelinux_lists
           path: artifacts/*
 
-       - name: Copy Oracle Linux Centmin Mod logs from container
+      - name: Copy Oracle Linux Centmin Mod logs from container
         # don’t fail the job if this step errors
         continue-on-error: true
         run: |
