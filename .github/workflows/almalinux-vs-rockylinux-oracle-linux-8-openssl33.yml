@@ -1011,9 +1011,24 @@ jobs:
           path: artifacts/*
 
       - name: Copy AlmaLinux Centmin Mod logs from container
+        # don’t fail the job if this step errors
+        continue-on-error: true
         run: |
           mkdir -p ./centminlogs
-          docker cp cmm_almalinux8:/root/centminlogs ./centminlogs
+          # check container is still running (or at least exists)
+          CONTAINER_EXISTS=$(docker ps -aq -f name=cmm_almalinux8)
+          if [ -z "$CONTAINER_EXISTS" ]; then
+            echo "❌ Container cmm_almalinux8 not found; skipping log copy"
+            exit 0
+          fi
+
+          # check for the logs directory inside the container
+          if docker exec cmm_almalinux8 test -d /root/centminlogs; then
+            echo "📂 Found /root/centminlogs – copying out…"
+            docker exec cmm_almalinux8 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
+          else
+            echo "⚠️ /root/centminlogs not present in container; skipping log copy"
+          fi
 
       - name: Upload AlmaLinux Centmin Mod Logs
         uses: actions/upload-artifact@v4
@@ -1984,9 +1999,24 @@ jobs:
           path: artifacts/*
 
       - name: Copy Rocky Linux Centmin Mod logs from container
+        # don’t fail the job if this step errors
+        continue-on-error: true
         run: |
           mkdir -p ./centminlogs
-          docker cp cmm_rockylinux8:/root/centminlogs ./centminlogs
+          # check container is still running (or at least exists)
+          CONTAINER_EXISTS=$(docker ps -aq -f name=cmm_rockylinux8)
+          if [ -z "$CONTAINER_EXISTS" ]; then
+            echo "❌ Container cmm_rockylinux8 not found; skipping log copy"
+            exit 0
+          fi
+
+          # check for the logs directory inside the container
+          if docker exec cmm_rockylinux8 test -d /root/centminlogs; then
+            echo "📂 Found /root/centminlogs – copying out…"
+            docker exec cmm_rockylinux8 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
+          else
+            echo "⚠️ /root/centminlogs not present in container; skipping log copy"
+          fi
 
       - name: Upload Rocky Linux Centmin Mod Logs
         uses: actions/upload-artifact@v4
@@ -2956,10 +2986,25 @@ jobs:
           name: oraclelinux_lists
           path: artifacts/*
 
-      - name: Copy Oracle Linux Centmin Mod logs from container
+        - name: Copy Oracle Linux Centmin Mod logs from container
+        # don’t fail the job if this step errors
+        continue-on-error: true
         run: |
           mkdir -p ./centminlogs
-          docker cp cmm_oraclelinux8:/root/centminlogs ./centminlogs
+          # check container is still running (or at least exists)
+          CONTAINER_EXISTS=$(docker ps -aq -f name=cmm_oraclelinux8)
+          if [ -z "$CONTAINER_EXISTS" ]; then
+            echo "❌ Container cmm_oraclelinux8 not found; skipping log copy"
+            exit 0
+          fi
+
+          # check for the logs directory inside the container
+          if docker exec cmm_oraclelinux8 test -d /root/centminlogs; then
+            echo "📂 Found /root/centminlogs – copying out…"
+            docker exec cmm_oraclelinux8 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
+          else
+            echo "⚠️ /root/centminlogs not present in container; skipping log copy"
+          fi
 
       - name: Upload Oracle Linux Centmin Mod Logs
         uses: actions/upload-artifact@v4
