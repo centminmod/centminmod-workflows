@@ -3,50 +3,14 @@ name: 132.00stable (1) AlmaLinux 9 with PHP 8.3
 on:
   workflow_dispatch:
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}
+  cancel-in-progress: true
+
 jobs:
-  cancel_previous:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: List in_progress workflow runs
-        id: list_in_progress
-        run: |
-          curl -s -H "Accept: application/vnd.github.v3+json" \
-               -H "Authorization: token ${{ secrets.PAT }}" \
-               "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=in_progress" > in_progress_runs.json
-          cat in_progress_runs.json
-          jq -r --arg workflow_name "${{ github.workflow }}" --arg current_run_id "${{ github.run_id }}" '
-            .workflow_runs | map(select(.name == $workflow_name and .id != ($current_run_id|tonumber))) | .[].id' in_progress_runs.json > runs_to_cancel.txt
-          echo "In progress runs to cancel:"
-          cat runs_to_cancel.txt
-
-      - name: List queued workflow runs
-        id: list_queued
-        run: |
-          curl -s -H "Accept: application/vnd.github.v3+json" \
-               -H "Authorization: token ${{ secrets.PAT }}" \
-               "https://api.github.com/repos/${{ github.repository }}/actions/runs?status=queued" > queued_runs.json
-          cat queued_runs.json
-          jq -r --arg workflow_name "${{ github.workflow }}" --arg current_run_id "${{ github.run_id }}" '
-            .workflow_runs | map(select(.name == $workflow_name and .id != ($current_run_id|tonumber))) | .[].id' queued_runs.json >> runs_to_cancel.txt
-          echo "Queued runs to cancel:"
-          cat runs_to_cancel.txt
-
-      - name: Cancel previous runs
-        if: ${{ always() }}
-        run: |
-          if [ -s runs_to_cancel.txt ]; then
-            while IFS= read -r run_id; do
-              echo "Cancelling run $run_id"
-              curl -s -X POST -H "Accept: application/vnd.github.v3+json" \
-                   -H "Authorization: token ${{ secrets.PAT }}" \
-                   https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id/cancel
-            done < runs_to_cancel.txt
-          else
-            echo "No runs to cancel"
-          fi
-
   build:
-    needs: cancel_previous
+
     runs-on: ubuntu-24.04
 
     steps:
