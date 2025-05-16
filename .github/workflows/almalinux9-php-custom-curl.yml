@@ -1,9 +1,7 @@
-name: AlmaLinux 8
+name: AlmaLinux 9 + PHP Custom Curl
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [run-almalinux-8-workflow]
 
 
 concurrency:
@@ -32,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-almalinux8
+        file: ./dockerfiles/Dockerfile-almalinux9
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
@@ -43,13 +41,13 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
+    - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
       run: |
-        docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
-        output=$(tail -20 cmm-install.log)
-        echo "$output" >> $GITHUB_STEP_SUMMARY
+        docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
+        docker exec cmm_el89 bash -c "echo 'PHP_CUSTOM_CURL=y' >> /etc/centminmod/custom_config.inc"
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash"
       continue-on-error: true
 
     - name: Display Centmmin Mod LEMP Install Log
@@ -139,6 +137,8 @@ jobs:
 
     - name: Inspect PHP-FPM setup
       run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "php --ri curl"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl restart php-fpm.service"
         docker exec cmm_el89 bash -c "echo '---'"
@@ -365,48 +365,8 @@ jobs:
     - name: Upload AlmaLinux Centmin Mod Logs
       uses: actions/upload-artifact@v4
       with:
-        name: almalinux8_logs
+        name: almalinux_logs
         path: centminlogs/*
-
-    - name: Trigger RockyLinux 8 Workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/rockylinux8.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger Nginx HTTP/3 Workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-nginx-http3.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger Nginx backported Freenginx patches
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-backport-freenginx-patches.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger AlmaLinux 8 + PHP 7.4
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-php7.4.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger Almalinux 8 + PHP Custom Curl
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux8-php-custom-curl.yml/dispatches \
-        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build
