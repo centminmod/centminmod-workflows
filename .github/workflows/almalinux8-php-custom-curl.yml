@@ -160,6 +160,12 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
       continue-on-error: true
 
+    - name: Test PHP-FPM Custom Curl
+      run: |
+        docker exec cmm_el89 bash -c "echo '---'"
+        docker exec cmm_el89 bash -c "/home/php-curl-test.sh"
+      continue-on-error: true
+
     - name: Inspect Nginx setup
       run: |
         docker exec cmm_el89 bash -c "echo '---'"
