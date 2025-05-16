@@ -161,7 +161,7 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "php --ri curl"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "/home/php-curl-test.sh"
+        docker exec cmm_el89 bash -c "php /home/php-curl-test.php"
       continue-on-error: true
 
     - name: Inspect Nginx setup

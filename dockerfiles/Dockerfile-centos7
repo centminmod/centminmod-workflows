@@ -21,8 +21,8 @@ RUN chmod 0700 /var/lib/pgsql/16/data/
 #RUN chown postgres:postgres /var/run/postgresql
 
 
-COPY scripts/php-curl-test.sh /home/php-curl-test.sh
-RUN chmod +x /home/php-curl-test.sh
+COPY scripts/php-curl-test.php /home/php-curl-test.php
+RUN chmod +x /home/php-curl-test.php
 
 COPY scripts/postfix39.sh /home/postfix39.sh
 RUN chmod +x /home/postfix39.sh
