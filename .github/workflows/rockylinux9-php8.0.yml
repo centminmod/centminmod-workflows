@@ -1,4 +1,4 @@
-name: AlmaLinux 8 + PHP Custom Curl
+name: Rocky Linux 9 with PHP 8.0
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-almalinux8
+        file: ./dockerfiles/Dockerfile-rockylinux9
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
@@ -41,13 +41,11 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 8 Install
+    - name: Run container Centmmin Mod LEMP Rocky Linux 9 Install
       run: |
         docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
-        docker exec cmm_el89 bash -c "echo 'PHP_CUSTOM_CURL=y' >> /etc/centminmod/custom_config.inc"
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller80.sh | bash" | tee cmm-install.log
         output=$(tail -20 cmm-install.log)
         echo "$output" >> $GITHUB_STEP_SUMMARY
       continue-on-error: true
@@ -139,8 +137,6 @@ jobs:
 
     - name: Inspect PHP-FPM setup
       run: |
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "php --ri curl"
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl restart php-fpm.service"
         docker exec cmm_el89 bash -c "echo '---'"
@@ -352,7 +348,7 @@ jobs:
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
 
-    - name: Copy AlmaLinux Centmin Mod logs from container
+    - name: Copy Rocky Linux Centmin Mod logs from container
       # don’t fail the job if this step errors
       continue-on-error: true
       run: |
@@ -372,10 +368,10 @@ jobs:
           echo "⚠️ /root/centminlogs not present in container; skipping log copy"
         fi
 
-    - name: Upload AlmaLinux Centmin Mod Logs
+    - name: Upload Rocky Linux Centmin Mod Logs
       uses: actions/upload-artifact@v4
       with:
-        name: almalinux8_logs
+        name: rockylinux_logs
         path: centminlogs/*
 
   discordNotificationSuccess:
