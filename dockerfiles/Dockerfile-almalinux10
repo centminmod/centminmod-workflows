@@ -1,0 +1,122 @@
+FROM almalinux/10-kitten-init
+
+ENV TERM=xterm-256color
+ENV container=docker
+
+RUN dnf clean all && dnf -y update
+
+RUN dnf install -y --skip-broken \
+        initscripts \
+        systemd-sysv \
+        systemd-devel \
+        dos2unix \
+        python3 \
+        iptables \
+        iproute \
+        kmod \
+        procps-ng \
+        sudo \
+        udev
+
+RUN systemctl unmask \
+        systemd-remount-fs.service \
+        dev-hugepages.mount \
+        sys-fs-fuse-connections.mount \
+        systemd-logind.service \
+        getty.target \
+        console-getty.service
+
+RUN echo "ReadKMsg=no" >> /etc/systemd/journald.conf
+
+RUN dnf clean all && \
+    rm -rf \
+       /var/cache/dnf/* \
+       /var/log/* \
+       /tmp/* \
+       /var/tmp/* \
+       /usr/share/doc/* \
+       /usr/share/man/*
+
+RUN systemctl mask systemd-journald-audit.socket systemd-udev-trigger.service systemd-firstboot.service systemd-networkd-wait-online.service
+
+RUN mkdir -p /var/run/postgresql
+RUN mkdir -p /usr/src/kernels
+RUN mkdir -p /var/lib/pgsql/16/data/
+RUN chmod 0700 /var/lib/pgsql/16/data/
+#RUN chown postgres:postgres /var/lib/pgsql/16/data/
+#RUN chown postgres:postgres /var/run/postgresql
+
+COPY scripts/php-curl-test.php /home/php-curl-test.php
+RUN chmod +x /home/php-curl-test.php
+
+COPY scripts/postfix39.sh /home/postfix39.sh
+RUN chmod +x /home/postfix39.sh
+
+COPY scripts/centminmod-keydb.sh /home/centminmod-keydb.sh
+RUN chmod +x /home/centminmod-keydb.sh
+
+COPY scripts/memtier_install.sh /home/memtier_install.sh
+RUN chmod +x /home/memtier_install.sh
+
+COPY scripts/centmin-option-11-submenu-0-y.sh /home/centmin-option-11-submenu-0-y.sh
+RUN chmod +x /home/centmin-option-11-submenu-0-y.sh
+
+COPY scripts/centmin-option-11-submenu-0-n.sh /home/centmin-option-11-submenu-0-n.sh
+RUN chmod +x /home/centmin-option-11-submenu-0-n.sh
+
+COPY scripts/phpbench.sh /home/phpbench.sh
+RUN chmod +x /home/phpbench.sh
+
+COPY scripts/bench.php /home/bench.php
+RUN chmod +x /home/bench.php
+
+COPY scripts/micro_bench.php /home/micro_bench.php
+RUN chmod +x /home/micro_bench.php
+
+COPY scripts/detailed_benchmark.php /home/detailed_benchmark.php
+RUN chmod +x /home/detailed_benchmark.php
+
+COPY scripts/openssltest.sh /home/openssltest.sh
+RUN chmod +x /home/openssltest.sh
+
+COPY scripts/sysbench-run.sh /home/sysbench-run.sh
+RUN chmod +x /home/sysbench-run.sh
+
+COPY scripts/mariadb-ssl-setup.sh /home/mariadb-ssl-setup.sh
+RUN chmod +x /home/mariadb-ssl-setup.sh
+
+COPY scripts/centmin-option-24.sh /home/centmin-option-24.sh
+RUN chmod +x /home/centmin-option-24.sh
+
+COPY scripts/centmin-option-4.sh /home/centmin-option-4.sh
+RUN chmod +x /home/centmin-option-4.sh
+
+COPY scripts/centmin-option-4-master.sh /home/centmin-option-4-master.sh
+RUN chmod +x /home/centmin-option-4-master.sh
+
+COPY scripts/centmin-option-4-angie.sh /home/centmin-option-4-angie.sh
+RUN chmod +x /home/centmin-option-4-angie.sh
+
+COPY scripts/centmin-option-5.sh /home/centmin-option-5.sh
+RUN chmod +x /home/centmin-option-5.sh
+
+COPY scripts/centmin-option-5-php7.3.sh /home/centmin-option-5-php7.3.sh
+RUN chmod +x /home/centmin-option-5-php7.3.sh
+
+COPY scripts/centmin-option-5-php7.4.sh /home/centmin-option-5-php7.4.sh
+RUN chmod +x /home/centmin-option-5-php7.4.sh
+
+COPY scripts/centmin-option-5-php8.1.sh /home/centmin-option-5-php8.1.sh
+RUN chmod +x /home/centmin-option-5-php8.1.sh
+
+COPY scripts/centmin-option-5-php8.2.sh /home/centmin-option-5-php8.2.sh
+RUN chmod +x /home/centmin-option-5-php8.2.sh
+
+COPY scripts/centmin-option-5-php8.3.sh /home/centmin-option-5-php8.3.sh
+RUN chmod +x /home/centmin-option-5-php8.3.sh
+
+COPY scripts/centmin-option-5-php8.4.sh /home/centmin-option-5-php8.4.sh
+RUN chmod +x /home/centmin-option-5-php8.4.sh
+
+VOLUME [ "/sys/fs/cgroup", "/run" ]
+CMD ["/sbin/init"]
