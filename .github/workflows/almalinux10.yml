@@ -1,4 +1,4 @@
-name: AlmaLinux 10
+name: 0 - AlmaLinux 10
 
 on:
   workflow_dispatch:
