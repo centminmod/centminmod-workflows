@@ -47,15 +47,15 @@ jobs:
           docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
           sleep 4
           docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
-          output=$(tail -20 cmm-install.log)
+          output=$(tail -80 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
 
       - name: Display Centmmin Mod LEMP Install Log
         run: |
-          echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
+          echo "Last 80 lines of Centmmin Mod LEMP Install Log:"
           echo "----------------------------------------"
-          tail -20 cmm-install.log
+          tail -80 cmm-install.log
           echo "----------------------------------------"
         continue-on-error: true
 
@@ -66,6 +66,7 @@ jobs:
           docker exec cmm_el89 bash -c "lscpu; echo"
           docker exec cmm_el89 bash -c "dnf repolist all; echo"
           docker exec cmm_el89 bash -c "dnf module list; echo"
+          docker exec cmm_el89 bash -c "dnf list enchant2 enchant2-devel; echo"
         continue-on-error: true
 
       - name: Inspect nginx uid/gid
