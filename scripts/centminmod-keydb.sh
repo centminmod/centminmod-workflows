@@ -143,7 +143,7 @@ keydb_install() {
     # set to lower of NIC TX or RX queue sizes
     sed -i "s|^server-threads .*|server-threads $queue_count|" ${KEYDB_DIR}/keydb.conf
   fi
-  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
+  cat ${KEYDB_DIR}/keydb.conf | grep -E '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
   
   # setup logrotate and systemd service files and dependencies
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/logrotate.d/keydb /etc/logrotate.d/keydb
@@ -231,7 +231,7 @@ keydb_upgrade() {
       time make install
       \cp -af ./src/keydb-diagnostic-tool /usr/local/bin/keydb-diagnostic-tool
       
-      cat ${KEYDB_DIR}/keydb.conf | egrep '   ^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
+      cat ${KEYDB_DIR}/keydb.conf | grep -E '   ^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
     
       # only enable keydb-server
       echo "systemctl daemon-reload"
@@ -323,9 +323,9 @@ genkeydb() {
         echo "log file: /var/log/keydb/keydb${KEYDBPORT}.log"
         echo
         if [[ "$UNIXSOCKET" = [Yy] ]]; then
-          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
         else
-          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
         fi
       else
         if [ ! -f "/usr/lib/systemd/system/keydb${KEYDBPORT}.service" ]; then
@@ -400,11 +400,11 @@ genkeydb() {
         echo "log file: /var/log/keydb/keydb${KEYDBPORT}.log"
         echo
         if [[ "$UNIXSOCKET" = [Yy] ]]; then
-          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
-          keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
+          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
         else
-          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
-          keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
+          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | grep -E 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
         fi
       fi
   done

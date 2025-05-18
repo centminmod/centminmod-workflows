@@ -109,9 +109,9 @@ systemctl status mariadb --no-pager
 
 echo
 echo "Check SSL setup in /etc/my.cnf"
-egrep -B1 'ssl|tls' /etc/my.cnf
+grep -E -B1 'ssl|tls' /etc/my.cnf
 echo
-mysqladmin var | egrep 'tls|ssl' | tr -s ' '
+mysqladmin var | grep -E 'tls|ssl' | tr -s ' '
 
 echo
 echo "Add the following lines to your MariaDB client's /etc/my.cnf file under [mysql] section:"

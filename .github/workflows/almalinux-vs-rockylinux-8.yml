@@ -149,7 +149,7 @@ jobs:
           sleep 1
           docker exec cmm_almalinux8 bash -c "pip --version"
           sleep 1
-          docker exec cmm_almalinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+          docker exec cmm_almalinux8 bash -c "alternatives --list | grep -E -i 'pip|python' || echo 'No match for pip or python keywords'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -175,7 +175,7 @@ jobs:
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+          docker exec cmm_almalinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | grep -E 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
         continue-on-error: true
   
       - name: Inspect chronyd setup
@@ -189,7 +189,7 @@ jobs:
       - name: Inspect CSF Firewall setup
         run: |
           docker exec cmm_almalinux8 bash -c "echo '---'"
-          docker exec cmm_almalinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_almalinux8 bash -c "grep -E '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
           docker exec cmm_almalinux8 bash -c "grep 'MM_LICENSE_KEY' /etc/csf/csf.conf"
           docker exec cmm_almalinux8 bash -c "echo '---'"
@@ -447,7 +447,7 @@ jobs:
           sleep 1
           docker exec cmm_rockylinux8 bash -c "pip --version"
           sleep 1
-          docker exec cmm_rockylinux8 bash -c "alternatives --list | egrep -i 'pip|python' || echo 'No match for pip or python keywords'"
+          docker exec cmm_rockylinux8 bash -c "alternatives --list | grep -E -i 'pip|python' || echo 'No match for pip or python keywords'"
         continue-on-error: true
   
       - name: Inspect Redis Server setup
@@ -473,7 +473,7 @@ jobs:
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | egrep 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+          docker exec cmm_rockylinux8 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | grep -E 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
         continue-on-error: true
   
       - name: Inspect chronyd setup
@@ -487,7 +487,7 @@ jobs:
       - name: Inspect CSF Firewall setup
         run: |
           docker exec cmm_rockylinux8 bash -c "echo '---'"
-          docker exec cmm_rockylinux8 bash -c "egrep '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_rockylinux8 bash -c "grep -E '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"
           docker exec cmm_rockylinux8 bash -c "grep 'MM_LICENSE_KEY' /etc/csf/csf.conf"
           docker exec cmm_rockylinux8 bash -c "echo '---'"

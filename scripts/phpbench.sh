@@ -409,11 +409,11 @@ elif [[ -f /etc/os-release && "$p" = '/usr/bin/php' ]]; then
     echo "$p detailed_benchmark.php [run: $i]"
     if [[ "$VERBOSE" = [yY] ]]; then
       {
-      $TIMEBIN --format='real: %es user: %Us sys: %Ss cpu: %P maxmem: %M KB cswaits: %w' $p $OPCLI detailed_benchmark.php 2>&1 | egrep -v 'Undefined' |sed -e 's|<pre>||' -e 's|</pre>||'| egrep ' sec|real:'
+      $TIMEBIN --format='real: %es user: %Us sys: %Ss cpu: %P maxmem: %M KB cswaits: %w' $p $OPCLI detailed_benchmark.php 2>&1 | grep -E -v 'Undefined' |sed -e 's|<pre>||' -e 's|</pre>||'| grep -E ' sec|real:'
       } 2>&1 | tee -a $PHPDETAILBENCHLOG
     else
       {
-      $TIMEBIN --format='real: %es user: %Us sys: %Ss cpu: %P maxmem: %M KB cswaits: %w' $p $OPCLI detailed_benchmark.php 2>&1 | egrep -v 'Undefined' |sed -e 's|<pre>||' -e 's|</pre>||'| egrep ' sec|real:'
+      $TIMEBIN --format='real: %es user: %Us sys: %Ss cpu: %P maxmem: %M KB cswaits: %w' $p $OPCLI detailed_benchmark.php 2>&1 | grep -E -v 'Undefined' |sed -e 's|<pre>||' -e 's|</pre>||'| grep -E ' sec|real:'
       } 2>&1 >> $PHPDETAILBENCHLOG
     fi
   done
@@ -592,11 +592,11 @@ bench
 } 2>&1 | tee -a "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log"
 
 echo
-egrep '\[PHP|bench.php avg :|micro_bench.php avg :|detailed_benchmark.php total avg :' "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log"
+grep -E '\[PHP|bench.php avg :|micro_bench.php avg :|detailed_benchmark.php total avg :' "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log"
 echo
 
 echo "PHP Version|bench.php|micro_bench.php|detailed_benchmark.php"
-egrep 'bench.php avg :|micro_bench.php avg :|detailed_benchmark.php total avg :' "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log"| sed -e 's|:|\||g'
+grep -E 'bench.php avg :|micro_bench.php avg :|detailed_benchmark.php total avg :' "${PHPBENCHLOGDIR}/phpbench-summary-${DT}.log"| sed -e 's|:|\||g'
 echo
 
 echo "|bench.php|micro_bench.php|detailed_benchmark.php|total"
