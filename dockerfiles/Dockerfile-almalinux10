@@ -27,6 +27,7 @@ RUN systemctl unmask \
         console-getty.service
 
 RUN echo "ReadKMsg=no" >> /etc/systemd/journald.conf
+RUN echo "Storage=volatile" >> /etc/systemd/journald.conf
 
 RUN dnf clean all && \
     rm -rf \
@@ -118,5 +119,5 @@ RUN chmod +x /home/centmin-option-5-php8.3.sh
 COPY scripts/centmin-option-5-php8.4.sh /home/centmin-option-5-php8.4.sh
 RUN chmod +x /home/centmin-option-5-php8.4.sh
 
-VOLUME [ "/sys/fs/cgroup", "/run" ]
+VOLUME [ "/sys/fs/cgroup", "/run", "/tmp" ]
 CMD ["/sbin/init"]
