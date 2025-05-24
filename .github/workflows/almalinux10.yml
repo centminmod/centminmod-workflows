@@ -45,6 +45,7 @@ jobs:
       - name: Run container Centmmin Mod LEMP AlmaLinux 10 Install
         run: |
           docker run --cgroupns host -d --name=cmm_el89 \
+            --privileged \
             --runtime=sysbox-runc \
             --cap-add=SYS_ADMIN \
             --cap-add=SYS_RESOURCE \
@@ -53,7 +54,7 @@ jobs:
             --security-opt apparmor=unconfined \
             --tmpfs /run \
             --tmpfs /run/lock \
-            -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
             cmm_el89:latest
           sleep 4
           docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
