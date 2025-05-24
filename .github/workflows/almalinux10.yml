@@ -209,7 +209,17 @@ jobs:
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
+          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
+        continue-on-error: true
+
+      - name: Debug MariaDB setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAhrt /var/lib/mysql"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /var/lib/mysql/*.err || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
         continue-on-error: true
 
       - name: Inspect Python3 setup
