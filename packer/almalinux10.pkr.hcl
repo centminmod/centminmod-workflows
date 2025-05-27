@@ -19,33 +19,32 @@ variable "iso_checksum" {
 }
 
 source "qemu" "almalinux10" {
-  iso_url            = var.iso_url
-  iso_checksum       = var.iso_checksum
-  iso_checksum_type  = "sha256"
+  iso_url          = var.iso_url
+  iso_checksum     = var.iso_checksum
 
-  output_directory   = "build/almalinux10"
-  format             = "qcow2"
-  disk_size          = 40960       # 40 GB disk
-  memory             = 4096        # 4 GB RAM for build VM
-  cpus               = 2           # 2 vCPUs
-  accelerator        = "kvm"
-  headless           = true
+  output_directory = "build/almalinux10"
+  format           = "qcow2"
+  disk_size        = 40960       # 40 GB disk
+  memory           = 4096        # 4 GB RAM for build VM
+  cpus             = 2           # 2 vCPUs
+  accelerator      = "kvm"
+  headless         = true
 
-  http_directory     = "packer/http"
-  boot_wait          = "5s"
-  boot_command       = [
+  http_directory   = "packer/http"
+  boot_wait        = "5s"
+  boot_command     = [
     "<tab><wait>",
     " inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
     " inst.sshd",
     "<enter><wait>"
   ]
 
-  communicator       = "ssh"
-  ssh_username       = "root"
-  ssh_password       = "changeme"
-  ssh_timeout        = "20m"
+  communicator     = "ssh"
+  ssh_username     = "root"
+  ssh_password     = "changeme"
+  ssh_timeout      = "20m"
 
-  shutdown_command   = "echo 'changeme' | sudo -S shutdown -P now"
+  shutdown_command = "echo 'changeme' | sudo -S shutdown -P now"
 }
 
 build {
