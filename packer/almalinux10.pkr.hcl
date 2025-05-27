@@ -1,3 +1,12 @@
+packer {
+  required_plugins {
+    qemu = {
+      version = ">= 1.1.2"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
+
 variable "iso_url" {
   type        = string
   description = "URL or path to the AlmaLinux 10 minimal ISO"
