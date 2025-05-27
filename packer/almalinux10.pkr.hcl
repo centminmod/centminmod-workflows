@@ -1,47 +1,59 @@
-// Packer template for AlmaLinux 10 Generic Cloud QCOW2
+packer {
+  required_version = ">= 1.12.0"
+  required_plugins {
+    qemu = {
+      version = ">= 1.0.0"
+      source  = "github.com/hashicorp/qemu"
+    }
+  }
+}
 
-// Variables
 variable "iso_url" {
   type        = string
-  description = "URL to AlmaLinux 10 minimal ISO"
+  description = "URL or path to the AlmaLinux 10 minimal ISO"
 }
 
 variable "iso_checksum" {
   type        = string
-  description = "SHA256 checksum of the ISO"
+  description = "SHA256 checksum for the ISO"
 }
 
-// QEMU builder definition
-target "source.qemu.almalinux10" {
-  type               = "qemu"
+source "qemu" "almalinux10" {
   iso_url            = var.iso_url
   iso_checksum       = var.iso_checksum
   iso_checksum_type  = "sha256"
+
   output_directory   = "build/almalinux10"
   format             = "qcow2"
+  disk_size          = 40960       # 40 GB disk
+  memory             = 4096        # 4 GB RAM for build VM
+  cpus               = 2           # 2 vCPUs
   accelerator        = "kvm"
   headless           = true
 
-  disk_size          = 40960      // 40 GB
-  memory             = 4096       // 4 GB for build VM
-  cpus               = 2          // 2 vCPUs
+  http_directory     = "packer/http"
+  boot_wait          = "5s"
+  boot_command       = [
+    "<tab><wait>",
+    " inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
+    " inst.sshd",
+    "<enter><wait>"
+  ]
 
   communicator       = "ssh"
-  ssh_username       = "almalinux"
-  ssh_timeout        = "10m"
-  shutdown_command   = "shutdown -P now"
+  ssh_username       = "root"
+  ssh_password       = "changeme"
+  ssh_timeout        = "20m"
 
-  // Serve Kickstart from local HTTP
-  http_directory     = "http"
-  boot_command       = [
-    "inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg inst.ks_delay=5<enter>"
-  ]
-  boot_wait          = "10s"
+  shutdown_command   = "echo 'changeme' | sudo -S shutdown -P now"
 }
 
-// Build block
 build {
-  name    = "almalinux10-qcow2"
   sources = ["source.qemu.almalinux10"]
-  // No additional provisioning; Kickstart handles package installation
+
+  provisioner "shell" {
+    inline = [
+      "echo 'Packer build complete.'"
+    ]
+  }
 }
