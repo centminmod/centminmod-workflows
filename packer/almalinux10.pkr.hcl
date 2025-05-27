@@ -1,4 +1,5 @@
 packer {
+  required_version = ">= 1.12.0"
   required_plugins {
     qemu = {
       version = ">= 1.1.2"
@@ -33,15 +34,20 @@ source "qemu" "almalinux10" {
   boot_wait        = "5s"
   boot_command     = [
     "<tab><wait>",
-    " inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
-    " inst.sshd",
+    " inst.text console=ttyS0,115200n8 inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg inst.sshd",
     "<enter><wait>"
   ]
 
   communicator     = "ssh"
   ssh_username     = "root"
   ssh_password     = "changeme"
-  ssh_timeout      = "20m"
+  ssh_timeout      = "60m"       # increase SSH wait time for slow installs
+
+  # send serial console output to Packer logs
+  qemuargs = [
+    ["-serial", "mon:stdio"],
+    ["-display", "none"]
+  ]
 
   shutdown_command = "echo 'changeme' | sudo -S shutdown -P now"
 }
