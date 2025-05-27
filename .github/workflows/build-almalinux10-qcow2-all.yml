@@ -13,7 +13,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients packer
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients unzip
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: '1.11.3'
 
       - name: Download ISO & extract checksum
         run: |
@@ -22,7 +27,7 @@ jobs:
           curl -sSL -o "$ISO_NAME" "$ISO_URL"
           curl -sSL https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/CHECKSUM -o CHECKSUM
 
-          # Now match "SHA256 (<filename>) = <hash>" and grab field 4
+          # Match "SHA256 (<filename>) = <hash>" and grab field 4
           ISO_CHECKSUM=$(grep "SHA256 (${ISO_NAME})" CHECKSUM | awk '{print $4}')
 
           echo "ISO_NAME=$ISO_NAME"   >> $GITHUB_ENV
@@ -59,7 +64,6 @@ jobs:
 
       - name: Prepare QCOW2 file
         run: |
-          # Grab the only .qcow2 in this directory and rename it to a stable name
           mv *.qcow2 alma10.qcow2
 
       - name: Create cloud-init seed
@@ -82,7 +86,7 @@ jobs:
             -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 \
             -nographic \
             -enable-kvm &
-          VM_PID=$!
+          VM_PID=$!  
 
           # wait up to ~1 min for SSH
           for i in {1..20}; do
@@ -92,12 +96,7 @@ jobs:
             sleep 3
           done
 
-          # your normal Centminmod install test
           ssh -p 2222 almalinux@localhost 'curl -4sL https://centminmod.com/betainstaller-el10.sh | bash'
 
-          # shut down VM cleanly
           ssh -p 2222 almalinux@localhost 'sudo poweroff'
-
-          # wait for QEMU process to exit
           wait $VM_PID
-

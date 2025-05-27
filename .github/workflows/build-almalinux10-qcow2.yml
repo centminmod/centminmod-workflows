@@ -13,7 +13,12 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients packer
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients unzip
+
+      - name: Setup Packer
+        uses: hashicorp/setup-packer@v2
+        with:
+          version: '1.11.3'
 
       - name: Download ISO & extract checksum
         run: |
@@ -22,7 +27,7 @@ jobs:
           curl -sSL -o "$ISO_NAME" "$ISO_URL"
           curl -sSL https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/CHECKSUM -o CHECKSUM
 
-          # Now match "SHA256 (<filename>) = <hash>" and grab field 4
+          # Match "SHA256 (<filename>) = <hash>" and grab field 4
           ISO_CHECKSUM=$(grep "SHA256 (${ISO_NAME})" CHECKSUM | awk '{print $4}')
 
           echo "ISO_NAME=$ISO_NAME"   >> $GITHUB_ENV
