@@ -41,7 +41,7 @@ source "qemu" "almalinux10" {
   communicator     = "ssh"
   ssh_username     = "root"
   ssh_password     = "changeme"
-  ssh_timeout      = "60m"       # increase SSH wait time for slow installs
+  ssh_timeout      = "5m"       # increase SSH wait time for slow installs
 
   # send serial console output to Packer logs
   qemuargs = [
