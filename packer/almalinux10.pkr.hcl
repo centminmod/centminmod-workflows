@@ -27,7 +27,7 @@ source "qemu" "almalinux10" {
   disk_size        = 40960       # 40 GB disk
   memory           = 4096        # 4 GB RAM for build VM
   cpus             = 2           # 2 vCPUs
-  accelerator      = "kvm"
+  accelerator      = "auto"     # auto-select KVM or TCG for hosted runners
   headless         = true
 
   http_directory   = "packer/http"
