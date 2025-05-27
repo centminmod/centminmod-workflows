@@ -22,15 +22,16 @@ jobs:
 
       - name: Download ISO & extract checksum
         run: |
-          ISO_URL=https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/AlmaLinux-10-latest-x86_64_v2-minimal.iso
+          ISO_URL=https://repo.almalinux.org/almalinux/10.0/isos/x86_64/AlmaLinux-10-latest-x86_64-minimal.iso
           ISO_NAME=${ISO_URL##*/}
           curl -sSL -o "$ISO_NAME" "$ISO_URL"
-          curl -sSL https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/CHECKSUM -o CHECKSUM
+          curl -sSL https://repo.almalinux.org/almalinux/10.0/isos/x86_64/CHECKSUM -o CHECKSUM
           ISO_CHECKSUM=$(grep "SHA256 (${ISO_NAME})" CHECKSUM | awk '{print $4}')
           echo "ISO_NAME=$ISO_NAME" >> $GITHUB_ENV
           echo "ISO_CHECKSUM=$ISO_CHECKSUM" >> $GITHUB_ENV
 
       - name: Build QCOW2 with Packer
+        continue-on-error: true
         env:
           PACKER_LOG: 1
           PACKER_LOG_PATH: packer-debug.log
@@ -39,6 +40,7 @@ jobs:
           echo "Using Packer template: $TEMPLATE"
           packer init "$TEMPLATE"
           packer build \
+            -on-error=keep \
             -debug \
             -only=qemu.almalinux10 \
             -var iso_url="file://$GITHUB_WORKSPACE/${ISO_NAME}" \
