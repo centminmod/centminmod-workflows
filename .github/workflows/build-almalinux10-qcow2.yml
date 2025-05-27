@@ -40,7 +40,7 @@ jobs:
           echo "Using Packer template: $TEMPLATE"
           packer init "$TEMPLATE"
           packer build \
-            -on-error=keep \
+            -on-error=abort \
             -debug \
             -only=qemu.almalinux10 \
             -var iso_url="file://$GITHUB_WORKSPACE/${ISO_NAME}" \
