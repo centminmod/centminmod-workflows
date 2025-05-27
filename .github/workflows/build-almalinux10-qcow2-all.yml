@@ -1,0 +1,103 @@
+name: 0 - Build AlmaLinux 10 QCOW2 Image All
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-qcow2:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients packer
+
+      - name: Download ISO & extract checksum
+        run: |
+          ISO_URL=https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/AlmaLinux-10-latest-x86_64_v2-minimal.iso
+          ISO_NAME=${ISO_URL##*/}
+          curl -sSL -o "$ISO_NAME" "$ISO_URL"
+          curl -sSL https://repo.almalinux.org/almalinux/10.0/isos/x86_64_v2/CHECKSUM -o CHECKSUM
+
+          # Now match "SHA256 (<filename>) = <hash>" and grab field 4
+          ISO_CHECKSUM=$(grep "SHA256 (${ISO_NAME})" CHECKSUM | awk '{print $4}')
+
+          echo "ISO_NAME=$ISO_NAME"   >> $GITHUB_ENV
+          echo "ISO_CHECKSUM=$ISO_CHECKSUM" >> $GITHUB_ENV
+
+      - name: Build QCOW2 with Packer
+        run: |
+          packer init packer/almalinux10.pkr.hcl
+          packer build \
+            -only=qemu.almalinux_kitten_10_gencloud_x86_64 \
+            -var iso_url="file://${{ github.workspace }}/${{ env.ISO_NAME }}" \
+            -var iso_checksum="${{ env.ISO_CHECKSUM }}" \
+            packer/almalinux10.pkr.hcl
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: almalinux-10-qcow2
+          path: build/almalinux10/*.qcow2
+
+  test-qcow2:
+    needs: build-qcow2
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: almalinux-10-qcow2
+          path: .
+
+      - name: Install test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-kvm cloud-image-utils
+
+      - name: Prepare QCOW2 file
+        run: |
+          # Grab the only .qcow2 in this directory and rename it to a stable name
+          mv *.qcow2 alma10.qcow2
+
+      - name: Create cloud-init seed
+        run: |
+          cat <<EOF > user-data
+          #cloud-config
+          ssh_authorized_keys:
+            - ${{ secrets.SSH_PUBLIC_KEY }}
+          EOF
+          touch meta-data
+          cloud-localds seed.img user-data meta-data
+
+      - name: Boot VM and smoke-test
+        run: |
+          qemu-system-x86_64 \
+            -m 8G \                        # ← 8 GB RAM
+            -smp 2 \                       # ← 2 vCPUs (adjust as needed)
+            -drive file=alma10.qcow2,if=virtio,cache=none \
+            -drive file=seed.img,if=virtio,format=raw \
+            -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 \
+            -nographic \
+            -enable-kvm &
+          VM_PID=$!
+
+          # wait up to ~1 min for SSH
+          for i in {1..20}; do
+            if ssh -o StrictHostKeyChecking=no -p 2222 almalinux@localhost hostname; then
+              break
+            fi
+            sleep 3
+          done
+
+          # your normal Centminmod install test
+          ssh -p 2222 almalinux@localhost 'curl -4sL https://centminmod.com/betainstaller-el10.sh | bash'
+
+          # shut down VM cleanly
+          ssh -p 2222 almalinux@localhost 'sudo poweroff'
+
+          # wait for QEMU process to exit
+          wait $VM_PID
+
