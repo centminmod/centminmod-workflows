@@ -41,7 +41,7 @@ jobs:
 
           packer init "$TEMPLATE"
           packer build \
-            -only=qemu.almalinux_kitten_10_gencloud_x86_64 \
+            -only=qemu.almalinux10 \
             -var iso_url="file://$GITHUB_WORKSPACE/${ISO_NAME}" \
             -var iso_checksum="${ISO_CHECKSUM}" \
             "$TEMPLATE"
