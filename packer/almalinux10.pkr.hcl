@@ -36,7 +36,7 @@ source "qemu" "almalinux10" {
   # Boot loader & Kickstart
   boot_command = [
     "<esc><wait>",
-    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg console=ttyS0,115200n8<enter>"
+    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg console=ttyS0,115200n8 ip=dhcp<enter>"
   ]
   boot_wait = "5s"
   format    = "qcow2"
@@ -48,7 +48,7 @@ source "qemu" "almalinux10" {
     ["-d",       "guest_errors"],
     ["-D",       "qemu-errors.log"],
     ["-netdev",  "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
-    ["-device",  "virtio-net-pci,netdev=net0"],
+    ["-device",  "e1000,netdev=net0"],
   ]
 
   # SSH communicator settings
