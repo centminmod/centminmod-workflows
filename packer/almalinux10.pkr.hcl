@@ -76,7 +76,7 @@ source "qemu" "almalinux10" {
   communicator = "ssh"
   ssh_username = "root"
   ssh_password = "changeme"
-  ssh_timeout  = "15m"
+  ssh_timeout  = "55m"
   ssh_pty      = true
 
   shutdown_command = "shutdown -P now"
