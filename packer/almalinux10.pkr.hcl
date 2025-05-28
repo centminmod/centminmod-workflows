@@ -68,7 +68,7 @@ source "qemu" "almalinux10" {
   host_port_max  = 2222
 
   qemuargs = [
-    ["-serial","file:${PWD}/serial.log"],
+    ["-serial", "file:serial.log"],
     ["-d",      "guest_errors,cpu_reset"],
     ["-D",      "qemu-errors.log"]
   ]
