@@ -34,8 +34,8 @@ variable "cpus" {
 # ───── QEMU builder ─────
 source "qemu" "almalinux10" {
   iso_url           = var.iso_url
-  iso_checksum_type = "sha256"
-  iso_checksum      = var.iso_checksum
+  # Packer-QEMU wants the algorithm and hash together
+  iso_checksum      = "sha256:${var.iso_checksum}"
 
   output_directory  = "build/almalinux10"
   vm_name           = "almalinux10"
