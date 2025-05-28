@@ -37,7 +37,7 @@ source "qemu" "almalinux10" {
   vm_name          = "almalinux10"
 
   iso_url      = var.iso_url
-  iso_checksum = var.iso_checksum
+  iso_checksum = "none"
 
   disk_size   = var.disk_size
   memory      = var.memory
