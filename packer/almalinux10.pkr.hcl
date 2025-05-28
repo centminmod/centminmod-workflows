@@ -17,22 +17,41 @@ variable "iso_checksum" {
   default = "auto"
 }
 
+variable "disk_size" {
+  type    = string
+  default = "40960"    # MiB (≈40 GiB)
+}
+
+variable "memory" {
+  type    = string
+  default = "4096"     # MiB
+}
+
+variable "cpus" {
+  type    = number
+  default = 2
+}
+
 source "qemu" "almalinux10" {
+  # Where to drop the built QCOW2 and logs
+  output_directory = "build/almalinux10"
+  vm_name         = "almalinux10"
+  
   # Base ISO
   iso_url      = var.iso_url
   iso_checksum = var.iso_checksum
-
+  
   # VM sizing & acceleration
-  disk_size   = "40960"  # MiB (≈40 GiB)
-  memory      = "4096"   # MiB
-  cpus        = 2
+  disk_size   = var.disk_size
+  memory      = var.memory
+  cpus        = var.cpus
   accelerator = "tcg"
-
+  
   # HTTP server for Kickstart
   http_directory = "packer/http"
   http_port_min  = 8000
   http_port_max  = 9000
-
+  
   # Kernel cmdline: serial console, Kickstart, and early DHCP
   boot_command = [
     "<esc><wait>",
@@ -40,9 +59,8 @@ source "qemu" "almalinux10" {
   ]
   boot_wait = "10s"
   format    = "qcow2"
-
+  
   # Serial-only + error logging + user-mode networking + host-forward + e1000 NIC
-  nographic = true
   qemuargs = [
     ["-serial",    "mon:stdio"],
     ["-nographic", ""],
@@ -51,7 +69,7 @@ source "qemu" "almalinux10" {
     ["-netdev",    "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
     ["-device",    "e1000,netdev=net0"],
   ]
-
+  
   # SSH communicator
   communicator = "ssh"
   ssh_username = "root"
@@ -62,7 +80,7 @@ source "qemu" "almalinux10" {
 
 build {
   sources = ["source.qemu.almalinux10"]
-
+  
   provisioner "shell" {
     inline = [
       "echo '=== VM up; running post-install shell provisioner ==='",
