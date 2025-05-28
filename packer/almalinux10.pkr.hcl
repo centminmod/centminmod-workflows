@@ -60,14 +60,17 @@ source "qemu" "almalinux10" {
   boot_wait = "10s"
   format    = "qcow2"
   
-  # Serial-only + error logging + user-mode networking + host-forward + e1000 NIC
+  # Disable default networking to avoid conflicts
+  net_device = "none"
+  
+  # Custom QEMU args for serial console and networking
   qemuargs = [
-    ["-serial",    "mon:stdio"],
+    ["-serial", "mon:stdio"],
     ["-nographic", ""],
-    ["-d",         "guest_errors"],
-    ["-D",         "qemu-errors.log"],
-    ["-netdev",    "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
-    ["-device",    "e1000,netdev=net0"],
+    ["-d", "guest_errors"],
+    ["-D", "qemu-errors.log"],
+    ["-netdev", "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
+    ["-device", "e1000,netdev=net0"]
   ]
   
   # SSH communicator
