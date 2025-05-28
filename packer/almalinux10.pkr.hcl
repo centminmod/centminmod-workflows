@@ -23,10 +23,10 @@ source "qemu" "almalinux10" {
   iso_checksum = var.iso_checksum
 
   # VM sizing & acceleration
-  disk_size    = "40960"   # MiB (≈40 GiB)
-  memory       = "4096"    # MiB
-  cpus         = 2
-  accelerator  = "tcg"
+  disk_size   = "40960"  # MiB (≈40 GiB)
+  memory      = "4096"   # MiB
+  cpus        = 2
+  accelerator = "tcg"
 
   # HTTP server for Kickstart
   http_directory = "http"
@@ -38,35 +38,25 @@ source "qemu" "almalinux10" {
     "<esc><wait>",
     "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg console=ttyS0,115200n8<enter>"
   ]
-  boot_wait    = "5s"
-  format       = "qcow2"
+  boot_wait = "5s"
+  format    = "qcow2"
 
-  # Serial console logging for debugging
+  # Serial console, QEMU error logging, and host-forwarded SSH
   qemuargs = [
-    ["-serial", "mon:stdio"],
+    ["-serial",  "mon:stdio"],
     ["-display", "none"],
-    ["-d", "guest_errors"],
-    ["-D", "qemu-errors.log"]
+    ["-d",       "guest_errors"],
+    ["-D",       "qemu-errors.log"],
+    ["-netdev",  "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
+    ["-device",  "virtio-net-pci,netdev=net0"],
   ]
 
   # SSH communicator settings
-  communicator  = "ssh"
-  ssh_username  = "root"
-  ssh_password  = "changeme"
-  ssh_timeout   = "10m"      # bumped from 5m
-  ssh_pty       = true
-
-  # User‐mode networking + host-forward so Packer can SSH in
-  netdev = [{
-    type    = "user"
-    id      = "net0"
-    hostfwd = ["tcp::{{ .SSHHostPort }}-:22"]
-  }]
-
-  device = [{
-    driver = "virtio-net-pci"
-    netdev = "net0"
-  }]
+  communicator = "ssh"
+  ssh_username = "root"
+  ssh_password = "changeme"
+  ssh_timeout  = "10m"
+  ssh_pty      = true
 }
 
 build {
@@ -74,7 +64,7 @@ build {
 
   provisioner "shell" {
     inline = [
-      "echo '=== VM up; running post‐install shell provisioner ==='",
+      "echo '=== VM up; running post-install shell provisioner ==='",
       "hostname && date"
     ]
   }
