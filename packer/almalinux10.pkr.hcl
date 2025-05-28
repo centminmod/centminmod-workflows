@@ -8,31 +8,47 @@ packer {
 }
 
 # ───── Variables ─────
-variable "iso_url"       { type = string }
-variable "iso_checksum"  { type = string }  # just the 64-char SHA256
-variable "disk_size"     { type = number   default = 20480 } # MiB
-variable "memory"        { type = number   default = 4096  } # MiB
-variable "cpus"          { type = number   default = 2     }
+variable "iso_url" {
+  type = string
+}
+
+variable "iso_checksum" {
+  type = string   # bare 64-char SHA-256 digest
+}
+
+variable "disk_size" {
+  type    = number
+  default = 20480   # MiB
+}
+
+variable "memory" {
+  type    = number
+  default = 4096    # MiB
+}
+
+variable "cpus" {
+  type    = number
+  default = 2
+}
 
 # ───── QEMU builder ─────
 source "qemu" "almalinux10" {
-  iso_url            = var.iso_url
-  iso_checksum_type  = "sha256"
-  iso_checksum       = var.iso_checksum
+  iso_url           = var.iso_url
+  iso_checksum_type = "sha256"
+  iso_checksum      = var.iso_checksum
 
-  output_directory   = "build/almalinux10"
-  vm_name            = "almalinux10"
+  output_directory  = "build/almalinux10"
+  vm_name           = "almalinux10"
 
-  disk_size          = var.disk_size
-  memory             = var.memory
-  cpus               = var.cpus
-  accelerator        = "tcg"
+  disk_size   = var.disk_size
+  memory      = var.memory
+  cpus        = var.cpus
+  accelerator = "tcg"
 
-  http_directory     = "packer/http"
-  http_port_min      = 8000
-  http_port_max      = 9000
+  http_directory = "packer/http"
+  http_port_min  = 8000
+  http_port_max  = 9000
 
-  # Kickstart fetch *needs* DHCP
   boot_command = [
     "<tab><wait>",
     " inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
@@ -46,6 +62,7 @@ source "qemu" "almalinux10" {
   vnc_port_min      = 5900
   vnc_port_max      = 6000
 
+  disk_interface = "virtio"
   net_device     = "virtio-net"
   host_port_min  = 2222
   host_port_max  = 2222
@@ -61,6 +78,7 @@ source "qemu" "almalinux10" {
   ssh_password = "changeme"
   ssh_timeout  = "15m"
   ssh_pty      = true
+
   shutdown_command = "shutdown -P now"
 }
 
@@ -71,7 +89,9 @@ build {
   provisioner "shell" {
     inline = [
       "echo '=== VM up; post-install check ==='",
-      "hostname; date; cat /root/install-complete.txt"
+      "hostname",
+      "date",
+      "cat /root/install-complete.txt"
     ]
   }
 }
