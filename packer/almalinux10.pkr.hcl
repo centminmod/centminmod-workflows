@@ -78,7 +78,7 @@ source "qemu" "almalinux10" {
   communicator = "ssh"
   ssh_username = "root"
   ssh_password = "changeme"
-  ssh_timeout  = "10m"
+  ssh_timeout  = "20m"
   ssh_pty      = true
 }
 

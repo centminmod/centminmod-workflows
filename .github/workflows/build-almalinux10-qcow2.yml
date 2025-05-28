@@ -47,6 +47,16 @@ jobs:
             -var iso_checksum="${ISO_CHECKSUM}" \
             "$TEMPLATE"
 
+      - name: Display serial console log
+        if: always()
+        run: |
+          if [ -f serial.log ]; then
+            echo "=== Serial Console Output ==="
+            cat serial.log
+          else
+            echo "No serial.log found"
+          fi
+
       - name: Upload QCOW2 artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -61,6 +71,13 @@ jobs:
           name: packer-debug-log
           path: packer-debug.log
 
+      - name: Upload serial console log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serial-console-log
+          path: serial.log
+
       - name: Mount QCOW2 and extract logs
         if: always()
         run: |
@@ -70,9 +87,17 @@ jobs:
             sudo qemu-nbd --connect=/dev/nbd0 "$QCOW"
             sudo partprobe /dev/nbd0
             sudo mkdir -p mnt
-            sudo mount /dev/nbd0p1 mnt
-            sudo cp mnt/root/ks-post.log ./ks-post.log || echo "ks-post.log not found"
-            sudo umount mnt
+            # Try different partition schemes
+            for part in /dev/nbd0p1 /dev/nbd0p2 /dev/nbd0p3; do
+              if [ -b "$part" ]; then
+                echo "Trying to mount $part..."
+                if sudo mount "$part" mnt 2>/dev/null; then
+                  sudo cp mnt/root/ks-post.log ./ks-post.log 2>/dev/null || echo "ks-post.log not found on $part"
+                  sudo umount mnt
+                  [ -f ./ks-post.log ] && break
+                fi
+              fi
+            done
             sudo qemu-nbd --disconnect /dev/nbd0
           else
             echo "No QCOW2 image found, skipping mount step"
@@ -92,10 +117,3 @@ jobs:
         with:
           name: qemu-errors-log
           path: qemu-errors.log
-
-      - name: Upload serial console log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: serial-console-log
-          path: serial.log
