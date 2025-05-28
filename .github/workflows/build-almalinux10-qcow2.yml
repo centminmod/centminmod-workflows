@@ -45,7 +45,7 @@ jobs:
             -var iso_url="file://$GITHUB_WORKSPACE/${ISO_NAME}" \
             -var iso_checksum="${ISO_CHECKSUM}" \
             "$TEMPLATE"
-                    
+
           # Start packer build in background
           packer build \
             -on-error=abort \
@@ -58,8 +58,8 @@ jobs:
           PACKER_PID=$!
           
           # Monitor serial log in parallel
-          touch serial.log
-          tail -f serial.log &
+          touch /tmp/serial.log
+          tail -f /tmp/serial.log &
           TAIL_PID=$!
           
           # Wait for packer to complete
@@ -74,11 +74,11 @@ jobs:
       - name: Display serial console log
         if: always()
         run: |
-          if [ -f serial.log ]; then
+          if [ -f /tmp/serial.log ]; then
             echo "=== Serial Console Output ==="
-            cat serial.log
+            cat /tmp/serial.log
           else
-            echo "No serial.log found"
+            echo "No /tmp/serial.log found"
           fi
 
       - name: Upload QCOW2 artifact
@@ -100,7 +100,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: serial-console-log
-          path: serial.log
+          path: /tmp/serial.log
 
       - name: Mount QCOW2 and extract logs
         if: always()

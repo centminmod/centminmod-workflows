@@ -68,7 +68,7 @@ source "qemu" "almalinux10" {
   host_port_max  = 2222
 
   qemuargs = [
-    ["-serial", "file:serial.log"],
+    ["-serial", "file:/tmp/serial.log"],
     ["-d",      "guest_errors,cpu_reset"],
     ["-D",      "qemu-errors.log"]
   ]
@@ -76,7 +76,8 @@ source "qemu" "almalinux10" {
   communicator = "ssh"
   ssh_username = "root"
   ssh_password = "changeme"
-  ssh_timeout  = "55m"
+  ssh_timeout  = "120m"
+  pause_before_connecting = "30m"
   ssh_pty      = true
 
   shutdown_command = "shutdown -P now"
