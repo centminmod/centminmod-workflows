@@ -1,5 +1,4 @@
 packer {
-  required_version = ">= 1.12.0"
   required_plugins {
     qemu = {
       version = ">= 1.1.2"
@@ -9,41 +8,40 @@ packer {
 }
 
 variable "iso_url" {
-  type        = string
-  description = "URL or path to the AlmaLinux 10 minimal ISO"
+  type    = string
+  default = "isos/x86_64/AlmaLinux-10-latest-x86_64-minimal.iso"
 }
 
 variable "iso_checksum" {
-  type        = string
-  description = "SHA256 checksum for the ISO"
+  type    = string
+  default = "auto"
 }
 
 source "qemu" "almalinux10" {
-  iso_url          = var.iso_url
-  iso_checksum     = var.iso_checksum
+  # Base ISO
+  iso_url      = var.iso_url
+  iso_checksum = var.iso_checksum
 
-  output_directory = "build/almalinux10"
-  format           = "qcow2"
-  disk_size        = 40960       # 40 GB disk
-  memory           = 4096        # 4 GB RAM for build VM
-  cpus             = 2           # 2 vCPUs
-  accelerator      = "tcg"      # use TCG for compatibility on hosted runners
-  headless         = true
+  # VM sizing & acceleration
+  disk_size    = "40960"   # MiB (≈40 GiB)
+  memory       = "4096"    # MiB
+  cpus         = 2
+  accelerator  = "tcg"
 
-  http_directory   = "packer/http"
-  boot_wait        = "5s"
-  boot_command     = [
-    "<tab><wait>",
-    " inst.text console=ttyS0,115200n8 inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg inst.sshd",
-    "<enter><wait>"
+  # HTTP server for Kickstart
+  http_directory = "http"
+  http_port_min  = 8000
+  http_port_max  = 9000
+
+  # Boot loader & Kickstart
+  boot_command = [
+    "<esc><wait>",
+    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg console=ttyS0,115200n8<enter>"
   ]
+  boot_wait    = "5s"
+  format       = "qcow2"
 
-  communicator     = "ssh"
-  ssh_username     = "root"
-  ssh_password     = "changeme"
-  ssh_timeout      = "5m"       # increase SSH wait time for slow installs
-
-  # send serial console output to Packer logs
+  # Serial console logging for debugging
   qemuargs = [
     ["-serial", "mon:stdio"],
     ["-display", "none"],
@@ -51,7 +49,24 @@ source "qemu" "almalinux10" {
     ["-D", "qemu-errors.log"]
   ]
 
-  shutdown_command = "echo 'changeme' | sudo -S shutdown -P now"
+  # SSH communicator settings
+  communicator  = "ssh"
+  ssh_username  = "root"
+  ssh_password  = "changeme"
+  ssh_timeout   = "10m"      # bumped from 5m
+  ssh_pty       = true
+
+  # User‐mode networking + host-forward so Packer can SSH in
+  netdev = [{
+    type    = "user"
+    id      = "net0"
+    hostfwd = ["tcp::{{ .SSHHostPort }}-:22"]
+  }]
+
+  device = [{
+    driver = "virtio-net-pci"
+    netdev = "net0"
+  }]
 }
 
 build {
@@ -59,7 +74,8 @@ build {
 
   provisioner "shell" {
     inline = [
-      "echo 'Packer build complete.'"
+      "echo '=== VM up; running post‐install shell provisioner ==='",
+      "hostname && date"
     ]
   }
 }
