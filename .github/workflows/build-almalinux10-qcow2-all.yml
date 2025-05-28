@@ -41,7 +41,10 @@ jobs:
           packer init "$TEMPLATE"
 
           # Validate template first
-          packer validate "$TEMPLATE"
+          packer validate \
+            -var iso_url="file://$GITHUB_WORKSPACE/${ISO_NAME}" \
+            -var iso_checksum="${ISO_CHECKSUM}" \
+            "$TEMPLATE"
                     
           # Start packer build in background
           packer build \
