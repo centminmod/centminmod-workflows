@@ -28,8 +28,8 @@ source "qemu" "almalinux10" {
   cpus        = 2
   accelerator = "tcg"
 
-  # HTTP server for Kickstart
-  http_directory = "http"
+  # HTTP server for Kickstart (adjusted to where your ks.cfg actually lives)
+  http_directory = "packer/http"
   http_port_min  = 8000
   http_port_max  = 9000
 
