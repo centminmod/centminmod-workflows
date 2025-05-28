@@ -7,11 +7,30 @@ packer {
   }
 }
 
-variable "iso_url" { type = string; default = "isos/x86_64/AlmaLinux-10-latest-x86_64-minimal.iso" }
-variable "iso_checksum" { type = string; default = "auto" }
-variable "disk_size" { type = string; default = "40960" }   # MiB
-variable "memory"    { type = string; default = "4096" }    # MiB
-variable "cpus"      { type = number; default = 2 }
+variable "iso_url" {
+  type    = string
+  default = "isos/x86_64/AlmaLinux-10-latest-x86_64-minimal.iso"
+}
+
+variable "iso_checksum" {
+  type    = string
+  default = "auto"
+}
+
+variable "disk_size" {
+  type    = string
+  default = "40960"    # MiB (≈40 GiB)
+}
+
+variable "memory" {
+  type    = string
+  default = "4096"     # MiB
+}
+
+variable "cpus" {
+  type    = number
+  default = 2
+}
 
 source "qemu" "almalinux10" {
   output_directory = "build/almalinux10"
