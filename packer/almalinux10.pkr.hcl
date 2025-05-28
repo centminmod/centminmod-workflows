@@ -35,7 +35,7 @@ variable "cpus" {
 source "qemu" "almalinux10" {
   # Where to drop the built QCOW2 and logs
   output_directory = "build/almalinux10"
-  vm_name         = "almalinux10"
+  vm_name          = "almalinux10"
   
   # Base ISO
   iso_url      = var.iso_url
@@ -60,17 +60,26 @@ source "qemu" "almalinux10" {
   boot_wait = "10s"
   format    = "qcow2"
   
-  # Disable default networking to avoid conflicts
-  net_device = "none"
-  
-  # Custom QEMU args for serial console and networking
+  # Disable Packer's built-in GUI and VNC
+  display      = "none"
+  vnc_display  = false
+  vnc_bind     = "127.0.0.1"
+  vnc_auto_port = false
+
+  # Use e1000 as the default NIC and forward SSH from host into the VM
+  net_device = "e1000"
+  netdev = [{
+    type    = "user"
+    id      = "net0"
+    hostfwd = ["tcp::{{ .SSHHostPort }}-:22"]
+  }]
+
+  # Serial-only, guest-error logging
   qemuargs = [
-    ["-serial", "mon:stdio"],
+    ["-serial",    "mon:stdio"],
     ["-nographic", ""],
-    ["-d", "guest_errors"],
-    ["-D", "qemu-errors.log"],
-    ["-netdev", "user,id=net0,hostfwd=tcp::{{ .SSHHostPort }}-:22"],
-    ["-device", "e1000,netdev=net0"]
+    ["-d",         "guest_errors"],
+    ["-D",         "qemu-errors.log"],
   ]
   
   # SSH communicator
