@@ -39,7 +39,10 @@ jobs:
           TEMPLATE=$(find "$GITHUB_WORKSPACE" -type f -name '*.pkr.hcl' | head -n1)
           echo "Using Packer template: $TEMPLATE"
           packer init "$TEMPLATE"
-          
+
+          # Validate template first
+          packer validate "$TEMPLATE"
+                    
           # Start packer build in background
           packer build \
             -on-error=abort \

@@ -19,7 +19,7 @@ variable "iso_checksum" {
 
 variable "disk_size" {
   type    = number
-  default = 40960    # MiB (≈40 GiB)
+  default = 20480    # MiB (20 GiB) - smaller for faster testing
 }
 
 variable "memory" {
@@ -49,9 +49,9 @@ source "qemu" "almalinux10" {
   http_port_max  = 9000
 
   boot_command = [
-    "<esc><wait>",
-    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg ",
-    "inst.text console=ttyS0,115200n8<enter>"
+    "<tab><wait>",
+    " inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
+    " console=ttyS0,115200n8<enter>"
   ]
   boot_wait = "10s"
   format    = "qcow2"
@@ -64,25 +64,28 @@ source "qemu" "almalinux10" {
   vnc_port_min     = 5900
   vnc_port_max     = 6000
 
-  # Use e1000 NIC + forward SSH to host:2222
-  net_device     = "e1000"
-  host_port_min  = 2222
-  host_port_max  = 2222
+  # Use virtio for better performance
+  disk_interface = "virtio"
+  net_device     = "virtio-net"
+  
+  # SSH configuration
+  ssh_username = "root"
+  ssh_password = "changeme"
+  ssh_timeout  = "45m"  # Extended timeout for slow TCG
+  ssh_pty      = true
+  
+  # Port forwarding
+  ssh_host_port_min = 2222
+  ssh_host_port_max = 2222
 
   # Serial console & QEMU error logging
   qemuargs = [
     ["-serial", "file:serial.log"],
-    ["-d",      "guest_errors"],
+    ["-d",      "guest_errors,cpu_reset"],
     ["-D",      "qemu-errors.log"],
   ]
-
-  communicator = "ssh"
-  ssh_username = "root"
-  ssh_password = "changeme"
-  ssh_timeout  = "15m"
-  ssh_pty      = true
   
-  # Keep VM running on disconnect
+  # Shutdown command
   shutdown_command = "shutdown -P now"
 }
 
@@ -94,7 +97,8 @@ build {
       "echo '=== VM up; post-install check ==='",
       "hostname",
       "date",
-      "ip addr show"
+      "ip addr show",
+      "cat /root/install-complete.txt || echo 'No install marker found'"
     ]
   }
 }
