@@ -46,7 +46,9 @@ source "qemu" "almalinux10" {
   # send serial console output to Packer logs
   qemuargs = [
     ["-serial", "mon:stdio"],
-    ["-display", "none"]
+    ["-display", "none"],
+    ["-d", "guest_errors"],
+    ["-D", "qemu-errors.log"]
   ]
 
   shutdown_command = "echo 'changeme' | sudo -S shutdown -P now"

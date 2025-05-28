@@ -13,7 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients unzip
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients unzip qemu-utils
 
       - name: Setup Packer
         uses: hashicorp/setup-packer@v3.1.0
@@ -60,3 +60,33 @@ jobs:
         with:
           name: packer-debug-log
           path: packer-debug.log
+
+      - name: Mount QCOW2 and extract Kickstart log
+        if: always()
+        run: |
+          # Connect QCOW2 via nbd
+          QCOW=$(find build/almalinux10 -name '*.qcow2' | head -n1)
+          sudo modprobe nbd max_part=8
+          sudo qemu-nbd --connect=/dev/nbd0 "$QCOW"
+          sudo partprobe /dev/nbd0
+          sudo mkdir -p mnt
+          sudo mount /dev/nbd0p1 mnt
+          sudo cp mnt/root/ks-post.log ./ks-post.log || true
+          sudo cp qemu-errors.log ./qemu-errors.log || true
+          sudo umount mnt
+          sudo qemu-nbd --disconnect /dev/nbd0
+        shell: bash
+
+      - name: Upload KS post-install log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ks-post-log
+          path: ks-post.log
+
+      - name: Upload QEMU errors log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qemu-errors-log
+          path: qemu-errors.log
