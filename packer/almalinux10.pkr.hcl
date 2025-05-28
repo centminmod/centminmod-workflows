@@ -75,8 +75,8 @@ source "qemu" "almalinux10" {
   ssh_pty      = true
   
   # Port forwarding
-  ssh_host_port_min = 2222
-  ssh_host_port_max = 2222
+  host_port_min = 2222
+  host_port_max = 2222
 
   # Serial console & QEMU error logging
   qemuargs = [
