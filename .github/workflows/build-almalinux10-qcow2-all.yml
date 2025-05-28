@@ -61,20 +61,22 @@ jobs:
           name: packer-debug-log
           path: packer-debug.log
 
-      - name: Mount QCOW2 and extract Kickstart log
+      - name: Mount QCOW2 and extract logs
         if: always()
         run: |
-          # Connect QCOW2 via nbd
           QCOW=$(find build/almalinux10 -name '*.qcow2' | head -n1)
-          sudo modprobe nbd max_part=8
-          sudo qemu-nbd --connect=/dev/nbd0 "$QCOW"
-          sudo partprobe /dev/nbd0
-          sudo mkdir -p mnt
-          sudo mount /dev/nbd0p1 mnt
-          sudo cp mnt/root/ks-post.log ./ks-post.log || true
-          sudo cp qemu-errors.log ./qemu-errors.log || true
-          sudo umount mnt
-          sudo qemu-nbd --disconnect /dev/nbd0
+          if [ -n "$QCOW" ] && [ -f "$QCOW" ]; then
+            sudo modprobe nbd max_part=8
+            sudo qemu-nbd --connect=/dev/nbd0 "$QCOW"
+            sudo partprobe /dev/nbd0
+            sudo mkdir -p mnt
+            sudo mount /dev/nbd0p1 mnt
+            sudo cp mnt/root/ks-post.log ./ks-post.log || echo "ks-post.log not found"
+            sudo umount mnt
+            sudo qemu-nbd --disconnect /dev/nbd0
+          else
+            echo "No QCOW2 image found, skipping mount step"
+          fi
         shell: bash
 
       - name: Upload KS post-install log
@@ -129,7 +131,7 @@ jobs:
             -drive file=seed.img,if=virtio,format=raw \
             -net nic,model=virtio -net user,hostfwd=tcp::2222-:22 \
             -nographic \
-            -enable-kvm &  
+            -enable-kvm &  \
           VM_PID=$!
           for i in {1..20}; do
             if ssh -o StrictHostKeyChecking=no -p 2222 almalinux@localhost hostname; then
