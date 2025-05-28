@@ -50,7 +50,8 @@ source "qemu" "almalinux10" {
 
   boot_command = [
     "<esc><wait>",
-    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg console=ttyS0,115200n8 ip=dhcp<enter>"
+    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg ",
+    "inst.text console=ttyS0,115200n8<enter>"
   ]
   boot_wait = "10s"
   format    = "qcow2"
@@ -70,7 +71,7 @@ source "qemu" "almalinux10" {
 
   # Serial console & QEMU error logging
   qemuargs = [
-    ["-serial", "file:serial.log"],  # Capture serial output to file
+    ["-serial", "file:serial.log"],
     ["-d",      "guest_errors"],
     ["-D",      "qemu-errors.log"],
   ]
@@ -78,11 +79,22 @@ source "qemu" "almalinux10" {
   communicator = "ssh"
   ssh_username = "root"
   ssh_password = "changeme"
-  ssh_timeout  = "20m"
+  ssh_timeout  = "15m"
   ssh_pty      = true
+  
+  # Keep VM running on disconnect
+  shutdown_command = "shutdown -P now"
 }
 
 build {
-  sources     = ["source.qemu.almalinux10"]
-  provisioner "shell" { inline = ["echo '=== VM up; post-install check ==='", "hostname && date"] }
+  sources = ["source.qemu.almalinux10"]
+  
+  provisioner "shell" {
+    inline = [
+      "echo '=== VM up; post-install check ==='",
+      "hostname",
+      "date",
+      "ip addr show"
+    ]
+  }
 }
