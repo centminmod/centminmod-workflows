@@ -51,7 +51,7 @@ source "qemu" "almalinux10" {
 
   boot_command = [
     "<tab><wait>",
-    " inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
+    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
     " ip=dhcp console=ttyS0,115200n8<enter>"
   ]
   boot_wait = "10s"
@@ -68,7 +68,7 @@ source "qemu" "almalinux10" {
   host_port_max  = 2222
 
   qemuargs = [
-    ["-serial", "file:serial.log"],
+    ["-serial","file:${PWD}/serial.log"],
     ["-d",      "guest_errors,cpu_reset"],
     ["-D",      "qemu-errors.log"]
   ]
