@@ -92,3 +92,10 @@ jobs:
         with:
           name: qemu-errors-log
           path: qemu-errors.log
+
+      - name: Upload serial console log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: serial-console-log
+          path: serial.log

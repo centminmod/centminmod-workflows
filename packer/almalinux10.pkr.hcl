@@ -18,13 +18,13 @@ variable "iso_checksum" {
 }
 
 variable "disk_size" {
-  type    = string
-  default = "40960"    # MiB (≈40 GiB)
+  type    = number
+  default = 40960    # MiB (≈40 GiB)
 }
 
 variable "memory" {
-  type    = string
-  default = "4096"     # MiB
+  type    = number
+  default = 4096     # MiB
 }
 
 variable "cpus" {
@@ -55,14 +55,13 @@ source "qemu" "almalinux10" {
   boot_wait = "10s"
   format    = "qcow2"
 
-  # Disable GUI
-  display             = "none"
-  use_default_display = false
-
-  # Disable VNC
-  vnc_port_min    = 0
-  vnc_port_max    = 0
-  vnc_use_password = false
+  # Headless mode (no GUI display)
+  headless = true
+  
+  # VNC configuration (required for boot commands)
+  vnc_bind_address = "127.0.0.1"
+  vnc_port_min     = 5900
+  vnc_port_max     = 6000
 
   # Use e1000 NIC + forward SSH to host:2222
   net_device     = "e1000"
@@ -71,10 +70,9 @@ source "qemu" "almalinux10" {
 
   # Serial console & QEMU error logging
   qemuargs = [
-    ["-serial",    "mon:stdio"],
-    ["-nographic", ""],
-    ["-d",         "guest_errors"],
-    ["-D",         "qemu-errors.log"],
+    ["-serial", "file:serial.log"],  # Capture serial output to file
+    ["-d",      "guest_errors"],
+    ["-D",      "qemu-errors.log"],
   ]
 
   communicator = "ssh"
