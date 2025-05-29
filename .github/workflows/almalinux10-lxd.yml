@@ -1,0 +1,195 @@
+name: 0 - AlmaLinux 10 LXD
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run-almalinux-10-lxd]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove Docker to prevent LXD conflicts
+        run: |
+          sudo systemctl stop docker || true
+          sudo apt-get remove -y docker.io docker-ce || true
+          sudo systemctl disable docker || true
+          sudo nft flush ruleset || true
+
+      - name: Install LXD
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lxd
+          sudo lxd init --auto
+
+      - name: Launch AlmaLinux 10 LXD container
+        run: |
+          lxc launch images:almalinux/10 almalinux10 -c security.nesting=true -c security.privileged=true
+          sleep 20
+          lxc exec almalinux10 -- bash -c "dnf install -y curl sudo"
+
+      - name: Copy and set permissions for custom scripts
+        run: |
+          for file in scripts/*; do
+            dest="/home/$(basename "$file")"
+            lxc file push "$file" almalinux10"$dest"
+            lxc exec almalinux10 -- chmod +x "$dest"
+          done
+
+      - name: Create directories and set permissions
+        run: |
+          lxc exec almalinux10 -- mkdir -p /var/run/postgresql
+          lxc exec almalinux10 -- mkdir -p /usr/src/kernels
+          lxc exec almalinux10 -- mkdir -p /var/lib/pgsql/16/data/
+          lxc exec almalinux10 -- chmod 0700 /var/lib/pgsql/16/data/
+          # Optional chown if needed
+          # lxc exec almalinux10 -- chown postgres:postgres /var/lib/pgsql/16/data/
+          # lxc exec almalinux10 -- chown postgres:postgres /var/run/postgresql
+
+      - name: Install Centmin Mod
+        run: |
+          lxc exec almalinux10 -- bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
+          tail -80 cmm-install.log >> $GITHUB_STEP_SUMMARY
+
+      - name: Display Install Log
+        run: |
+          echo "Last 80 lines of Centmin Mod LEMP Install Log:"
+          echo "----------------------------------------"
+          tail -80 cmm-install.log
+          echo "----------------------------------------"
+
+      - name: EL10 Info Collection
+        run: |
+          lxc exec almalinux10 -- bash -c "cat /etc/releases || true"
+          lxc exec almalinux10 -- bash -c "cat /etc/os-release"
+          lxc exec almalinux10 -- bash -c "lscpu"
+          lxc exec almalinux10 -- bash -c "dnf repolist all"
+          lxc exec almalinux10 -- bash -c "dnf module list"
+          lxc exec almalinux10 -- bash -c "dnf list enchant2 enchant2-devel"
+
+      - name: Inspect Nginx UID/GID
+        run: lxc exec almalinux10 -- bash -c "id nginx"
+
+      - name: List /home/nginx
+        run: lxc exec almalinux10 -- bash -c "ls -lahn /home/nginx"
+
+      - name: Restart PHP-FPM
+        run: lxc exec almalinux10 -- bash -c "systemctl restart php-fpm.service"
+
+      - name: PHP-FPM Status
+        run: lxc exec almalinux10 -- bash -c "systemctl status php-fpm.service"
+
+      - name: Journalctl tail for PHP-FPM
+        run: lxc exec almalinux10 -- bash -c "journalctl -xe --no-pager | tail -n 35"
+
+      - name: Nginx Status
+        run: lxc exec almalinux10 -- bash -c "systemctl status nginx.service"
+
+      - name: MariaDB Status
+        run: lxc exec almalinux10 -- bash -c "systemctl status mariadb.service"
+
+      - name: PHP Version and Modules
+        run: |
+          lxc exec almalinux10 -- bash -c "php-config || true"
+          lxc exec almalinux10 -- bash -c "/usr/local/bin/php --ini"
+          lxc exec almalinux10 -- bash -c "ldd /usr/local/bin/php"
+          lxc exec almalinux10 -- bash -c "/usr/local/bin/php -v"
+
+      - name: Nginx Version
+        run: |
+          lxc exec almalinux10 -- bash -c "/usr/local/sbin/nginx -V"
+          lxc exec almalinux10 -- bash -c "ldd /usr/local/sbin/nginx"
+
+      - name: Python3 and Pip
+        run: |
+          lxc exec almalinux10 -- bash -c "python3 --version"
+          lxc exec almalinux10 -- bash -c "pip --version"
+          lxc exec almalinux10 -- bash -c "alternatives --list | grep -Ei 'pip|python' || echo 'No match'"
+
+      - name: Redis Server
+        run: |
+          lxc exec almalinux10 -- bash -c "redis-cli info"
+          lxc exec almalinux10 -- bash -c "systemctl status redis"
+          lxc exec almalinux10 -- bash -c "php --ri redis"
+
+      - name: CSF Firewall Info
+        run: |
+          lxc exec almalinux10 -- bash -c "grep -E '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          lxc exec almalinux10 -- bash -c "csf -v"
+          lxc exec almalinux10 -- bash -c "csf -ra"
+          lxc exec almalinux10 -- bash -c "cat /etc/csf/csf.allow"
+
+      - name: System Logs and Journal
+        run: |
+          lxc exec almalinux10 -- bash -c "systemctl status sysstat.service"
+          lxc exec almalinux10 -- bash -c "systemctl status systemd-journald.service"
+          lxc exec almalinux10 -- bash -c "ls -ld /var/log/journal || echo '/var/log/journal not configured'"
+          lxc exec almalinux10 -- bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+
+      - name: Run Centmin Mod Tools
+        run: |
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+
+      - name: Run Centmin CSF/Cloudflare Tool
+        run: |
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          lxc exec almalinux10 -- bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+
+      - name: Create Nginx HTTPS vhost
+        run: lxc exec almalinux10 -- bash -c "/usr/bin/nv -d domain.com -s y"
+
+      - name: Run cmupdate
+        run: lxc exec almalinux10 -- bash -c "cmupdate"
+
+      - name: Nginx Upgrade Test (Option 4)
+        run: lxc exec almalinux10 -- bash -c "/home/centmin-option-4.sh"
+
+      - name: YUM History Info
+        run: lxc exec almalinux10 -- bash -c "for id in \$(yum history list | awk '{print \$1}' | grep -E '^[0-9]+\$'); do yum history info \$id; done"
+
+      - name: Copy AlmaLinux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          lxc exec almalinux10 -- bash -c "tar -C /root/centminlogs -cf - ." | tar -C ./centminlogs -xf -
+
+      - name: Upload AlmaLinux Centmin Mod Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: almalinux_logs
+          path: centminlogs/*
+
+  discordNotificationSuccess:
+    needs: build
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord Success
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  discordNotificationFailure:
+    needs: build
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Discord Failure
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
