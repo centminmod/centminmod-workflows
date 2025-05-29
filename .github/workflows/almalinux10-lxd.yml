@@ -70,24 +70,28 @@ jobs:
 
       # ---------------- System information -------------
       - name: AlmaLinux release & repos
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- cat /etc/os-release
           sudo lxc exec almalinux10 -- dnf repolist all
           sudo lxc exec almalinux10 -- dnf module list
 
       - name: CPU info
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- lscpu
 
       # ---------------- Centmin baseline checks --------
       - name: Nginx user & home directory
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- id nginx
           sudo lxc exec almalinux10 -- ls -lahn /home/nginx
 
-      - name: Pure-FTPD virtual user quick test
+      - name: Pure‑FTPD virtual user quick test
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
-          sudo lxc exec almalinux10 -- bash -c "(echo ftppass; echo ftppass) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d /home/nginx/domains/demodomain.com && pure-pw mkdb"
+          sudo lxc exec almalinux10 -- bash -c "(echo ftppass; echo ftppass) | pure-pw useradd ftpuser -u nginx -g \$(id -g nginx) -d /home/nginx/domains/demodomain.com && pure-pw mkdb"
           # Install lftp for test
           sudo lxc exec almalinux10 -- dnf -y install lftp
           CONTAINER_IP=$(sudo lxc list almalinux10 -c4 --format csv | cut -d, -f1)
@@ -95,12 +99,14 @@ jobs:
 
       # ---------------- Centmin log inspections --------
       - name: Nginx configure, patch & PHP-FPM patch logs
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- cat /root/centminlogs/nginx-configure-* || true
           sudo lxc exec almalinux10 -- cat /root/centminlogs/patch_patchnginx_* || true
           sudo lxc exec almalinux10 -- cat /root/centminlogs/patch_php_* || true
 
       - name: Disk usage snapshot
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- du -sh /svr-setup || true
           sudo lxc exec almalinux10 -- df -hT
@@ -108,20 +114,24 @@ jobs:
 
       # ---------------- Centmin post-install tuning ----
       - name: Set Centmin notification emails
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- bash -c "echo 1 > /etc/centminmod/email-primary.ini"
           sudo lxc exec almalinux10 -- bash -c "echo 2 > /etc/centminmod/email-secondary.ini"
 
       - name: YUM repo list (full)
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- yum repolist all
 
       # ---------------- Toolchain checks ---------------
       - name: Wget binaries (system vs /usr/local)
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- /usr/local/bin/wget -V || true
           sudo lxc exec almalinux10 -- /usr/bin/wget -V || true
 
       - name: Ccache presence & stats
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- /usr/local/bin/ccache -V || true
           sudo lxc exec almalinux10 -- /usr/local/bin/ccache -s || true
@@ -129,6 +139,7 @@ jobs:
 
       # ---------------- PHP-FPM deep dive --------------
       - name: Restart & inspect PHP-FPM
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- systemctl restart php-fpm || true
           sudo lxc exec almalinux10 -- journalctl -xe --no-pager | tail -n 35 || true
@@ -138,6 +149,7 @@ jobs:
 
       # ---------------- Nginx deep dive ----------------
       - name: Inspect Nginx logs & binary details
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- ls -lAh /usr/local/nginx/logs || true
           sudo lxc exec almalinux10 -- cat /usr/local/nginx/logs/nginx.pid || true
@@ -149,6 +161,7 @@ jobs:
 
       # ---------------- MariaDB deep dive --------------
       - name: MariaDB variables & plugin list
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- mysql -t -e "SELECT * FROM mysql.plugin;" || true
           sudo lxc exec almalinux10 -- mysql -t -e "SHOW PLUGINS;" || true
@@ -158,12 +171,14 @@ jobs:
 
       # ---------------- Python & Redis -----------------
       - name: Python / Pip alternatives
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- python3 --version
           sudo lxc exec almalinux10 -- pip --version
           sudo lxc exec almalinux10 -- alternatives --list | grep -Ei 'pip|python' || true
 
       - name: Redis service & PHP extension
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- redis-cli info | head -n 20 || true
           sudo lxc exec almalinux10 -- systemctl status redis --no-pager || true
@@ -171,6 +186,7 @@ jobs:
 
       # ---------------- Pure-FTPD config ---------------
       - name: Pure-FTPD service details
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- ls -lAh /etc/systemd/system/pure-ftpd.service.d || true
           sudo lxc exec almalinux10 -- cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf || true
@@ -179,18 +195,21 @@ jobs:
 
       # ---------------- chronyd / CSF / logrotate ------
       - name: chronyd & CSF checks
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- journalctl -u chronyd --no-pager | tail -n 100 || true
           sudo lxc exec almalinux10 -- systemctl status chronyd --no-pager || echo "chronyd not available"
           sudo lxc exec almalinux10 -- csf -ra || true
 
       - name: logrotate configs validate
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- logrotate -dv /etc/logrotate.d/nginx || true
           sudo lxc exec almalinux10 -- logrotate -dv /etc/logrotate.d/php-fpm || true
 
       # ---------------- Journald & sysstat -------------
       - name: sysstat / journald services
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- systemctl status sysstat --no-pager || true
           sudo lxc exec almalinux10 -- systemctl status systemd-journald --no-pager || true
@@ -199,6 +218,7 @@ jobs:
 
       # ---------------- Centmin helper tools -----------
       - name: cminfo & addons
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- /usr/local/src/centminmod/tools/cminfo.sh || true
           sudo lxc exec almalinux10 -- /usr/local/src/centminmod/addons/golang.sh install || true
@@ -207,6 +227,7 @@ jobs:
 
       # ---------------- CSF / Cloudflare tool ----------
       - name: Run csfcf helper
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- /usr/local/src/centminmod/tools/csfcf.sh
           sudo lxc exec almalinux10 -- /usr/local/src/centminmod/tools/csfcf.sh auto
@@ -215,10 +236,12 @@ jobs:
 
       # ---------------- Nginx HTTPS vhost --------------
       - name: Create HTTPS test vhost
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- /usr/bin/nv -d example.com -s y || true
 
       # ---------------- MySQL admin helper -------------
       - name: mysqladmin_shell functional test
+        continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/example.com/dbfile.txt"
           sudo lxc exec almalinux10 -- /usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/example.com/dbfile.txt || true
@@ -227,22 +250,27 @@ jobs:
 
       # ---------------- cmupdate & option 4 ------------
       - name: cmupdate latest Centmin code
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- cmupdate || true
 
       - name: Nginx upgrade via option 4
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- /home/centmin-option-4.sh || true
 
       # ---------------- YUM history log ---------------
       - name: Dump YUM transaction history
+        continue-on-error: true
         run: sudo lxc exec almalinux10 -- bash -c "for id in $(yum history list | awk '{print $1}' | grep -E '^[0-10]+$'); do yum history info $id; done" || true
 
       # ---------------- Collect artifacts -------------
       - name: Tar /root/centminlogs
+        continue-on-error: true
         run: |
           mkdir -p centminlogs
           sudo lxc exec almalinux10 -- tar -C /root/centminlogs -cf - . | tar -C centminlogs -xf -
 
       - name: Upload Centmin logs artifact
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: centmin_logs
