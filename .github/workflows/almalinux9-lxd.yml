@@ -139,7 +139,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{"content":"Workflow `${{ github.workflow }}` triggered by `${{ github.event_name }}` completed **successfully**."}' \
+               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\"}" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   discordNotificationFailure:
@@ -151,5 +151,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{"content":"Workflow `${{ github.workflow }}` triggered by `${{ github.event_name }}` **failed**."}' \
+               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\"}" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
