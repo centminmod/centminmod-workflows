@@ -172,15 +172,30 @@ jobs:
           sudo lxc exec almalinux9 -- /usr/local/sbin/nginx -V || true
           sudo lxc exec almalinux9 -- ldd /usr/local/sbin/nginx | head -n 20
 
-      # ---------------- MariaDB deep dive --------------
-      - name: MariaDB variables & plugin list
+      # ---------------- MariaDB checks -----------------
+      - name: Inspect MariaDB setup
         continue-on-error: true
         run: |
-          sudo lxc exec almalinux9 -- mysql -t -e "SELECT * FROM mysql.plugin;" || true
-          sudo lxc exec almalinux9 -- mysql -t -e "SHOW PLUGINS;" || true
-          sudo lxc exec almalinux9 -- mysqladmin var | tr -s ' ' | head -n 40 || true
-          sudo lxc exec almalinux9 -- ls -lAhrt /var/lib/mysql | head -n 20
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- systemctl status mariadb.service
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- cat /etc/my.cnf
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- bash -c "mysqladmin var | tr -s ' ' || true"
+
+      - name: Debug MariaDB setup
+        continue-on-error: true
+        run: |
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- ls -lAhrt /var/lib/mysql
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
           sudo lxc exec almalinux9 -- cat /var/lib/mysql/*.err || true
+          sudo lxc exec almalinux9 -- bash -c "echo '---'"
+          sudo lxc exec almalinux9 -- bash -c "mysqladmin var | tr -s ' ' || true"
 
       # ---------------- Python & Redis -----------------
       - name: Python / Pip alternatives
