@@ -6,39 +6,44 @@ on:
     types: [run-almalinux-9-lxd]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}
+  group: "${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}"
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      # ---------------- Base runner prep ----------------
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Remove Docker to prevent LXD conflicts
+      - name: Remove Docker to avoid bridge/iptables clash with LXD
         run: |
           sudo systemctl stop docker || true
-          sudo apt-get remove -y docker.io docker-ce || true
           sudo systemctl disable docker || true
+          sudo apt-get -y remove docker docker.io docker-ce docker-ce-cli containerd runc || true
           sudo nft flush ruleset || true
 
-      - name: Install LXD (snap)
+      # ---------------- LXD install & init --------------
+      - name: Install LXD (snap) & initialise
         run: |
           sudo apt-get update
           sudo apt-get install -y snapd
           sudo snap install lxd
-          # Initialise LXD non-interactively (all defaults)
-          sudo lxd init --auto
+          sudo lxd init --auto   # non-interactive defaults
 
+      # ---------------- Container boot -----------------
       - name: Launch AlmaLinux 9 container (systemd enabled)
         run: |
-          sudo lxc launch images:almalinux/9 almalinux9 -c security.nesting=true -c security.privileged=true
-          # Give the container a moment to boot & cloud-init to finish
-          sleep 25
-          sudo lxc exec almalinux9 -- bash -c "dnf install -y curl sudo"
+          sudo lxc launch images:almalinux/9 almalinux9 \
+            -c security.nesting=true \
+            -c security.privileged=true
+          # Wait for cloud-init + systemd to settle
+          sleep 30
+          sudo lxc exec almalinux9 -- dnf -y install curl sudo
 
-      - name: Copy project scripts into container
+      # ---------------- Project files ------------------
+      - name: Push project scripts into container & chmod
         run: |
           for f in scripts/*; do
             dest="/home/$(basename "$f")"
@@ -46,79 +51,193 @@ jobs:
             sudo lxc exec almalinux9 -- chmod +x "$dest"
           done
 
-      - name: Create required directories
+      - name: Create required directories (PostgreSQL etc.)
         run: |
-          sudo lxc exec almalinux9 -- mkdir -p /var/run/postgresql
-          sudo lxc exec almalinux9 -- mkdir -p /usr/src/kernels
-          sudo lxc exec almalinux9 -- mkdir -p /var/lib/pgsql/16/data
+          sudo lxc exec almalinux9 -- mkdir -p \
+            /var/run/postgresql \
+            /usr/src/kernels \
+            /var/lib/pgsql/16/data
           sudo lxc exec almalinux9 -- chmod 0700 /var/lib/pgsql/16/data
 
-      # --------------------------------------------------------------------
-      # Centmin Mod installation & validation steps (converted from Docker)
-      # --------------------------------------------------------------------
-
-      - name: Install Centmin Mod
+      # ---------------- Centmin Mod install ------------
+      - name: Install Centmin Mod beta (el10 script)
         run: |
           sudo lxc exec almalinux9 -- bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
-          tail -80 cmm-install.log >> "$GITHUB_STEP_SUMMARY"
+          tail -80 cmm-install.log >> $GITHUB_STEP_SUMMARY
 
-      - name: Display installer tail
+      - name: Show Centmin install log tail
+        run: tail -80 cmm-install.log
+
+      # ---------------- System information -------------
+      - name: AlmaLinux release & repos
         run: |
-          echo "Last 80 lines of Centmin Mod install log:"
-          tail -80 cmm-install.log
+          sudo lxc exec almalinux9 -- cat /etc/os-release
+          sudo lxc exec almalinux9 -- dnf repolist all
+          sudo lxc exec almalinux9 -- dnf module list
 
-      - name: EL Info collection
-        run: |
-          sudo lxc exec almalinux9 -- bash -c "cat /etc/os-release"
-          sudo lxc exec almalinux9 -- bash -c "lscpu"
-          sudo lxc exec almalinux9 -- bash -c "dnf repolist all"
-          sudo lxc exec almalinux9 -- bash -c "dnf module list"
+      - name: CPU info
+        run: sudo lxc exec almalinux9 -- lscpu
 
-      - name: Inspect Nginx uid/gid & home
+      # ---------------- Centmin baseline checks --------
+      - name: Nginx user & home directory
         run: |
           sudo lxc exec almalinux9 -- id nginx
           sudo lxc exec almalinux9 -- ls -lahn /home/nginx
 
-      - name: PHP-FPM restart & status
+      - name: Pure-FTPD virtual user quick test
+        run: |
+          sudo lxc exec almalinux9 -- bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
+          sudo lxc exec almalinux9 -- bash -c "(echo ftppass; echo ftppass) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d /home/nginx/domains/demodomain.com && pure-pw mkdb"
+          # Install lftp for test
+          sudo lxc exec almalinux9 -- dnf -y install lftp
+          CONTAINER_IP=$(sudo lxc list almalinux9 -c4 --format csv | cut -d, -f1)
+          sudo lxc exec almalinux9 -- bash -c "lftp -e 'set ftp:passive-mode yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls; quit'"
+
+      # ---------------- Centmin log inspections --------
+      - name: Nginx configure, patch & PHP-FPM patch logs
+        run: |
+          sudo lxc exec almalinux9 -- cat /root/centminlogs/nginx-configure-* || true
+          sudo lxc exec almalinux9 -- cat /root/centminlogs/patch_patchnginx_* || true
+          sudo lxc exec almalinux9 -- cat /root/centminlogs/patch_php_* || true
+
+      - name: Disk usage snapshot
+        run: |
+          sudo lxc exec almalinux9 -- du -sh /svr-setup || true
+          sudo lxc exec almalinux9 -- df -hT
+          sudo lxc exec almalinux9 -- rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n | head -n 40
+
+      # ---------------- Centmin post-install tuning ----
+      - name: Set Centmin notification emails
+        run: |
+          sudo lxc exec almalinux9 -- bash -c "echo 1 > /etc/centminmod/email-primary.ini"
+          sudo lxc exec almalinux9 -- bash -c "echo 2 > /etc/centminmod/email-secondary.ini"
+
+      - name: YUM repo list (full)
+        run: sudo lxc exec almalinux9 -- yum repolist all
+
+      # ---------------- Toolchain checks ---------------
+      - name: Wget binaries (system vs /usr/local)
+        run: |
+          sudo lxc exec almalinux9 -- /usr/local/bin/wget -V || true
+          sudo lxc exec almalinux9 -- /usr/bin/wget -V || true
+
+      - name: Ccache presence & stats
+        run: |
+          sudo lxc exec almalinux9 -- /usr/local/bin/ccache -V || true
+          sudo lxc exec almalinux9 -- /usr/local/bin/ccache -s || true
+          sudo lxc exec almalinux9 -- grep ccache ~/.bashrc || true
+
+      # ---------------- PHP-FPM deep dive --------------
+      - name: Restart & inspect PHP-FPM
         run: |
           sudo lxc exec almalinux9 -- systemctl restart php-fpm || true
-          sudo lxc exec almalinux9 -- systemctl status php-fpm --no-pager || true
           sudo lxc exec almalinux9 -- journalctl -xe --no-pager | tail -n 35 || true
+          sudo lxc exec almalinux9 -- systemctl status php-fpm --no-pager || true
+          sudo lxc exec almalinux9 -- php --ini || true
+          sudo lxc exec almalinux9 -- php -v
 
-      - name: Nginx status & sanity
+      # ---------------- Nginx deep dive ----------------
+      - name: Inspect Nginx logs & binary details
         run: |
+          sudo lxc exec almalinux9 -- ls -lAh /usr/local/nginx/logs || true
+          sudo lxc exec almalinux9 -- cat /usr/local/nginx/logs/nginx.pid || true
           sudo lxc exec almalinux9 -- systemctl status nginx --no-pager || true
           sudo lxc exec almalinux9 -- curl -I http://localhost || true
           sudo lxc exec almalinux9 -- curl -sIv http://localhost || true
           sudo lxc exec almalinux9 -- /usr/local/sbin/nginx -V || true
+          sudo lxc exec almalinux9 -- ldd /usr/local/sbin/nginx | head -n 20
 
-      - name: MariaDB status & vars
+      # ---------------- MariaDB deep dive --------------
+      - name: MariaDB variables & plugin list
         run: |
-          sudo lxc exec almalinux9 -- systemctl status mariadb --no-pager || true
-          sudo lxc exec almalinux9 -- mysqladmin var | tr -s ' ' || true
+          sudo lxc exec almalinux9 -- mysql -t -e "SELECT * FROM mysql.plugin;" || true
+          sudo lxc exec almalinux9 -- mysql -t -e "SHOW PLUGINS;" || true
+          sudo lxc exec almalinux9 -- mysqladmin var | tr -s ' ' | head -n 40 || true
+          sudo lxc exec almalinux9 -- ls -lAhrt /var/lib/mysql | head -n 20
+          sudo lxc exec almalinux9 -- cat /var/lib/mysql/*.err || true
 
-      - name: Python, Pip & Redis checks
+      # ---------------- Python & Redis -----------------
+      - name: Python / Pip alternatives
         run: |
           sudo lxc exec almalinux9 -- python3 --version
           sudo lxc exec almalinux9 -- pip --version
+          sudo lxc exec almalinux9 -- alternatives --list | grep -Ei 'pip|python' || true
+
+      - name: Redis service & PHP extension
+        run: |
           sudo lxc exec almalinux9 -- redis-cli info | head -n 20 || true
           sudo lxc exec almalinux9 -- systemctl status redis --no-pager || true
+          sudo lxc exec almalinux9 -- php --ri redis || true
 
-      - name: CSF firewall quick check
+      # ---------------- Pure-FTPD config ---------------
+      - name: Pure-FTPD service details
         run: |
-          sudo lxc exec almalinux9 -- csf -v || true
+          sudo lxc exec almalinux9 -- ls -lAh /etc/systemd/system/pure-ftpd.service.d || true
+          sudo lxc exec almalinux9 -- cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf || true
+          sudo lxc exec almalinux9 -- journalctl -u pure-ftpd --no-pager | tail -n 100 || true
+          sudo lxc exec almalinux9 -- systemctl status pure-ftpd --no-pager || true
+
+      # ---------------- chronyd / CSF / logrotate ------
+      - name: chronyd & CSF checks
+        run: |
+          sudo lxc exec almalinux9 -- journalctl -u chronyd --no-pager | tail -n 100 || true
+          sudo lxc exec almalinux9 -- systemctl status chronyd --no-pager || echo "chronyd not available"
           sudo lxc exec almalinux9 -- csf -ra || true
 
-      - name: Centmin tools & addons
+      - name: logrotate configs validate
+        run: |
+          sudo lxc exec almalinux9 -- logrotate -dv /etc/logrotate.d/nginx || true
+          sudo lxc exec almalinux9 -- logrotate -dv /etc/logrotate.d/php-fpm || true
+
+      # ---------------- Journald & sysstat -------------
+      - name: sysstat / journald services
+        run: |
+          sudo lxc exec almalinux9 -- systemctl status sysstat --no-pager || true
+          sudo lxc exec almalinux9 -- systemctl status systemd-journald --no-pager || true
+          sudo lxc exec almalinux9 -- ls -ld /var/log/journal || echo "/var/log/journal not persistent"
+          sudo lxc exec almalinux9 -- journalctl --unit systemd-journald --no-pager | tail -n 100 || true
+
+      # ---------------- Centmin helper tools -----------
+      - name: cminfo & addons
         run: |
           sudo lxc exec almalinux9 -- /usr/local/src/centminmod/tools/cminfo.sh || true
           sudo lxc exec almalinux9 -- /usr/local/src/centminmod/addons/golang.sh install || true
           sudo lxc exec almalinux9 -- /usr/local/src/centminmod/addons/nodejs.sh install || true
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/addons/opendkim.sh || true
 
-      - name: Optional Nginx upgrade test (option 4)
+      # ---------------- CSF / Cloudflare tool ----------
+      - name: Run csfcf helper
+        run: |
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/tools/csfcf.sh
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/tools/csfcf.sh auto
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/tools/csfcf.sh ipv4
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/tools/csfcf.sh ipv6
+
+      # ---------------- Nginx HTTPS vhost --------------
+      - name: Create HTTPS test vhost
+        run: sudo lxc exec almalinux9 -- /usr/bin/nv -d example.com -s y || true
+
+      # ---------------- MySQL admin helper -------------
+      - name: mysqladmin_shell functional test
+        run: |
+          sudo lxc exec almalinux9 -- bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/example.com/dbfile.txt"
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/example.com/dbfile.txt || true
+          sudo lxc exec almalinux9 -- /usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydb myuser mypass || true
+          sudo lxc exec almalinux9 -- bash -c "echo 'myuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants" || true
+
+      # ---------------- cmupdate & option 4 ------------
+      - name: cmupdate latest Centmin code
+        run: sudo lxc exec almalinux9 -- cmupdate || true
+
+      - name: Nginx upgrade via option 4
         run: sudo lxc exec almalinux9 -- /home/centmin-option-4.sh || true
 
-      - name: Copy Centmin logs to host
+      # ---------------- YUM history log ---------------
+      - name: Dump YUM transaction history
+        run: sudo lxc exec almalinux9 -- bash -c "for id in $(yum history list | awk '{print $1}' | grep -E '^[0-9]+$'); do yum history info $id; done" || true
+
+      # ---------------- Collect artifacts -------------
+      - name: Tar /root/centminlogs
         run: |
           mkdir -p centminlogs
           sudo lxc exec almalinux9 -- tar -C /root/centminlogs -cf - . | tar -C centminlogs -xf -
@@ -127,29 +246,33 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: centmin_logs
-          path: centminlogs/
+          path: centminlogs
 
-  # ---------------------------- Notifications -----------------------------
-  discordNotificationSuccess:
+  # ------------------- Notifications ------------------
+  discord_success:
     needs: build
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
-      - name: Discord: success
+      - name: Discord – success
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          WF: ${{ github.workflow }}
+          EVT: ${{ github.event_name }}
         run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully!\"}" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -X POST \
+               -d "{\"content\":\"✅ Workflow '$(echo $WF)' triggered by '$(echo $EVT)' finished successfully.\"}" "$WEBHOOK"
 
-  discordNotificationFailure:
+  discord_failure:
     needs: build
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
-      - name: Discord: failure
+      - name: Discord – failure
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          WF: ${{ github.workflow }}
+          EVT: ${{ github.event_name }}
         run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\"}" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -X POST \
+               -d "{\"content\":\"❌ Workflow '$(echo $WF)' triggered by '$(echo $EVT)' failed.\"}" "$WEBHOOK"
