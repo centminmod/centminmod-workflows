@@ -103,11 +103,19 @@ jobs:
           sudo lxc exec almalinux10 -- bash -c "lftp -e 'set ftp:passive-mode yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls; quit'"
 
       # ---------------- Centmin log inspections --------
-      - name: Nginx configure, patch & PHP-FPM patch logs
+      - name: Nginx configure logs
         continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- cat /root/centminlogs/nginx-configure-* || true
+
+      - name: Nginx patch logs
+        continue-on-error: true
+        run: |
           sudo lxc exec almalinux10 -- cat /root/centminlogs/patch_patchnginx_* || true
+
+      - name: PHP-FPM patch logs
+        continue-on-error: true
+        run: |
           sudo lxc exec almalinux10 -- cat /root/centminlogs/patch_php_* || true
 
       - name: Disk usage snapshot
