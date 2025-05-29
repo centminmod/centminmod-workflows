@@ -42,6 +42,11 @@ jobs:
           sleep 30
           sudo lxc exec almalinux9 -- dnf -y install curl sudo
 
+      # ---------------- Set TERM -----------------
+      - name: Set TERM inside container
+        run: |
+          sudo lxc exec almalinux9 -- sh -c "echo TERM=xterm >> /etc/environment"
+
       # ---------------- Project files ------------------
       - name: Push project scripts into container & chmod
         run: |
