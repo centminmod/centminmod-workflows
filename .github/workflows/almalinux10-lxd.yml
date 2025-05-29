@@ -68,10 +68,10 @@ jobs:
       - name: Install Centmin Mod beta (el10 script)
         run: |
           sudo lxc exec almalinux10 -- bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
-          tail -80 cmm-install.log >> $GITHUB_STEP_SUMMARY
+          tail -30 cmm-install.log >> $GITHUB_STEP_SUMMARY
 
       - name: Show Centmin install log tail
-        run: tail -80 cmm-install.log
+        run: tail -30 cmm-install.log
 
       # ---------------- System information -------------
       - name: AlmaLinux release & repos
@@ -222,12 +222,23 @@ jobs:
           sudo lxc exec almalinux10 -- systemctl status pure-ftpd --no-pager || true
 
       # ---------------- chronyd / CSF / logrotate ------
-      - name: chronyd & CSF checks
+      - name: chronyd checks
         continue-on-error: true
         run: |
           sudo lxc exec almalinux10 -- journalctl -u chronyd --no-pager | tail -n 100 || true
           sudo lxc exec almalinux10 -- systemctl status chronyd --no-pager || echo "chronyd not available"
-          sudo lxc exec almalinux10 -- csf -ra || true
+
+      - name: Inspect CSF Firewall setup
+        continue-on-error: true
+        run: |
+          sudo lxc exec almalinux10 -- sh -c 'echo "---"'
+          sudo lxc exec almalinux10 -- sh -c "grep -E '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          sudo lxc exec almalinux10 -- sh -c 'echo "---"'
+          sudo lxc exec almalinux10 -- sh -c "csf -v"
+          sudo lxc exec almalinux10 -- sh -c 'echo "---"'
+          sudo lxc exec almalinux10 -- sh -c "csf -ra"
+          sudo lxc exec almalinux10 -- sh -c 'echo "---"'
+          sudo lxc exec almalinux10 -- sh -c "cat /etc/csf/csf.allow"
 
       - name: logrotate configs validate
         continue-on-error: true
