@@ -28,11 +28,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y snapd
           sudo snap install lxd
-          # make lxd CLI available in PATH
-          sudo ln -s /var/lib/snapd/snap/bin/lxd /usr/bin/lxd
-          newgrp lxd <<-EOF
-          lxd init --auto
-          EOF
+          # Add current user to lxd group and initialize
+          sudo usermod -aG lxd $USER
+          # Initialize LXD (no interactive prompts)
+          sudo lxd init --auto
 
       - name: Launch AlmaLinux 10 LXD container
         run: |
