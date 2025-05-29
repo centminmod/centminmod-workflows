@@ -51,8 +51,10 @@ source "qemu" "almalinux10" {
 
   boot_command = [
     "<tab><wait>",
-    "linux inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg",
-    " ip=dhcp console=ttyS0,115200n8<enter>"
+    "linux inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/almalinux10-ks.cfg ",
+    "ip=dhcp ",
+    "console=ttyS0,115200n8",
+    "<enter>"
   ]
   boot_wait = "10s"
   format    = "qcow2"
@@ -76,8 +78,8 @@ source "qemu" "almalinux10" {
   communicator = "ssh"
   ssh_username = "root"
   ssh_password = "changeme"
-  ssh_timeout  = "120m"
-  pause_before_connecting = "30m"
+  ssh_timeout  = "150m"
+  pause_before_connecting = "35m"
   ssh_pty      = true
 
   shutdown_command = "shutdown -P now"

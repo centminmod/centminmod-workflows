@@ -71,6 +71,16 @@ jobs:
           
           exit $PACKER_EXIT
 
+      - name: Debug Packer HTTP server
+        if: always()
+        run: |
+          # Start a simple HTTP server to test
+          cd packer/http
+          python3 -m http.server 8000 &
+          sleep 2
+          curl -I http://localhost:8000/almalinux10-ks.cfg
+          kill %1
+
       - name: Display serial console log
         if: always()
         run: |
