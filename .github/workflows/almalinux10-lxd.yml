@@ -45,6 +45,7 @@ jobs:
       # ---------------- Set TERM -----------------
       - name: Set TERM inside container
         run: |
+          sudo lxc config set almalinux9 environment.TERM xterm
           sudo lxc exec almalinux10 -- sh -c "echo TERM=xterm >> /etc/environment"
 
       # ---------------- Project files ------------------
