@@ -136,6 +136,16 @@ jobs:
           docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
         continue-on-error: true
 
+      - name: Inspect ccache YUM install
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -V"
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -s"
+          sleep 1
+          docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+
       - name: Inspect PHP-FPM setup
         run: |
           docker exec cmm_el89 bash -c "echo '---'"

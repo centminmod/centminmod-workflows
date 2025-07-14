@@ -151,6 +151,13 @@ jobs:
           sudo lxc exec almalinux10 -- /usr/local/bin/ccache -s || true
           sudo lxc exec almalinux10 -- grep ccache ~/.bashrc || true
 
+      - name: Ccache YUM presence & stats
+        continue-on-error: true
+        run: |
+          sudo lxc exec almalinux10 -- /usr/bin/ccache -V || true
+          sudo lxc exec almalinux10 -- /usr/bin/ccache -s || true
+          sudo lxc exec almalinux10 -- grep ccache ~/.bashrc || true
+
       # ---------------- PHP-FPM deep dive --------------
       - name: Restart & inspect PHP-FPM
         continue-on-error: true
