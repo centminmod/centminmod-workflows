@@ -343,6 +343,7 @@ jobs:
     - name: centmin.sh menu option 4 Nginx upgrade test
       run: |
         docker exec cmm_el89 /home/centmin-option-4.sh
+        docker exec cmm_el89 bash -c "ccache -s"
       continue-on-error: true
 
     - name: YUM History Info
