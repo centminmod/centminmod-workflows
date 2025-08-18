@@ -24,7 +24,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ALMALINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -1275,7 +1275,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ROCKYLINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -2525,7 +2525,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ORACLELINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
