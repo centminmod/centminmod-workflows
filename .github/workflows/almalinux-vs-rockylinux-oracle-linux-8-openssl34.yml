@@ -36,7 +36,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./dockerfiles/Dockerfile-almalinux8
@@ -1025,7 +1025,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./dockerfiles/Dockerfile-rockylinux8
@@ -2013,7 +2013,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./dockerfiles/Dockerfile-oraclelinux8
