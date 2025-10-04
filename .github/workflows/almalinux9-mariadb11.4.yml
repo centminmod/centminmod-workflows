@@ -205,7 +205,7 @@ jobs:
         docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' '"
       continue-on-error: true
 
-    - name: Inspect MariaDB 10.11 Logs
+    - name: Inspect MariaDB 11.4 Logs
       run: |
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "journalctl -u mariadb --no-pager"
