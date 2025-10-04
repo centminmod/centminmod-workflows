@@ -1,4 +1,4 @@
-name: AlmaLinux 9 with MariaDB 11.4 Default
+name: AlmaLinux 9 with MariaDB 11.8 Default
 
 on:
   workflow_dispatch:
@@ -41,12 +41,12 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 9 + MariaDB 10.11 Default Install
+    - name: Run container Centmmin Mod LEMP AlmaLinux 9 + MariaDB 11.8 Default Install
       run: |
         docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
         docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
-        docker exec cmm_el89 bash -c "echo 'MARIADB_INSTALLELEVENFOUR=y' >> /etc/centminmod/custom_config.inc"
+        docker exec cmm_el89 bash -c "echo 'MARIADB_INSTALLELEVENEIGHT=y' >> /etc/centminmod/custom_config.inc"
         docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
         output=$(tail -20 cmm-install.log)
         echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -384,22 +384,6 @@ jobs:
       with:
         name: almalinux_logs
         path: centminlogs/*
-
-    - name: Trigger Oracle Workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/oraclelinux9.yml/dispatches \
-        -d '{"ref":"master"}'
-
-    - name: Trigger AlmaLinux 9 + MariaDB 11.8
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux9-mariadb11.8.yml/dispatches \
-        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build
