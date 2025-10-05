@@ -64,6 +64,13 @@ jobs:
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
 
+      - name: Monitor MariaDB Service Status
+        run: |
+          echo "=== MariaDB Service Status Check at $(date) ==="
+          docker exec cmm_el89 bash -c "systemctl is-active mariadb.service && echo 'MariaDB is RUNNING' || echo 'MariaDB is NOT running'"
+          docker exec cmm_el89 bash -c "systemctl status mariadb.service --no-pager || true"
+        continue-on-error: true
+
       - name: Display Centmmin Mod LEMP Install Log
         run: |
           echo "Last 80 lines of Centmmin Mod LEMP Install Log:"
@@ -211,26 +218,72 @@ jobs:
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
+      - name: Check MariaDB Logging Configuration
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Logging Configuration ==='"
+          docker exec cmm_el89 bash -c "grep -E 'log-error|log_error' /etc/my.cnf || echo 'No log-error directive in /etc/my.cnf'"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lah /var/log/ | grep -i mysql || echo 'No mysql logs in /var/log/'"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lah /var/lib/mysql/ | grep -i '\.err\|\.log' || echo 'No .err or .log files in /var/lib/mysql/'"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: Inspect MariaDB setup
         run: |
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Service Status ==='"
+          docker exec cmm_el89 bash -c "systemctl status mariadb.service --no-pager -l || true"
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "systemctl status mariadb.service"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Journal (Last 100 Lines) ==='"
+          docker exec cmm_el89 bash -c "journalctl -u mariadb --no-pager -n 100 || true"
           docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== /etc/my.cnf Configuration ==='"
           docker exec cmm_el89 bash -c "cat /etc/my.cnf"
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Plugins (if accessible) ==='"
+          docker exec cmm_el89 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;" 2>&1 || echo "MariaDB not accessible for query"'
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
-          docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
         continue-on-error: true
 
       - name: Debug MariaDB setup
         run: |
-          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Data Directory ==='"
           docker exec cmm_el89 bash -c "ls -lAhrt /var/lib/mysql"
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "cat /var/lib/mysql/*.err || true"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Error Logs (if any) ==='"
+          docker exec cmm_el89 bash -c "cat /var/lib/mysql/*.err 2>/dev/null || echo 'No .err files found in /var/lib/mysql/'"
+          docker exec cmm_el89 bash -c "cat /var/log/mysqld.log 2>/dev/null || echo 'No /var/log/mysqld.log file'"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Full MariaDB Systemd Journal (Last 200 Lines) ==='"
+          docker exec cmm_el89 bash -c "journalctl -u mariadb --no-pager -n 200 || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Systemd Service Status (Detailed) ==='"
+          docker exec cmm_el89 bash -c "systemctl status mariadb.service -l --no-pager || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Systemd Drop-in Files ==='"
+          docker exec cmm_el89 bash -c "ls -lAh /etc/systemd/system/mariadb.service.d/ || echo 'No drop-in directory'"
+          docker exec cmm_el89 bash -c "cat /etc/systemd/system/mariadb.service.d/*.conf || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Socket Check ==='"
+          docker exec cmm_el89 bash -c "ls -lah /var/lib/mysql/mysql.sock || echo 'Socket file does not exist'"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Process Check ==='"
+          docker exec cmm_el89 bash -c "ps aux | grep -E 'maria|mysql' | grep -v grep || echo 'No MariaDB processes running'"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Attempt MariaDB Service Restart
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Attempting to Start MariaDB ==='"
+          docker exec cmm_el89 bash -c "systemctl start mariadb.service"
+          docker exec cmm_el89 bash -c "echo 'Waiting 5 seconds...'"
+          sleep 5
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Status After Start Attempt ==='"
+          docker exec cmm_el89 bash -c "systemctl status mariadb.service --no-pager || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MariaDB Journal After Start Attempt (Last 50 Lines) ==='"
+          docker exec cmm_el89 bash -c "journalctl -u mariadb --no-pager -n 50 || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
         continue-on-error: true
