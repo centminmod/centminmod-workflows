@@ -370,6 +370,145 @@ jobs:
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
+      - name: Enable ProxySQL Query Cache
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Configuring ProxySQL Query Cache ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='256' WHERE variable_name='mysql-query_cache_size_MB';\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='true' WHERE variable_name='mysql-query_cache_store_empty_result';\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL VARIABLES TO RUNTIME; SAVE MYSQL VARIABLES TO DISK;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Query Cache Configuration ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT variable_name, variable_value FROM global_variables WHERE variable_name LIKE '%cache%';\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Create ProxySQL Query Cache Rules
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Creating Test Database for Cache Testing ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 3306 -e \"CREATE DATABASE IF NOT EXISTS cachetest; USE cachetest; CREATE TABLE IF NOT EXISTS products (id INT PRIMARY KEY, name VARCHAR(100), price DECIMAL(10,2)); INSERT INTO products VALUES (1, 'Product A', 19.99), (2, 'Product B', 29.99), (3, 'Product C', 39.99) ON DUPLICATE KEY UPDATE name=VALUES(name);\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Generating Query Digest ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT * FROM cachetest.products;\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT digest, digest_text FROM stats_mysql_query_digest WHERE digest_text LIKE '%cachetest%' ORDER BY last_seen DESC LIMIT 5;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Creating Cache Rule with 10 Second TTL ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup, cache_ttl, apply) VALUES (100, 1, '^SELECT.*FROM cachetest\\\\.products', 10, 10000, 1);\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL QUERY RULES TO RUNTIME; SAVE MYSQL QUERY RULES TO DISK;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Verify Cache Rules ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT rule_id, match_pattern, cache_ttl, hits FROM mysql_query_rules WHERE cache_ttl > 0;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Test ProxySQL Query Cache Effectiveness
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Query Cache Performance Test ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT * FROM stats.stats_mysql_query_digest_reset;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Baseline: First Query Execution (Cache MISS) ==='"
+          docker exec cmm_el89 bash -c "time mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT * FROM cachetest.products WHERE price > 20;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Cache Hit Test: Execute Same Query 5 Times ==='"
+          docker exec cmm_el89 bash -c "for i in {1..5}; do echo \"Query \$i:\"; time mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT * FROM cachetest.products WHERE price > 20;\"; done || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Cache Statistics ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SHOW GLOBAL STATUS LIKE 'Query_Cache%';\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Query Rule Hits (Should Show 5+ Hits) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT rule_id, match_pattern, cache_ttl, hits FROM mysql_query_rules WHERE cache_ttl > 0;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Backend Connection Pool (Should Show Minimal Query Increase) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT hostgroup, srv_host, Queries, Bytes_data_sent, Bytes_data_recv FROM stats_mysql_connection_pool;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Test ProxySQL Cache TTL Expiration
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Cache TTL Expiration Test ==='"
+          docker exec cmm_el89 bash -c "echo '=== Execute Query to Populate Cache ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT COUNT(*) as total_products FROM cachetest.products;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Cache Entries Before TTL Expiration ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SHOW GLOBAL STATUS LIKE 'Query_Cache_Entries';\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Waiting 12 Seconds (TTL=10s + 2s buffer) for Cache Expiration ==='"
+          sleep 12
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Cache Entries After TTL Expiration (Should Be Lower) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SHOW GLOBAL STATUS LIKE 'Query_Cache_Entries';\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Execute Query Again (Should Be Cache MISS After Expiration) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT COUNT(*) as total_products FROM cachetest.products;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Test Cache Behavior on Data Modification
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Cache Invalidation Test (Data Modification) ==='"
+          docker exec cmm_el89 bash -c "echo '=== Execute Query to Populate Cache ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT * FROM cachetest.products WHERE id = 1;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Modify Data in Backend MariaDB (Bypassing ProxySQL Cache) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 3306 -e \"UPDATE cachetest.products SET price = 99.99 WHERE id = 1;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Execute Same Query Again (Will Return STALE Cached Data) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"SELECT * FROM cachetest.products WHERE id = 1;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Direct Backend Query (Shows Updated Price) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 3306 -e \"SELECT * FROM cachetest.products WHERE id = 1;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== NOTE: ProxySQL Query Cache has NO automatic invalidation mechanism ==='"
+          docker exec cmm_el89 bash -c "echo '=== Cache entries only expire via TTL timeout ==='"
+          docker exec cmm_el89 bash -c "echo '=== This is documented behavior - best for read-heavy workloads with tolerable staleness ==='"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Test ProxySQL Prepared Statements Cache
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== Prepared Statements Cache Test ==='"
+          docker exec cmm_el89 bash -c "echo '=== Baseline: Prepared Statement Statistics Before Test ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT * FROM stats_mysql_prepared_statements_info;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Execute Prepared Statement Test (PREPARE + EXECUTE x3 + DEALLOCATE) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"PREPARE stmt1 FROM 'SELECT * FROM cachetest.products WHERE price > ?'; SET @price_threshold = 20.00; EXECUTE stmt1 USING @price_threshold; EXECUTE stmt1 USING @price_threshold; EXECUTE stmt1 USING @price_threshold; DEALLOCATE PREPARE stmt1;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Re-PREPARE Same Statement (Should Use Global Prepared Statement Cache) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u proxyuser -pproxypass123 -h 127.0.0.1 -P 6033 -e \"PREPARE stmt2 FROM 'SELECT * FROM cachetest.products WHERE price > ?'; SET @price_threshold = 30.00; EXECUTE stmt2 USING @price_threshold; DEALLOCATE PREPARE stmt2;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Prepared Statement Statistics After Test ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT * FROM stats_mysql_prepared_statements_info;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Backend Connection Queries (Should Show Prepared Statement Reuse) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT hostgroup, srv_host, Queries FROM stats_mysql_connection_pool;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== NOTE: Prepared statements have SEPARATE cache from query result cache ==='"
+          docker exec cmm_el89 bash -c "echo '=== Prepared statement cache persists statements across frontend close ==='"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: ProxySQL Cache Statistics Summary
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== ProxySQL Caching Statistics Summary ==='"
+          docker exec cmm_el89 bash -c "echo '=== Query Cache Global Status ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SHOW GLOBAL STATUS LIKE 'Query_Cache%';\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Query Cache Rules and Hit Counts ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT rule_id, active, match_pattern, cache_ttl, hits FROM mysql_query_rules WHERE cache_ttl > 0 ORDER BY hits DESC;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Cache Configuration Variables ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT variable_name, variable_value FROM global_variables WHERE variable_name LIKE '%cache%' ORDER BY variable_name;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Query Digest Performance (Top 10 by Total Time) ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT digest_text, count_star, sum_time, sum_time/count_star as avg_time_us FROM stats_mysql_query_digest ORDER BY sum_time DESC LIMIT 10;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Backend Connection Pool Final Stats ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT hostgroup, srv_host, status, Queries, ConnUsed, ConnFree, Bytes_data_sent, Bytes_data_recv FROM stats_mysql_connection_pool;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Prepared Statements Cache Stats ==='"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT * FROM stats_mysql_prepared_statements_info;\" || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: Inspect Python3 setup
         run: |
           sleep 1
