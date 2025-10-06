@@ -122,5 +122,9 @@ RUN chmod +x /home/centmin-option-5-php8.3.sh
 COPY scripts/centmin-option-5-php8.4.sh /home/centmin-option-5-php8.4.sh
 RUN chmod +x /home/centmin-option-5-php8.4.sh
 
+# Copy MySQLTuner v2.7.0 with Centmin Mod customizations
+COPY scripts/mysqltuner.pl /home/mysqltuner.pl
+RUN chmod +x /home/mysqltuner.pl
+
 VOLUME [ "/sys/fs/cgroup", "/run", "/tmp" ]
 CMD ["/sbin/init"]

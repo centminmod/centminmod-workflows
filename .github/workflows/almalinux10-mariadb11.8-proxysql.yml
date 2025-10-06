@@ -509,6 +509,26 @@ jobs:
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
+      - name: Run MySQLTuner Analysis
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== MySQLTuner v2.7.0 MariaDB Performance Analysis ==='"
+          docker exec cmm_el89 bash -c "echo '=== Modified by George Liu (eva2000) at https://centminmod.com/ ==='"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Installing Perl Dependencies ==='"
+          docker exec cmm_el89 bash -c "dnf install -y perl perl-DBI perl-DBD-MySQL perl-Digest-MD5 perl-Socket || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Running MySQLTuner (MariaDB 11.8 Direct via Socket) ==='"
+          docker exec cmm_el89 bash -c "perl /home/mysqltuner.pl --socket /var/lib/mysql/mysql.sock --verbose || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== Running MySQLTuner (MariaDB 11.8 via ProxySQL Port 6033) ==='"
+          docker exec cmm_el89 bash -c "perl /home/mysqltuner.pl --host 127.0.0.1 --port 6033 --user proxyuser --pass proxypass123 --verbose || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== MySQLTuner Analysis Complete ==='"
+          docker exec cmm_el89 bash -c "echo 'NOTE: Memory usage warnings include extended Centmin Mod explanations'"
+          docker exec cmm_el89 bash -c "echo 'These explain why theoretical max memory warnings should not be taken literally'"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: Inspect Python3 setup
         run: |
           sleep 1
