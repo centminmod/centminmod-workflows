@@ -118,8 +118,8 @@ log "Patching deps/Makefile to fix configure script permissions..."
 # Backup original Makefile
 cp deps/Makefile deps/Makefile.backup
 
-# Replace ALL ./configure with bash configure + TMPDIR (single global replacement)
-sed -i "s|\./configure|TMPDIR=$CUSTOM_TMPDIR bash configure|g" deps/Makefile
+# Replace ALL ./configure commands with bash configure + TMPDIR (matches only commands, not file paths)
+sed -i "s| \./configure| TMPDIR=$CUSTOM_TMPDIR bash configure|g" deps/Makefile
 
 # Verify patches were applied
 log "DEBUG: Verifying Makefile patches..."
@@ -134,8 +134,8 @@ CPU_CORES=$(nproc)
 log "Using $CPU_CORES CPU cores for compilation"
 
 # Disable problematic GCC warnings
-export CFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement"
-export CXXFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement"
+export CFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement -Wno-deprecated-declarations -Wno-stringop-truncation -Wno-format-overflow -Wno-switch-outside-range"
+export CXXFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement -Wno-deprecated-declarations -Wno-stringop-truncation -Wno-format-overflow -Wno-switch-outside-range"
 
 make -j"$CPU_CORES" 2>&1 | tee -a "$INSTALL_LOG"
 
