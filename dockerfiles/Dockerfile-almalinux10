@@ -86,6 +86,9 @@ RUN chmod +x /home/sysbench-run.sh
 COPY scripts/mariadb-ssl-setup.sh /home/mariadb-ssl-setup.sh
 RUN chmod +x /home/mariadb-ssl-setup.sh
 
+COPY scripts/proxysql_install.sh /home/proxysql_install.sh
+RUN chmod +x /home/proxysql_install.sh
+
 COPY scripts/centmin-option-24.sh /home/centmin-option-24.sh
 RUN chmod +x /home/centmin-option-24.sh
 
