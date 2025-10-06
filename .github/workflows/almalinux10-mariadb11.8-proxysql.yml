@@ -315,26 +315,26 @@ jobs:
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== Configuring ProxySQL ==='"
           docker exec cmm_el89 bash -c "sleep 5"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"INSERT INTO mysql_servers(hostgroup_id, hostname, port, max_connections) VALUES (10, '127.0.0.1', 3306, 200);\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='proxysql_monitor' WHERE variable_name='mysql-monitor_username';\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='monitor123' WHERE variable_name='mysql-monitor_password';\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"INSERT INTO mysql_users(username, password, default_hostgroup, transaction_persistent) VALUES ('proxyuser', 'proxypass123', 10, 1);\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL SERVERS TO RUNTIME; SAVE MYSQL SERVERS TO DISK;\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL VARIABLES TO RUNTIME; SAVE MYSQL VARIABLES TO DISK;\" || true"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL USERS TO RUNTIME; SAVE MYSQL USERS TO DISK;\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"INSERT INTO mysql_servers(hostgroup_id, hostname, port, max_connections) VALUES (10, '127.0.0.1', 3306, 200);\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='proxysql_monitor' WHERE variable_name='mysql-monitor_username';\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"UPDATE global_variables SET variable_value='monitor123' WHERE variable_name='mysql-monitor_password';\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"INSERT INTO mysql_users(username, password, default_hostgroup, transaction_persistent) VALUES ('proxyuser', 'proxypass123', 10, 1);\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL SERVERS TO RUNTIME; SAVE MYSQL SERVERS TO DISK;\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL VARIABLES TO RUNTIME; SAVE MYSQL VARIABLES TO DISK;\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"LOAD MYSQL USERS TO RUNTIME; SAVE MYSQL USERS TO DISK;\" || true"
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
       - name: Verify ProxySQL Configuration
         run: |
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Backend Servers ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM mysql_servers;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM mysql_servers;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Users ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT username, default_hostgroup FROM mysql_users;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT username, default_hostgroup FROM mysql_users;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Global Variables (Connection Settings) ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT variable_name, variable_value FROM global_variables WHERE variable_name LIKE 'mysql-%connection%' OR variable_name LIKE 'mysql-monitor%';\" || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e \"SELECT variable_name, variable_value FROM global_variables WHERE variable_name LIKE 'mysql-%connection%' OR variable_name LIKE 'mysql-monitor%';\" || true"
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
@@ -354,19 +354,19 @@ jobs:
       - name: Monitor ProxySQL Backend Health and Statistics
         run: |
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Connection Pool Stats ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_connection_pool;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_connection_pool;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Ping Health Checks ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM monitor.mysql_server_ping_log ORDER BY time_start_us DESC LIMIT 5;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM monitor.mysql_server_ping_log ORDER BY time_start_us DESC LIMIT 5;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Connect Health Checks ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM monitor.mysql_server_connect_log ORDER BY time_start_us DESC LIMIT 5;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM monitor.mysql_server_connect_log ORDER BY time_start_us DESC LIMIT 5;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Query Digest Stats ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_query_digest ORDER BY sum_time DESC LIMIT 10;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_query_digest ORDER BY sum_time DESC LIMIT 10;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Commands Stats ==='"
-          docker exec cmm_el89 bash -c "mysql -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_commands_counters WHERE Total_cnt > 0 ORDER BY Total_cnt DESC;' || true"
+          docker exec cmm_el89 bash -c "mariadb -u admin -padmin -h 127.0.0.1 -P6032 -e 'SELECT * FROM stats_mysql_commands_counters WHERE Total_cnt > 0 ORDER BY Total_cnt DESC;' || true"
           docker exec cmm_el89 bash -c "echo '---'"
         continue-on-error: true
 
