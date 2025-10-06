@@ -105,11 +105,22 @@ fi
 
 cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
+# Fix execute permissions on dependency configure scripts
+log "Fixing execute permissions on dependency configure scripts..."
+chmod +x deps/libdaemon/libdaemon/configure 2>/dev/null || true
+chmod +x deps/libconfig/libconfig/configure 2>/dev/null || true
+chmod +x deps/jemalloc/jemalloc/configure 2>/dev/null || true
+log "✓ Configure script permissions fixed"
+
 # Step 3: Compile ProxySQL
 log "Step 3/10: Compiling ProxySQL (this may take 2-3 minutes)..."
 
 CPU_CORES=$(nproc)
 log "Using $CPU_CORES CPU cores for compilation"
+
+# Disable problematic GCC warnings
+export CFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement"
+export CXXFLAGS="-Wno-maybe-uninitialized -Wno-declaration-after-statement"
 
 make -j"$CPU_CORES" 2>&1 | tee -a "$INSTALL_LOG"
 
