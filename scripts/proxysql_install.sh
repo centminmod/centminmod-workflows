@@ -105,11 +105,12 @@ fi
 
 cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
-# Set custom TMPDIR to avoid /tmp noexec restrictions
-CUSTOM_TMPDIR="$PROXYSQL_BUILD_DIR/tmp_build"
+# Set custom TMPDIR OUTSIDE /tmp to avoid noexec restrictions
+# Use /root which has exec permissions in Docker containers
+CUSTOM_TMPDIR="/root/proxysql_tmp_build"
 mkdir -p "$CUSTOM_TMPDIR"
 export TMPDIR="$CUSTOM_TMPDIR"
-log "Set TMPDIR=$TMPDIR to avoid /tmp noexec restrictions"
+log "Set TMPDIR=$TMPDIR (outside /tmp to avoid noexec restrictions)"
 
 # Patch deps/Makefile to use bash for configure execution with custom TMPDIR
 log "Patching deps/Makefile to fix configure script permissions..."
@@ -117,14 +118,8 @@ log "Patching deps/Makefile to fix configure script permissions..."
 # Backup original Makefile
 cp deps/Makefile deps/Makefile.backup
 
-# Patch libdaemon: use bash to execute configure with custom TMPDIR
-sed -i 's|&& \./configure --disable-examples|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure --disable-examples|' deps/Makefile
-
-# Patch libconfig: use bash to execute configure with custom TMPDIR
-sed -i 's|&& \./configure --disable-examples|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure --disable-examples|' deps/Makefile
-
-# Patch jemalloc: use bash to execute configure with custom TMPDIR (matches ${MYJEOPT} variable)
-sed -i 's|&& \./configure \${MYJEOPT}|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure ${MYJEOPT}|' deps/Makefile
+# Replace ALL ./configure with bash configure + TMPDIR (single global replacement)
+sed -i "s|\./configure|TMPDIR=$CUSTOM_TMPDIR bash configure|g" deps/Makefile
 
 # Verify patches were applied
 log "DEBUG: Verifying Makefile patches..."
