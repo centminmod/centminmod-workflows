@@ -95,7 +95,7 @@ if [ -d "$PROXYSQL_BUILD_DIR" ]; then
     rm -rf "$PROXYSQL_BUILD_DIR"
 fi
 
-git clone --depth 1 --branch "v$PROXYSQL_VERSION" "$PROXYSQL_GIT_REPO" "$PROXYSQL_BUILD_DIR" 2>&1 | tee -a "$INSTALL_LOG"
+git clone --branch "v$PROXYSQL_VERSION" "$PROXYSQL_GIT_REPO" "$PROXYSQL_BUILD_DIR" 2>&1 | tee -a "$INSTALL_LOG"
 
 if [ ${PIPESTATUS[0]} -eq 0 ]; then
     log "✓ ProxySQL source code downloaded successfully"
