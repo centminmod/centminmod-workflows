@@ -121,9 +121,15 @@ cp deps/Makefile deps/Makefile.backup
 # Replace ALL ./configure commands with bash configure + TMPDIR (matches only commands, not file paths)
 sed -i "s| \./configure| TMPDIR=$CUSTOM_TMPDIR bash configure|g" deps/Makefile
 
+# Patch re2 compilation to force -fPIC for static library objects
+# This ensures libhttpserver can link against libre2.a when building shared libraries
+log "Patching re2 make command to add CXXFLAGS=\"-fPIC\"..."
+sed -i 's|cd re2/re2 && CC=cc CXX=g++ make|cd re2/re2 \&\& CC=cc CXX=g++ CXXFLAGS="-fPIC" make|g' deps/Makefile
+
 # Verify patches were applied
 log "DEBUG: Verifying Makefile patches..."
 grep -n "bash configure" deps/Makefile 2>&1 | tee -a "$INSTALL_LOG" || warn "No bash configure patches found in Makefile"
+grep -n 'CXXFLAGS="-fPIC"' deps/Makefile 2>&1 | tee -a "$INSTALL_LOG" || warn "No CXXFLAGS re2 patches found in Makefile"
 
 log "✓ deps/Makefile patched successfully"
 
