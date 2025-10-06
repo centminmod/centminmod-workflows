@@ -105,24 +105,30 @@ fi
 
 cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
-# Patch deps/Makefile to add chmod +x configure before ./configure calls
+# Set custom TMPDIR to avoid /tmp noexec restrictions
+CUSTOM_TMPDIR="$PROXYSQL_BUILD_DIR/tmp_build"
+mkdir -p "$CUSTOM_TMPDIR"
+export TMPDIR="$CUSTOM_TMPDIR"
+log "Set TMPDIR=$TMPDIR to avoid /tmp noexec restrictions"
+
+# Patch deps/Makefile to use bash for configure execution with custom TMPDIR
 log "Patching deps/Makefile to fix configure script permissions..."
 
 # Backup original Makefile
 cp deps/Makefile deps/Makefile.backup
 
-# Patch libdaemon: add chmod before ./configure
-sed -i 's|\(config\.sub && \)\(./configure --disable-examples\)|\1chmod +x configure \&\& \2|' deps/Makefile
+# Patch libdaemon: use bash to execute configure with custom TMPDIR
+sed -i 's|&& \./configure --disable-examples|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure --disable-examples|' deps/Makefile
 
-# Patch libconfig: add chmod before ./configure
-sed -i 's|\(libconfig/libconfig && \)\(./configure --disable-examples\)|\1chmod +x configure \&\& \2|' deps/Makefile
+# Patch libconfig: use bash to execute configure with custom TMPDIR
+sed -i 's|&& \./configure --disable-examples|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure --disable-examples|' deps/Makefile
 
-# Patch jemalloc: add chmod before ./configure
-sed -i 's|\(jemalloc/jemalloc && \)\(./configure --enable-xmalloc\)|\1chmod +x configure \&\& \2|' deps/Makefile
+# Patch jemalloc: use bash to execute configure with custom TMPDIR (matches ${MYJEOPT} variable)
+sed -i 's|&& \./configure \${MYJEOPT}|&& TMPDIR='"$CUSTOM_TMPDIR"' bash configure ${MYJEOPT}|' deps/Makefile
 
 # Verify patches were applied
 log "DEBUG: Verifying Makefile patches..."
-grep -n "chmod +x configure" deps/Makefile 2>&1 | tee -a "$INSTALL_LOG" || warn "No chmod patches found in Makefile"
+grep -n "bash configure" deps/Makefile 2>&1 | tee -a "$INSTALL_LOG" || warn "No bash configure patches found in Makefile"
 
 log "✓ deps/Makefile patched successfully"
 
