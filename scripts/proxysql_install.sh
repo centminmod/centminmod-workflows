@@ -10,7 +10,7 @@ set -e  # Exit on error
 # Configuration Variables
 PROXYSQL_VERSION="3.0.2"
 PROXYSQL_GIT_REPO="https://github.com/sysown/proxysql.git"
-PROXYSQL_BUILD_DIR="/tmp/proxysql"
+PROXYSQL_BUILD_DIR="/root/proxysql"
 PROXYSQL_USER="proxysql"
 PROXYSQL_GROUP="proxysql"
 PROXYSQL_DATA_DIR="/var/lib/proxysql"
@@ -105,12 +105,12 @@ fi
 
 cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
-# Set custom TMPDIR OUTSIDE /tmp to avoid noexec restrictions
-# Use /root which has exec permissions in Docker containers
-CUSTOM_TMPDIR="/root/proxysql_tmp_build"
+# Set custom TMPDIR for configure test programs
+# Build directory is already outside /tmp to avoid noexec restrictions
+CUSTOM_TMPDIR="$PROXYSQL_BUILD_DIR/tmp_build"
 mkdir -p "$CUSTOM_TMPDIR"
 export TMPDIR="$CUSTOM_TMPDIR"
-log "Set TMPDIR=$TMPDIR (outside /tmp to avoid noexec restrictions)"
+log "Set TMPDIR=$TMPDIR (build directory outside /tmp to avoid noexec restrictions)"
 
 # Patch deps/Makefile to use bash for configure execution with custom TMPDIR
 log "Patching deps/Makefile to fix configure script permissions..."
