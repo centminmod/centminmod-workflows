@@ -107,9 +107,9 @@ cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
 # Fix execute permissions on dependency configure scripts
 log "Fixing execute permissions on dependency configure scripts..."
-chmod +x deps/libdaemon/libdaemon/configure 2>/dev/null || true
-chmod +x deps/libconfig/libconfig/configure 2>/dev/null || true
-chmod +x deps/jemalloc/jemalloc/configure 2>/dev/null || true
+chmod +x libdaemon/libdaemon/configure 2>/dev/null || true
+chmod +x libconfig/libconfig/configure 2>/dev/null || true
+chmod +x jemalloc/jemalloc/configure 2>/dev/null || true
 log "✓ Configure script permissions fixed"
 
 # Step 3: Compile ProxySQL
