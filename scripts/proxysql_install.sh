@@ -105,12 +105,26 @@ fi
 
 cd "$PROXYSQL_BUILD_DIR" || error "Failed to change to build directory"
 
-# Fix execute permissions on dependency configure scripts
-log "Fixing execute permissions on dependency configure scripts..."
-chmod +x libdaemon/libdaemon/configure 2>/dev/null || true
-chmod +x libconfig/libconfig/configure 2>/dev/null || true
-chmod +x jemalloc/jemalloc/configure 2>/dev/null || true
-log "✓ Configure script permissions fixed"
+# Patch deps/Makefile to add chmod +x configure before ./configure calls
+log "Patching deps/Makefile to fix configure script permissions..."
+
+# Backup original Makefile
+cp deps/Makefile deps/Makefile.backup
+
+# Patch libdaemon: add chmod before ./configure
+sed -i 's|\(config\.sub && \)\(./configure --disable-examples\)|\1chmod +x configure \&\& \2|' deps/Makefile
+
+# Patch libconfig: add chmod before ./configure
+sed -i 's|\(libconfig/libconfig && \)\(./configure --disable-examples\)|\1chmod +x configure \&\& \2|' deps/Makefile
+
+# Patch jemalloc: add chmod before ./configure
+sed -i 's|\(jemalloc/jemalloc && \)\(./configure --enable-xmalloc\)|\1chmod +x configure \&\& \2|' deps/Makefile
+
+# Verify patches were applied
+log "DEBUG: Verifying Makefile patches..."
+grep -n "chmod +x configure" deps/Makefile 2>&1 | tee -a "$INSTALL_LOG" || warn "No chmod patches found in Makefile"
+
+log "✓ deps/Makefile patched successfully"
 
 # Step 3: Compile ProxySQL
 log "Step 3/10: Compiling ProxySQL (this may take 2-3 minutes)..."
