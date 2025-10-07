@@ -275,7 +275,20 @@ class ProxySQLAnalyzer:
         """
 
         results = self.execute_query(query)
-        return [QueryDigest(*row) for row in results]
+        return [
+            QueryDigest(
+                hostgroup=int(row[0]) if str(row[0]).isdigit() else 0,
+                schemaname=str(row[1]),
+                username=str(row[2]),
+                digest=str(row[3]),
+                digest_text=str(row[4]),
+                count_star=int(row[5]) if str(row[5]).isdigit() else 0,
+                sum_time=int(row[6]) if str(row[6]).isdigit() else 0,
+                min_time=int(row[7]) if str(row[7]).isdigit() else 0,
+                max_time=int(row[8]) if str(row[8]).isdigit() else 0
+            )
+            for row in results
+        ]
 
     def get_cache_stats(self) -> CacheStats:
         """Fetch query cache statistics"""
@@ -377,7 +390,13 @@ class ProxySQLAnalyzer:
         ORDER BY rule_id
         """
 
-        return self.execute_query(query)
+        results = self.execute_query(query)
+        return [
+            (int(row[0]) if str(row[0]).isdigit() else 0,
+             str(row[1]),
+             int(row[2]) if str(row[2]).isdigit() else 0)
+            for row in results
+        ]
 
     def get_global_stats(self) -> GlobalStats:
         """Fetch ProxySQL global performance statistics"""
