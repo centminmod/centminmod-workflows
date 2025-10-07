@@ -125,7 +125,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 **Download the script**:
 ```bash
-wget https://raw.githubusercontent.com/centminmod/centminmod-workflows/master/scripts/proxysql_report.py
+wget https://raw.githubusercontent.com/centminmod/centminmod-proxysql-report/master/proxysql_report.py
 chmod +x proxysql_report.py
 ```
 
@@ -1380,20 +1380,20 @@ uv run proxysql_report.py \
 
 ```
 proxysql_report.py (844 lines)
-   PEP 723 Metadata (lines 1-10)
-   Dataclasses (lines 60-211)
-      QueryStats
-      CacheStats
-      ConnectionPoolStats (with 6 @property methods)
-      HealthCheckStats
-      GlobalStats
-   ProxySQLAnalyzer Class (lines 213-804)
-      Connection Management
-      Data Retrieval Methods (9 methods)
-      Analysis Methods (6 methods)
-      Print Methods (10 methods)
-      Main run_analysis() orchestrator
-   CLI Entry Point (lines 806-844)
+ PEP 723 Metadata (lines 1-10)
+ Dataclasses (lines 60-211)
+    QueryStats
+    CacheStats
+    ConnectionPoolStats (with 6 @property methods)
+    HealthCheckStats
+    GlobalStats
+ ProxySQLAnalyzer Class (lines 213-804)
+    Connection Management
+    Data Retrieval Methods (9 methods)
+    Analysis Methods (6 methods)
+    Print Methods (10 methods)
+    Main run_analysis() orchestrator
+ CLI Entry Point (lines 806-844)
 ```
 
 ---
@@ -1431,27 +1431,27 @@ proxysql_report.py (844 lines)
 
 ```
 1. Connection Establishment
-    > ProxySQL Admin Interface (port 6032)
+   > ProxySQL Admin Interface (port 6032)
 
 2. Data Collection
-    > Query Digest (stats_mysql_query_digest)
-    > Cache Stats (stats_mysql_global)
-    > Connection Pool (stats_mysql_connection_pool)
-    > Global Stats (stats_mysql_global)
-    > Health Checks (monitor.mysql_server_ping_log, connect_log)
-    > Command Counters (stats_mysql_commands_counters)
-    > Configuration (global_variables, mysql_query_rules)
+   > Query Digest (stats_mysql_query_digest)
+   > Cache Stats (stats_mysql_global)
+   > Connection Pool (stats_mysql_connection_pool)
+   > Global Stats (stats_mysql_global)
+   > Health Checks (monitor.mysql_server_ping_log, connect_log)
+   > Command Counters (stats_mysql_commands_counters)
+   > Configuration (global_variables, mysql_query_rules)
 
 3. Analysis Engine
-    > Cache Scoring Algorithm
-    > Efficiency Score Calculation
-    > TTL Recommendation Logic
-    > Health Threshold Evaluation
+   > Cache Scoring Algorithm
+   > Efficiency Score Calculation
+   > TTL Recommendation Logic
+   > Health Threshold Evaluation
 
 4. Output Generation
-    > Formatted Console Output
-    > SQL Cache Rules
-    > Tuning Recommendations
+   > Formatted Console Output
+   > SQL Cache Rules
+   > Tuning Recommendations
 ```
 
 ---
@@ -1515,16 +1515,11 @@ The script is designed for extensibility:
 - [ProxySQL Tools](https://github.com/sysown/proxysql/tree/master/tools) - Official ProxySQL utilities
 
 ---
-
-## Contributing
-
-Contributions are welcome! Please submit issues and pull requests to the [Centmin Mod Workflows](https://github.com/centminmod/centminmod-workflows) repository.
-
 ### Development Setup
 
 ```bash
-git clone https://github.com/centminmod/centminmod-workflows.git
-cd centminmod-workflows/scripts
+git clone https://github.com/centminmod/centminmod-proxysql-report.git
+cd centminmod-proxysql-report
 ```
 
 ### Testing
@@ -1536,12 +1531,6 @@ uv run proxysql_report.py --host testproxy.local --port 6032 --user admin --pass
 # Validate output formatting
 uv run proxysql_report.py --host 127.0.0.1 --port 6032 --user admin --password admin | tee test_output.txt
 ```
-
----
-
-## License
-
-This script is part of the Centmin Mod project and is provided as-is for use with ProxySQL deployments.
 
 ---
 
@@ -1566,15 +1555,3 @@ This script is part of the Centmin Mod project and is provided as-is for use wit
 - ( Automated TTL recommendations
 
 ---
-
-## Support
-
-For issues, questions, or feature requests:
-
-- **Forum**: [Centmin Mod Community](https://community.centminmod.com/)
-- **GitHub**: [centminmod/centminmod-workflows](https://github.com/centminmod/centminmod-workflows)
-- **Documentation**: [Centmin Mod Docs](https://centminmod.com/)
-
----
-
-**by George Liu (eva2000) at https://centminmod.com/**
