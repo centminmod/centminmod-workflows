@@ -1,4 +1,4 @@
-# ProxySQL Metrics Analyzer v1.1.0
+# ProxySQL Metrics Analyzer
 
 **Technical Documentation and User Manual**
 
@@ -29,19 +29,6 @@
 ## Overview
 
 ProxySQL Metrics Analyzer is a Python script designed to analyze ProxySQL performance metrics and provide actionable recommendations for query caching optimization and connection pool tuning. It connects to the ProxySQL admin interface (default port 6032) and generates comprehensive reports with efficiency scores, health check monitoring, and automated cache rule suggestions.
-
-### Version History
-
-- **v1.1.0** (Current)
-  - Connection pool efficiency analysis with derived metrics
-  - Global performance metrics and multiplexing ratio
-  - Backend health monitoring (ping/connect checks)
-  - Enhanced recommendations engine
-
-- **v1.0.0** (Initial Release)
-  - Query digest analysis and cache rule generation
-  - Basic connection pool statistics
-  - Command counter analysis
 
 ---
 
