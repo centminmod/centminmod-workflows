@@ -168,7 +168,7 @@ uv run proxysql_report.py
 ### Example Output
 
 ```
- >>  ProxySQL Metrics Analyzer 1.1.0
+ >>  ProxySQL Metrics Analyzer 1.2.0
      * Analysis tool for ProxySQL query caching optimization
  >>  by George Liu (eva2000) at https://centminmod.com/
  >>  ProxySQL Admin Interface Analysis
@@ -216,6 +216,31 @@ Connect     192.168.1.10:3306   60            1                 98.3% 2.15
 Ping        192.168.1.11:3306   60            0                100.0% 0.52
 Connect     192.168.1.11:3306   60            0                100.0% 1.98
 
+-------- Free Connection Pool Analysis --------------------------------------------------
+Total Free Connections: 47
+Stale Connections (idle > 5min): 3 (6.4%)
+Average Idle Time: 23.4s
+Max Idle Time: 8.2 minutes
+
+Free Connections by Hostgroup:
+  Hostgroup 10: 28 connections
+  Hostgroup 20: 19 connections
+
+Free Connections by User:
+  proxyuser: 42 connections
+  appuser: 5 connections
+
+-------- ProxySQL Memory Usage ----------------------------------------------------------
+Jemalloc Allocated: 234.56 MB
+Jemalloc Resident (RSS): 312.45 MB
+Memory Overhead: 33.2%
+
+Component Memory Breakdown:
+  Query Digest Cache: 45.23 MB
+  Auth Cache: 2.34 MB
+  SQLite: 12.67 MB
+  Thread Stacks: 80.00 MB
+
 -------- Command Counters (Top 10) -----------------------------------------------------
 Command             Total Count    Total Time (μs)
 -------------------------------------------------------
@@ -236,6 +261,20 @@ mysql-query_cache_handle_warnings: 0
 mysql-query_cache_size_MB: 256
 mysql-query_cache_soft_ttl_pct: 0
 mysql-query_cache_stores_empty_result: true
+
+-------- Monitor Configuration ----------------------------------------------------------
+mysql-monitor_connect_interval: 60000
+mysql-monitor_connect_timeout: 600
+mysql-monitor_enabled: true
+mysql-monitor_history: 600000
+mysql-monitor_password: proxysql_monitor
+mysql-monitor_ping_interval: 10000
+mysql-monitor_ping_max_failures: 3
+mysql-monitor_ping_timeout: 1000
+mysql-monitor_read_only_interval: 1500
+mysql-monitor_read_only_timeout: 500
+mysql-monitor_username: proxysql_monitor
+mysql-monitor_wait_timeout: true
 
 -------- Existing Cache Rules -----------------------------------------------------------
 Rule ID   Match Pattern                                               TTL (ms)
@@ -271,6 +310,12 @@ General Recommendations:
   ✔  Global multiplexing ratio excellent: 15.3x (target ≥10x)
   ✔  Connection success rates healthy across all hostgroups
   ✔  Cache hit rate good: 78.5% (target ≥70%)
+
+-------- Free Connection Pool Recommendations -------------------------------------------
+⚠️  3 stale connections detected (idle > 5min). Consider reducing mysql-wait_timeout or investigating connection leaks.
+
+-------- Memory Optimization Recommendations --------------------------------------------
+💡 Query digest using 45 MB. Consider reducing mysql-query_digests_max_query_length or mysql-query_digests_max_digest_length.
 ```
 
 ---
