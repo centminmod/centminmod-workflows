@@ -7,7 +7,7 @@
 # ///
 
 """
-ProxySQL Metrics Analyzer v1.1.0
+ProxySQL Metrics Analyzer v1.2.0
 
 MySQLTuner-equivalent tool for ProxySQL query digest analysis and cache optimization.
 Identifies top SELECT queries for ProxySQL query cache configuration and provides
@@ -223,10 +223,97 @@ class GlobalStats:
         return (self.slow_queries / self.queries_total * 100) if self.queries_total > 0 else 0.0
 
 
+@dataclass
+class FreeConnectionStats:
+    """Individual free connection in pool"""
+    fd: int                    # File descriptor
+    hostgroup: int
+    srv_host: str
+    srv_port: int
+    user: str
+    schema: str
+    idle_ms: int
+
+    @property
+    def idle_seconds(self) -> float:
+        """Idle time in seconds"""
+        return self.idle_ms / 1000.0
+
+    @property
+    def is_stale(self) -> bool:
+        """Connection idle > 5 minutes (potential leak)"""
+        return self.idle_ms > 300000
+
+
+@dataclass
+class FreeConnectionSummary:
+    """Aggregated free connection metrics"""
+    total_free: int = 0
+    total_stale: int = 0        # Idle > 5 min
+    avg_idle_ms: float = 0.0
+    max_idle_ms: int = 0
+    connections_by_hostgroup: Dict[int, int] = None
+    connections_by_user: Dict[str, int] = None
+
+    def __post_init__(self):
+        if self.connections_by_hostgroup is None:
+            self.connections_by_hostgroup = {}
+        if self.connections_by_user is None:
+            self.connections_by_user = {}
+
+    @property
+    def stale_percentage(self) -> float:
+        """Percentage of connections that are stale"""
+        return (self.total_stale / self.total_free * 100) if self.total_free > 0 else 0.0
+
+    @property
+    def max_idle_minutes(self) -> float:
+        """Max idle time in minutes"""
+        return self.max_idle_ms / 60000.0
+
+
+@dataclass
+class MemoryMetrics:
+    """ProxySQL memory usage metrics"""
+    jemalloc_allocated: int = 0    # Bytes allocated by jemalloc
+    jemalloc_resident: int = 0     # Resident memory (RSS)
+    jemalloc_active: int = 0       # Active allocations
+    auth_memory: int = 0           # Authentication cache memory
+    sqlite3_memory_bytes: int = 0  # SQLite memory usage
+    query_digest_memory: int = 0   # Query digest cache memory
+    stack_memory_mysql_threads: int = 0
+    stack_memory_admin_threads: int = 0
+
+    @property
+    def jemalloc_allocated_mb(self) -> float:
+        """Allocated memory in MB"""
+        return self.jemalloc_allocated / (1024 * 1024)
+
+    @property
+    def jemalloc_resident_mb(self) -> float:
+        """Resident memory in MB"""
+        return self.jemalloc_resident / (1024 * 1024)
+
+    @property
+    def total_stack_memory_mb(self) -> float:
+        """Total thread stack memory in MB"""
+        return (self.stack_memory_mysql_threads + self.stack_memory_admin_threads) / (1024 * 1024)
+
+    @property
+    def query_digest_memory_mb(self) -> float:
+        """Query digest memory in MB"""
+        return self.query_digest_memory / (1024 * 1024)
+
+    @property
+    def memory_overhead_pct(self) -> float:
+        """Memory overhead: resident vs allocated"""
+        return ((self.jemalloc_resident - self.jemalloc_allocated) / self.jemalloc_allocated * 100) if self.jemalloc_allocated > 0 else 0.0
+
+
 class ProxySQLAnalyzer:
     """ProxySQL metrics analyzer - MySQLTuner equivalent for ProxySQL"""
 
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
 
     def __init__(self, host: str, port: int, user: str, password: str):
         self.host = host
@@ -515,6 +602,102 @@ class ProxySQLAnalyzer:
 
         return ping_checks, connect_checks
 
+    def get_free_connections(self) -> FreeConnectionSummary:
+        """Fetch and analyze free connection statistics"""
+        query = """
+        SELECT fd, hostgroup, srv_host, srv_port, user,
+               COALESCE(schema, '') as schema, idle_ms
+        FROM stats_mysql_free_connections
+        ORDER BY idle_ms DESC
+        """
+
+        results = self.execute_query(query)
+
+        connections = []
+        by_hostgroup = {}
+        by_user = {}
+        total_idle_ms = 0
+        max_idle = 0
+        stale_count = 0
+
+        for row in results:
+            fd = int(row[0])
+            hostgroup = int(row[1])
+            srv_host = str(row[2])
+            srv_port = int(row[3])
+            user = str(row[4])
+            schema = str(row[5]) if row[5] else ''
+            idle_ms = int(row[6]) if str(row[6]).isdigit() else 0
+
+            conn = FreeConnectionStats(
+                fd=fd,
+                hostgroup=hostgroup,
+                srv_host=srv_host,
+                srv_port=srv_port,
+                user=user,
+                schema=schema,
+                idle_ms=idle_ms
+            )
+
+            connections.append(conn)
+            total_idle_ms += idle_ms
+            max_idle = max(max_idle, idle_ms)
+
+            if conn.is_stale:
+                stale_count += 1
+
+            # Aggregate by hostgroup
+            by_hostgroup[hostgroup] = by_hostgroup.get(hostgroup, 0) + 1
+
+            # Aggregate by user
+            by_user[user] = by_user.get(user, 0) + 1
+
+        total_connections = len(connections)
+        avg_idle = total_idle_ms / total_connections if total_connections > 0 else 0
+
+        return FreeConnectionSummary(
+            total_free=total_connections,
+            total_stale=stale_count,
+            avg_idle_ms=avg_idle,
+            max_idle_ms=max_idle,
+            connections_by_hostgroup=by_hostgroup,
+            connections_by_user=by_user
+        )
+
+    def get_memory_metrics(self) -> MemoryMetrics:
+        """Fetch ProxySQL memory usage metrics"""
+        query = """
+        SELECT Variable_Name, Variable_Value
+        FROM stats_memory_metrics
+        """
+
+        results = self.execute_query(query)
+        metrics = MemoryMetrics()
+
+        for var_name, var_value in results:
+            value = int(var_value) if str(var_value).isdigit() else 0
+
+            var_lower = var_name.lower()
+
+            if 'jemalloc_allocated' in var_lower:
+                metrics.jemalloc_allocated = value
+            elif 'jemalloc_resident' in var_lower:
+                metrics.jemalloc_resident = value
+            elif 'jemalloc_active' in var_lower:
+                metrics.jemalloc_active = value
+            elif 'auth_memory' in var_lower:
+                metrics.auth_memory = value
+            elif 'sqlite3_memory_bytes' in var_lower:
+                metrics.sqlite3_memory_bytes = value
+            elif 'query_digest_memory' in var_lower:
+                metrics.query_digest_memory = value
+            elif 'stack_memory_mysql_threads' in var_lower:
+                metrics.stack_memory_mysql_threads = value
+            elif 'stack_memory_admin_threads' in var_lower:
+                metrics.stack_memory_admin_threads = value
+
+        return metrics
+
     def suggest_ttl(self, count_star: int, avg_time: float) -> int:
         """Suggest appropriate TTL based on query frequency and execution time"""
         # High-frequency queries (>100/sec equivalent in our test window)
@@ -669,6 +852,50 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
 
         print()
 
+    def print_free_connections(self, summary: FreeConnectionSummary):
+        """Print free connection pool analysis"""
+        if summary.total_free == 0:
+            return
+
+        print("-------- Free Connection Pool Analysis " + "-" * 50)
+        print(f"Total Free Connections: {summary.total_free:,}")
+        print(f"Stale Connections (idle > 5min): {summary.total_stale:,} ({summary.stale_percentage:.1f}%)")
+        print(f"Average Idle Time: {summary.avg_idle_ms/1000:.1f}s")
+        print(f"Max Idle Time: {summary.max_idle_minutes:.1f} minutes")
+        print()
+
+        # Connections by hostgroup
+        if summary.connections_by_hostgroup:
+            print("Free Connections by Hostgroup:")
+            for hg, count in sorted(summary.connections_by_hostgroup.items()):
+                print(f"  Hostgroup {hg}: {count:,} connections")
+            print()
+
+        # Connections by user
+        if summary.connections_by_user:
+            print("Free Connections by User:")
+            for user, count in sorted(summary.connections_by_user.items(), key=lambda x: x[1], reverse=True)[:5]:
+                print(f"  {user}: {count:,} connections")
+            print()
+
+    def print_memory_metrics(self, metrics: MemoryMetrics):
+        """Print ProxySQL memory usage metrics"""
+        if metrics.jemalloc_allocated == 0 and metrics.jemalloc_resident == 0:
+            return
+
+        print("-------- ProxySQL Memory Usage " + "-" * 56)
+        print(f"Jemalloc Allocated: {metrics.jemalloc_allocated_mb:.2f} MB")
+        print(f"Jemalloc Resident (RSS): {metrics.jemalloc_resident_mb:.2f} MB")
+        print(f"Memory Overhead: {metrics.memory_overhead_pct:.1f}%")
+        print()
+
+        print("Component Memory Breakdown:")
+        print(f"  Query Digest Cache: {metrics.query_digest_memory_mb:.2f} MB")
+        print(f"  Auth Cache: {metrics.auth_memory / (1024*1024):.2f} MB")
+        print(f"  SQLite: {metrics.sqlite3_memory_bytes / (1024*1024):.2f} MB")
+        print(f"  Thread Stacks: {metrics.total_stack_memory_mb:.2f} MB")
+        print()
+
     def print_pool_recommendations(self, pools: List[ConnectionPoolStats], global_stats: GlobalStats):
         """Print connection pool tuning recommendations based on metrics"""
         recommendations = []
@@ -732,6 +959,85 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
             for rec in recommendations:
                 print(f"  {rec}")
             print()
+
+    def print_connection_pool_analysis(self, free_conns: FreeConnectionSummary,
+                                       pool_stats: List[ConnectionPoolStats]):
+        """Generate recommendations for connection pool management"""
+        if free_conns.total_free == 0:
+            return
+
+        recommendations = []
+
+        # Stale connection detection
+        if free_conns.total_stale > 10:
+            recommendations.append(
+                f"⚠️  {free_conns.total_stale} stale connections detected (idle > 5min). "
+                f"Consider reducing mysql-wait_timeout or investigating connection leaks."
+            )
+
+        # Excessive free connections
+        if free_conns.total_free > 100:
+            total_used = sum(p.conn_used for p in pool_stats)
+            recommendations.append(
+                f"ℹ️  High free connection count ({free_conns.total_free}). "
+                f"Pool may be oversized. Current utilization: {total_used} used vs {free_conns.total_free} free."
+            )
+
+        # Average idle time too high
+        if free_conns.avg_idle_ms > 120000:  # > 2 minutes
+            recommendations.append(
+                f"💡 Average idle time is {free_conns.avg_idle_ms/1000:.0f}s. "
+                f"Consider tuning mysql-free_connections_pct to release idle connections faster."
+            )
+
+        if recommendations:
+            print("-------- Free Connection Pool Recommendations " + "-" * 41)
+            for rec in recommendations:
+                print(f"{rec}")
+                print()
+
+    def print_memory_recommendations(self, metrics: MemoryMetrics):
+        """Generate recommendations for memory optimization"""
+        if metrics.jemalloc_allocated == 0 and metrics.jemalloc_resident == 0:
+            return
+
+        recommendations = []
+
+        # High resident memory
+        if metrics.jemalloc_resident_mb > 1024:  # > 1GB
+            recommendations.append(
+                f"⚠️  High memory usage detected: {metrics.jemalloc_resident_mb:.0f} MB resident. "
+                f"Monitor for memory leaks and consider capacity planning."
+            )
+
+        # Query digest memory pressure
+        if metrics.query_digest_memory_mb > 100:
+            recommendations.append(
+                f"💡 Query digest using {metrics.query_digest_memory_mb:.0f} MB. "
+                f"Consider reducing mysql-query_digests_max_query_length or mysql-query_digests_max_digest_length."
+            )
+
+        # High memory overhead
+        if metrics.memory_overhead_pct > 50:
+            recommendations.append(
+                f"⚠️  Memory overhead is {metrics.memory_overhead_pct:.1f}% "
+                f"(resident: {metrics.jemalloc_resident_mb:.0f} MB, allocated: {metrics.jemalloc_allocated_mb:.0f} MB). "
+                f"May indicate fragmentation or caching inefficiency."
+            )
+
+        # SQLite memory high
+        sqlite_mb = metrics.sqlite3_memory_bytes / (1024*1024)
+        if sqlite_mb > 50:
+            recommendations.append(
+                f"ℹ️  SQLite using {sqlite_mb:.0f} MB. This is normal for large configurations "
+                f"but consider periodic VACUUM if admin interface feels sluggish."
+            )
+
+        if recommendations:
+            print("-------- Memory Optimization Recommendations " + "-" * 44)
+            for rec in recommendations:
+                print(f"{rec}")
+                print()
 
     def print_command_counters(self, counters: List[Tuple[str, int, int]]):
         """Print command counter statistics"""
@@ -842,6 +1148,14 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
             ping_checks, connect_checks = self.get_health_checks()
             self.print_health_checks(ping_checks, connect_checks)
 
+            # Free connection analysis
+            free_conns = self.get_free_connections()
+            self.print_free_connections(free_conns)
+
+            # Memory metrics
+            memory_metrics = self.get_memory_metrics()
+            self.print_memory_metrics(memory_metrics)
+
             # Command counters
             commands = self.get_command_counters()
             self.print_command_counters(commands)
@@ -863,6 +1177,12 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
 
             # Connection pool recommendations
             self.print_pool_recommendations(pool_stats, global_stats)
+
+            # Free connection recommendations
+            self.print_connection_pool_analysis(free_conns, pool_stats)
+
+            # Memory recommendations
+            self.print_memory_recommendations(memory_metrics)
 
         finally:
             self.close()

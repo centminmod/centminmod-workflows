@@ -2,7 +2,7 @@
 
 **Technical Documentation and User Manual**
 
-> A comprehensive Python-based analysis tool for ProxySQL query caching optimization, connection pool efficiency monitoring, and performance diagnostics.
+> A comprehensive Python-based analysis tool for [ProxySQL](https://proxysql.com/) query caching optimization, connection pool efficiency monitoring, and performance diagnostics.
 >
 > by George Liu (eva2000) at https://centminmod.com/
 
@@ -1165,6 +1165,114 @@ LOAD MYSQL VARIABLES TO RUNTIME;
 SAVE MYSQL VARIABLES TO DISK;
 ```
 
+### Free Connection Pool Monitoring
+
+Monitor idle connections in ProxySQL's connection pool to detect leaks and optimize sizing:
+
+**Purpose:**
+- Detect connection leaks (connections idle > 5 minutes)
+- Optimize connection pool sizing
+- Track connection lifecycle by user/hostgroup
+- Identify unused connections consuming resources
+
+**Key Metrics:**
+- `Total Free Connections` - Currently idle connections in pool
+- `Stale Connections` - Idle > 5 minutes (potential leaks)
+- `Average Idle Time` - Mean idle duration across all free connections
+- `Max Idle Time` - Longest idle connection (identifies leaks)
+
+**SQL Query:**
+```sql
+-- View all free connections with idle time
+SELECT hostgroup, srv_host, srv_port, user, schema,
+       idle_ms, idle_ms/1000 as idle_seconds
+FROM stats_mysql_free_connections
+ORDER BY idle_ms DESC;
+```
+
+**Interpretation:**
+- ✅ **Healthy**: Average idle < 60s, stale < 5% of total free
+- ⚠️  **Warning**: Average idle > 120s, indicates oversized pool
+- ❌ **Alert**: Stale connections > 10, likely connection leak
+
+**Tuning Parameters:**
+```sql
+-- Adjust connection timeout (default: 28800000ms = 8 hours)
+UPDATE global_variables SET variable_value='3600000' WHERE variable_name='mysql-wait_timeout';
+
+-- Control free connection recycling percentage
+UPDATE global_variables SET variable_value='10' WHERE variable_name='mysql-free_connections_pct';
+
+-- Apply changes
+LOAD MYSQL VARIABLES TO RUNTIME;
+SAVE MYSQL VARIABLES TO DISK;
+```
+
+---
+
+### Memory Usage Monitoring
+
+Track ProxySQL memory consumption across internal components:
+
+**Purpose:**
+- Early detection of memory leaks
+- Capacity planning and right-sizing
+- Identify memory-intensive components
+- Monitor jemalloc allocator efficiency
+
+**Key Metrics:**
+- `Jemalloc Allocated` - Bytes actively allocated by jemalloc
+- `Jemalloc Resident (RSS)` - Total resident memory (includes overhead)
+- `Memory Overhead` - Difference between resident and allocated (fragmentation)
+- `Query Digest Cache` - Memory used by query digest tracking
+- `Auth Cache` - Authentication credentials cache memory
+- `SQLite` - Admin database memory usage
+
+**SQL Query:**
+```sql
+-- View all memory metrics
+SELECT Variable_Name, Variable_Value,
+       CAST(Variable_Value AS UNSIGNED) / 1024 / 1024 as MB
+FROM stats_memory_metrics
+ORDER BY Variable_Name;
+```
+
+**Interpretation:**
+- ✅ **Healthy**: Resident < 512 MB, overhead < 30%
+- ⚠️  **Warning**: Resident > 1024 MB, overhead > 50%
+- ❌ **Alert**: Query digest > 100 MB, memory leak suspected
+
+**Memory Optimization:**
+```sql
+-- Reduce query digest memory footprint
+UPDATE global_variables SET variable_value='2048' WHERE variable_name='mysql-query_digests_max_digest_length';
+UPDATE global_variables SET variable_value='32768' WHERE variable_name='mysql-query_digests_max_query_length';
+
+-- Limit query digest history
+UPDATE global_variables SET variable_value='300000' WHERE variable_name='mysql-monitor_history';
+
+-- Apply changes
+LOAD MYSQL VARIABLES TO RUNTIME;
+SAVE MYSQL VARIABLES TO DISK;
+```
+
+**Memory Leak Detection:**
+Monitor memory growth over time:
+```bash
+#!/bin/bash
+# memory_trend.sh - Track ProxySQL memory growth
+
+while true; do
+  TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+  MEMORY=$(mysql -h127.0.0.1 -P6032 -uadmin -padmin -sN \
+    -e "SELECT Variable_Value FROM stats_memory_metrics WHERE Variable_Name='jemalloc_resident'")
+  MEMORY_MB=$((MEMORY / 1024 / 1024))
+
+  echo "$TIMESTAMP,$MEMORY_MB" >> /var/log/proxysql_memory.csv
+  sleep 300  # Check every 5 minutes
+done
+```
+
 ---
 
 ## Advanced Usage
@@ -1599,6 +1707,18 @@ uv run proxysql_report.py --host 127.0.0.1 --port 6032 --user admin --password a
 ---
 
 ## Changelog
+
+### v1.2.0 (2025-01-07)
+
+- ✨ Added free connection pool monitoring (`stats_mysql_free_connections`)
+- ✨ Added memory usage metrics (`stats_memory_metrics`)
+- 📊 Added stale connection detection (idle > 5 minutes)
+- 📊 Added connection pool analysis by hostgroup and user
+- 📊 Added jemalloc memory allocator metrics
+- 📊 Added component memory breakdown (query digest, auth cache, SQLite, thread stacks)
+- 💡 Added free connection pool recommendations (leak detection, oversizing alerts)
+- 💡 Added memory optimization recommendations (digest pruning, overhead alerts)
+- 📚 Added comprehensive documentation for free connections and memory monitoring
 
 ### v1.1.0 (2025-01-07)
 - ( Added connection pool efficiency analysis with derived metrics
