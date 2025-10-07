@@ -25,7 +25,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ALMALINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -1267,7 +1267,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ROCKYLINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -2509,7 +2509,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ORACLELINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |

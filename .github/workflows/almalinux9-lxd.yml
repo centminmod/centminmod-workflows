@@ -15,7 +15,7 @@ jobs:
     steps:
       # ---------------- Base runner prep ----------------
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Remove Docker to avoid bridge/iptables clash with LXD
         run: |

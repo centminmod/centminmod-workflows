@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 180  # 3 hour timeout for TCG
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
