@@ -538,7 +538,7 @@ jobs:
           docker exec cmm_el89 bash -c "curl -LsSf https://astral.sh/uv/install.sh | sh || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== Running ProxySQL Metrics Analysis (Top 20 SELECT Query Candidates) ==='"
-          docker exec cmm_el89 bash -c "source ~/.cargo/env && uv run /home/proxysql_report.py --host 127.0.0.1 --port 6032 --user admin --password admin --top 20 || true"
+          docker exec cmm_el89 bash -c "/root/.local/bin/uv run /home/proxysql_report.py --host 127.0.0.1 --port 6032 --user admin --password admin --top 20 || true"
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "echo '=== ProxySQL Metrics Analysis Complete ==='"
           docker exec cmm_el89 bash -c "echo 'Use generated SQL statements above to configure ProxySQL query cache rules'"
