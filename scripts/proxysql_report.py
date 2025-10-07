@@ -348,7 +348,13 @@ class ProxySQLAnalyzer:
         LIMIT 10
         """
 
-        return self.execute_query(query)
+        results = self.execute_query(query)
+        return [
+            (str(row[0]),
+             int(row[1]) if str(row[1]).isdigit() else 0,
+             int(row[2]) if str(row[2]).isdigit() else 0)
+            for row in results
+        ]
 
     def get_cache_config(self) -> Dict[str, str]:
         """Fetch cache configuration variables"""
@@ -420,7 +426,7 @@ class ProxySQLAnalyzer:
                SUM(CASE WHEN ping_error IS NOT NULL THEN 1 ELSE 0 END) as failed_checks,
                COALESCE(AVG(CASE WHEN ping_success_time_us > 0 THEN ping_success_time_us ELSE NULL END), 0) as avg_time_us
         FROM monitor.mysql_server_ping_log
-        WHERE time_start_us > (UNIX_TIMESTAMP() - 300) * 1000000
+        WHERE time_start_us > (strftime('%s', 'now') - 300) * 1000000
         GROUP BY hostname, port
         """
 
@@ -432,7 +438,7 @@ class ProxySQLAnalyzer:
                COALESCE(AVG(CASE WHEN connect_success_time_us > 0 THEN connect_success_time_us ELSE NULL END), 0) as avg_time_us,
                MAX(connect_error) as last_error
         FROM monitor.mysql_server_connect_log
-        WHERE time_start_us > (UNIX_TIMESTAMP() - 300) * 1000000
+        WHERE time_start_us > (strftime('%s', 'now') - 300) * 1000000
         GROUP BY hostname, port
         """
 
