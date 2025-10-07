@@ -599,7 +599,7 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
 
         for pool in pools:
             server = f"{pool.srv_host}:{pool.srv_port}"
-            print(f"{pool.hostgroup:<12}{server:<20}{pool.pool_utilization:<12.1f}%{pool.connection_success_rate:<13.1f}%"
+            print(f"{pool.hostgroup:<12}{server:<20}{pool.pool_utilization:>11.1f}% {pool.connection_success_rate:>12.1f}% "
                   f"{pool.queries_per_connection:<14.1f}{pool.avg_latency_ms:<13.2f}{pool.efficiency_score:<8.1f}")
 
         print()
@@ -628,12 +628,12 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
         for check in ping_checks:
             server = f"{check.hostname}:{check.port}"
             print(f"{check.check_type.capitalize():<12}{server:<20}{check.total_checks:<14}{check.failed_checks:<10}"
-                  f"{check.success_rate:<13.1f}%{check.avg_time_ms:<15.2f}")
+                  f"{check.success_rate:>12.1f}% {check.avg_time_ms:<15.2f}")
 
         for check in connect_checks:
             server = f"{check.hostname}:{check.port}"
             print(f"{check.check_type.capitalize():<12}{server:<20}{check.total_checks:<14}{check.failed_checks:<10}"
-                  f"{check.success_rate:<13.1f}%{check.avg_time_ms:<15.2f}")
+                  f"{check.success_rate:>12.1f}% {check.avg_time_ms:<15.2f}")
 
             if check.last_error and check.failed_checks > 0:
                 print(f"  └─ Last Error: {check.last_error}")
