@@ -184,39 +184,106 @@ uv run proxysql_report.py
  >>  ProxySQL Metrics Analyzer 1.1.0
      * Analysis tool for ProxySQL query caching optimization
  >>  by George Liu (eva2000) at https://centminmod.com/
+ >>  ProxySQL Admin Interface Analysis
 
 -------- Connection Info ----------------------------------------------------------------
-  Connected to ProxySQL Admin Interface (127.0.0.1:6032)
-  ProxySQL Version: 3.0.2-30-gafb1865
-  Backend Servers: 1 ONLINE (Total: 1)
+✔  Connected to ProxySQL Admin Interface (127.0.0.1:6032)
+✔  ProxySQL Version: 3.0.2-30-gafb1865
+✔  Backend Servers: 1 ONLINE (Total: 1)
 
 -------- Top SELECT Queries for Caching ----------------------------------------------
-Rank  Query Pattern                                     Exec      Total(�s)   Avg(�s)   Score
+Rank  Query Pattern                                     Exec      Total(μs)   Avg(μs)   Score
 ------------------------------------------------------------------------------------------------
   1   SELECT * FROM products WHERE price > ?              450      125000       278      987.0
   2   SELECT COUNT(*) FROM orders WHERE status = ?        320       89000       278      765.4
 
+-------- Query Cache Performance --------------------------------------------------------
+Query_Cache_Memory_bytes: 256,384
+Query_Cache_Entries: 12
+Query_Cache_Hit_Rate: 78.5% (314 hits / 400 requests)
+Query_Cache_count_SET: 12
+Query_Cache_bytes_IN: 45,280
+Query_Cache_bytes_OUT: 892,160
+Query_Cache_Purged: 3
+
 -------- Connection Pool Efficiency Analysis ------------------------------------------
 Hostgroup   Server              Utilization  Success Rate  Queries/Conn  Latency(ms)  Score
-10          192.168.1.10:3306   65.2%        99.8%         156.3         1.23         89.4
+----------------------------------------------------------------------------------------------
+10          192.168.1.10:3306          65.2%         99.8% 156.3         1.23         89.4
+20          192.168.1.11:3306          48.7%        100.0% 203.7         0.89         92.1
 
 -------- ProxySQL Global Performance Metrics ------------------------------------------
 ProxySQL_Uptime: 12h 34m 56s
-Multiplexing_Ratio: 15.3x (1,532 frontend � 100 backend)
+Client_Connections_connected: 1,532
+Server_Connections_created: 100
+Multiplexing_Ratio: 15.3x (1,532 frontend → 100 backend)
 Total_Queries: 234,567
 Slow_Queries: 23 (0.010%)
+Active_Transactions: 5
+
+-------- Backend Health Checks (Last 5 Minutes) ----------------------------------------
+Type        Server              Total Checks  Failed    Success Rate  Avg Time(ms)
+-------------------------------------------------------------------------------------
+Ping        192.168.1.10:3306   60            0                100.0% 0.45
+Connect     192.168.1.10:3306   60            1                 98.3% 2.15
+Ping        192.168.1.11:3306   60            0                100.0% 0.52
+Connect     192.168.1.11:3306   60            0                100.0% 1.98
+
+-------- Command Counters (Top 10) -----------------------------------------------------
+Command             Total Count    Total Time (μs)
+-------------------------------------------------------
+SELECT              189,234        45,823,120
+INSERT              12,456         8,234,890
+UPDATE              8,923          5,123,450
+DELETE              2,341          1,234,560
+SHOW                456            234,120
+SET                 234            89,450
+COMMIT              198            45,230
+
+-------- Cache Configuration ------------------------------------------------------------
+mysql-client_host_cache_size: 0
+mysql-max_stmts_cache: 10000
+mysql-monitor_local_dns_cache_refresh_interval: 60000
+mysql-monitor_local_dns_cache_ttl: 300000
+mysql-query_cache_handle_warnings: 0
+mysql-query_cache_size_MB: 256
+mysql-query_cache_soft_ttl_pct: 0
+mysql-query_cache_stores_empty_result: true
+
+-------- Existing Cache Rules -----------------------------------------------------------
+Rule ID   Match Pattern                                               TTL (ms)
+----------------------------------------------------------------------------------
+100       ^SELECT.*FROM products WHERE                                10000
+101       ^SELECT.*FROM orders WHERE status                           30000
 
 -------- Recommendations ----------------------------------------------------------------
--- Rule 101: Cache SELECT * FROM products WHERE price > ? (TTL: 10s, Score: 987.0)
-INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup, cache_ttl, apply)
-VALUES (101, 1, '^SELECT.*FROM products WHERE price.*', 10, 10000, 1);
+ProxySQL Query Cache Rules (Top 20 SELECT Query Candidates):
 
+-- Rule 102: Cache SELECT * FROM products WHERE price > ? (TTL: 10s, Score: 987.0)
+INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup, cache_ttl, apply)
+VALUES (102, 1, '^SELECT.*FROM products WHERE price.*', 10, 10000, 1);
+
+-- Rule 103: Cache SELECT COUNT(*) FROM orders WHERE status = ? (TTL: 30s, Score: 765.4)
+INSERT INTO mysql_query_rules (rule_id, active, match_pattern, destination_hostgroup, cache_ttl, apply)
+VALUES (103, 1, '^SELECT COUNT.*FROM orders WHERE status.*', 10, 30000, 1);
+
+-- Apply all rules to ProxySQL runtime:
 LOAD MYSQL QUERY RULES TO RUNTIME;
 SAVE MYSQL QUERY RULES TO DISK;
 
+General Recommendations:
+  * Monitor cache hit rate - aim for >70% for cached query patterns
+  * Adjust TTL values based on data update frequency
+  * ProxySQL query cache has NO automatic invalidation
+  * Cache is best for read-heavy workloads with tolerable staleness
+  * Review stats_mysql_query_digest regularly for new cache candidates
+
 -------- Connection Pool Tuning Recommendations -----------------------------------------
-    Hostgroup 10: Excellent efficiency (89.4/100)
-    Global multiplexing ratio excellent: 15.3x (target e10x)
+  ✔  Hostgroup 10: Excellent efficiency (89.4/100)
+  ✔  Hostgroup 20: Excellent efficiency (92.1/100)
+  ✔  Global multiplexing ratio excellent: 15.3x (target ≥10x)
+  ✔  Connection success rates healthy across all hostgroups
+  ✔  Cache hit rate good: 78.5% (target ≥70%)
 ```
 
 ---
