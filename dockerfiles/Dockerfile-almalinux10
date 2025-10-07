@@ -126,5 +126,9 @@ RUN chmod +x /home/centmin-option-5-php8.4.sh
 COPY scripts/mysqltuner.pl /home/mysqltuner.pl
 RUN chmod +x /home/mysqltuner.pl
 
+# Copy ProxySQL Metrics Analyzer v1.0.0 with uv inline dependencies
+COPY scripts/proxysql_report.py /home/proxysql_report.py
+RUN chmod +x /home/proxysql_report.py
+
 VOLUME [ "/sys/fs/cgroup", "/run", "/tmp" ]
 CMD ["/sbin/init"]
