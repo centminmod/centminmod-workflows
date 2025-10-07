@@ -140,21 +140,33 @@ class ConnectionPoolStats:
         """Overall connection pool efficiency score (0-100)
 
         Weighted formula:
-        - 40% connection success rate
-        - 30% pool utilization (capped at 80% optimal)
-        - 30% queries per connection efficiency
+        - 35% connection success rate
+        - 25% pool utilization (capped at 80% optimal)
+        - 25% queries per connection efficiency
+        - 15% latency performance
         """
-        success_weight = self.connection_success_rate * 0.4
+        success_weight = self.connection_success_rate * 0.35
 
         # Cap utilization at 80% (higher can indicate saturation)
         util_pct = min(self.pool_utilization, 80) / 80 * 100
-        util_weight = util_pct * 0.3
+        util_weight = util_pct * 0.25
 
         # Normalize queries/conn (100+ is excellent)
         qpc_pct = min(self.queries_per_connection / 100, 1) * 100
-        qpc_weight = qpc_pct * 0.3
+        qpc_weight = qpc_pct * 0.25
 
-        return success_weight + util_weight + qpc_weight
+        # Latency scoring: reward <2ms, penalize >5ms
+        if self.avg_latency_ms <= 2:
+            latency_score = 100
+        elif self.avg_latency_ms <= 5:
+            latency_score = 80
+        elif self.avg_latency_ms <= 10:
+            latency_score = 50
+        else:
+            latency_score = max(0, 100 - (self.avg_latency_ms - 10) * 5)
+        latency_weight = latency_score * 0.15
+
+        return success_weight + util_weight + qpc_weight + latency_weight
 
 
 @dataclass
@@ -381,6 +393,18 @@ class ProxySQLAnalyzer:
         results = self.execute_query(query)
         return {name: value for name, value in results}
 
+    def get_monitor_config(self) -> Dict[str, str]:
+        """Fetch monitor configuration variables"""
+        query = """
+        SELECT variable_name, variable_value
+        FROM global_variables
+        WHERE variable_name LIKE 'mysql-monitor%'
+        ORDER BY variable_name
+        """
+
+        results = self.execute_query(query)
+        return {name: value for name, value in results}
+
     def get_existing_cache_rules(self) -> List[Tuple[int, str, int]]:
         """Fetch existing cache rules"""
         query = """
@@ -522,8 +546,13 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
         # Replace ? with .* for flexible matching
         pattern = digest_text.replace('?', '.*')
 
-        # Escape special regex characters except .* we just added
-        pattern = re.escape(pattern).replace(r'\.\*', '.*')
+        # Only escape regex special chars that aren't SQL keywords
+        # ProxySQL uses regex directly on SQL - don't escape spaces, asterisks in SELECT *, etc.
+        pattern = pattern.replace('(', r'\(').replace(')', r'\)')
+        pattern = pattern.replace('[', r'\[').replace(']', r'\]')
+        pattern = pattern.replace('{', r'\{').replace('}', r'\}')
+        pattern = pattern.replace('+', r'\+').replace('|', r'\|')
+        pattern = pattern.replace('$', r'\$')  # But allow ^ for start anchor
 
         # Add ^ anchor for start of query
         if not pattern.startswith('^'):
@@ -726,6 +755,15 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
 
         print()
 
+    def print_monitor_config(self, config: Dict[str, str]):
+        """Print monitor configuration variables"""
+        print("-------- Monitor Configuration " + "-" * 58)
+
+        for var, value in sorted(config.items()):
+            print(f"{var}: {value}")
+
+        print()
+
     def print_existing_rules(self, rules: List[Tuple[int, str, int]]):
         """Print existing cache rules"""
         if not rules:
@@ -811,6 +849,10 @@ VALUES ({rule_id}, 1, '{pattern}', 10, {ttl}, 1);"""
             # Cache configuration
             cache_config = self.get_cache_config()
             self.print_cache_config(cache_config)
+
+            # Monitor configuration
+            monitor_config = self.get_monitor_config()
+            self.print_monitor_config(monitor_config)
 
             # Existing rules
             existing_rules = self.get_existing_cache_rules()

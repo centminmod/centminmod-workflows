@@ -1085,6 +1085,70 @@ LOAD MYSQL VARIABLES TO RUNTIME;
 SAVE MYSQL VARIABLES TO DISK;
 ```
 
+### Query Cache Limitations & Best Practices
+
+**IMPORTANT**: ProxySQL query cache behavior differs from traditional database caching:
+
+#### No Automatic Invalidation
+
+- ProxySQL query cache **does NOT automatically invalidate** when underlying data changes
+- Cache entries **only expire via TTL** - there is no trigger-based invalidation
+- Stale data will be served until the TTL expires
+
+#### Suitable Use Cases
+
+✅ **Best for:**
+
+- Product catalogs and reference data (low volatility)
+- Read-heavy workloads with eventual consistency tolerance
+- Static content (country lists, categories, settings)
+- Dashboards with acceptable staleness (5-60s old data)
+
+❌ **NOT suitable for:**
+
+- Real-time financial data (orders, transactions, balances)
+- Inventory counts and stock levels
+- User session data and authentication tokens
+- Any write-heavy tables or time-sensitive information
+
+#### Manual Cache Invalidation
+
+When immediate cache clearing is required:
+
+```sql
+-- Connect to ProxySQL admin interface
+mysql -u admin -padmin -h 127.0.0.1 -P6032
+
+-- Clear entire query cache
+PROXYSQL FLUSH QUERY CACHE;
+
+-- Or clear specific cache entries (ProxySQL 2.0.13+)
+DELETE FROM stats_mysql_query_digest_reset WHERE digest='<digest_hash>';
+```
+
+#### Cache Monitoring
+
+Track cache effectiveness:
+
+```sql
+-- View cache hit rates
+SELECT * FROM stats_mysql_query_cache;
+
+-- Identify most cached queries
+SELECT digest_text, cache_hit_cnt, cache_ttl
+FROM stats_mysql_query_digest
+WHERE cache_ttl > 0
+ORDER BY cache_hit_cnt DESC
+LIMIT 20;
+```
+
+#### Recommended TTL Guidelines
+
+- **Reference data**: 300000ms (5 minutes)
+- **Product catalogs**: 60000ms (60 seconds)
+- **Dynamic content**: 5000-10000ms (5-10 seconds)
+- **Near real-time**: Use connection pooling instead of caching
+
 ---
 
 ### Backend Monitoring

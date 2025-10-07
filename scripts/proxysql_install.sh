@@ -220,8 +220,8 @@ mysql_variables=
     stacksize=1048576
     server_version="5.5.30"
     connect_timeout_server=3000
-    monitor_username="monitor"
-    monitor_password="monitor"
+    monitor_username="proxysql_monitor"
+    monitor_password="monitor123"
     monitor_history=600000
     monitor_connect_interval=60000
     monitor_ping_interval=10000
@@ -270,6 +270,10 @@ RestartSec=5s
 # Security settings
 NoNewPrivileges=true
 PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/proxysql /var/log/proxysql
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 
 # Resource limits
 LimitNOFILE=102400
