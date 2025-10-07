@@ -319,7 +319,24 @@ class ProxySQLAnalyzer:
         """
 
         results = self.execute_query(query)
-        return [ConnectionPoolStats(*row) for row in results]
+        pool_stats = []
+        for row in results:
+            pool_stats.append(ConnectionPoolStats(
+                hostgroup=int(row[0]) if str(row[0]).isdigit() else 0,
+                srv_host=str(row[1]),
+                srv_port=int(row[2]) if str(row[2]).isdigit() else 0,
+                status=str(row[3]),
+                queries=int(row[4]) if str(row[4]).isdigit() else 0,
+                conn_used=int(row[5]) if str(row[5]).isdigit() else 0,
+                conn_free=int(row[6]) if str(row[6]).isdigit() else 0,
+                bytes_sent=int(row[7]) if str(row[7]).isdigit() else 0,
+                bytes_recv=int(row[8]) if str(row[8]).isdigit() else 0,
+                conn_ok=int(row[9]) if str(row[9]).isdigit() else 0,
+                conn_err=int(row[10]) if str(row[10]).isdigit() else 0,
+                max_conn_used=int(row[11]) if str(row[11]).isdigit() else 0,
+                latency_us=int(row[12]) if str(row[12]).isdigit() else 0
+            ))
+        return pool_stats
 
     def get_command_counters(self) -> List[Tuple[str, int, int]]:
         """Fetch command counter statistics"""
@@ -424,15 +441,28 @@ class ProxySQLAnalyzer:
 
         ping_checks = []
         for row in ping_results:
-            ping_checks.append(HealthCheckStats(*row[:6]))
+            ping_checks.append(HealthCheckStats(
+                check_type=str(row[0]),
+                hostname=str(row[1]),
+                port=int(row[2]) if str(row[2]).isdigit() else 0,
+                total_checks=int(row[3]) if str(row[3]).isdigit() else 0,
+                failed_checks=int(row[4]) if str(row[4]).isdigit() else 0,
+                avg_time_us=int(float(row[5])) if row[5] else 0
+            ))
 
         connect_checks = []
         for row in connect_results:
-            # Handle last_error which is optional
-            if len(row) > 6 and row[6]:
-                connect_checks.append(HealthCheckStats(*row[:6], last_error=row[6]))
-            else:
-                connect_checks.append(HealthCheckStats(*row[:6]))
+            # Handle last_error which is optional (7th field)
+            last_error = str(row[6]) if len(row) > 6 and row[6] else None
+            connect_checks.append(HealthCheckStats(
+                check_type=str(row[0]),
+                hostname=str(row[1]),
+                port=int(row[2]) if str(row[2]).isdigit() else 0,
+                total_checks=int(row[3]) if str(row[3]).isdigit() else 0,
+                failed_checks=int(row[4]) if str(row[4]).isdigit() else 0,
+                avg_time_us=int(float(row[5])) if row[5] else 0,
+                last_error=last_error
+            ))
 
         return ping_checks, connect_checks
 
