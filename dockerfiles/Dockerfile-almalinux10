@@ -1,4 +1,4 @@
-FROM almalinux/10-kitten-init
+FROM almalinux/10-init
 
 ENV TERM=xterm-256color
 ENV container=docker
