@@ -25,7 +25,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ALMALINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -1341,7 +1341,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ROCKYLINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -2656,7 +2656,7 @@ jobs:
       php84_test_status: ${{ steps.php84_test.outputs.ORACLELINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Sysbox
         run: |
@@ -3963,37 +3963,37 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Download almalinux package and repo lists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: almalinux_lists
           path: almalinux
   
       - name: Download rockylinux package and repo lists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: rockylinux_lists
           path: rockylinux
 
       - name: Download oraclelinux package and repo lists
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: oraclelinux_lists
           path: oraclelinux
 
       - name: Download AlmaLinux Centmin Mod log
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: almalinux_logs
           path: almalinux_logs
 
       - name: Download Rocky Linux Centmin Mod log
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: rockylinux_logs
           path: rockylinux_logs
 
       - name: Download Oracle Linux Centmin Mod log
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: oraclelinux_logs
           path: oraclelinux_logs
