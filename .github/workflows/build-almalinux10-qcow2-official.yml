@@ -77,7 +77,7 @@ jobs:
 
       - name: Upload QCOW2 artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: almalinux-10-gencloud-qcow2
           path: build/almalinux10/*.qcow2
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: build-logs
           path: |

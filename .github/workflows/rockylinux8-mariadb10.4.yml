@@ -374,7 +374,7 @@ jobs:
         fi
 
     - name: Upload Rocky Linux Centmin Mod Logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: rockylinux_logs
         path: centminlogs/*

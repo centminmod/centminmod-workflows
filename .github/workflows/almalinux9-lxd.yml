@@ -311,7 +311,7 @@ jobs:
 
       - name: Upload Centmin logs artifact
         continue-on-error: true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: centmin_logs
           path: centminlogs
