@@ -100,21 +100,21 @@ jobs:
 
       - name: Upload QCOW2 artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: almalinux-10-qcow2
           path: build/almalinux10/*.qcow2
 
       - name: Upload Packer debug log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: packer-debug-log
           path: packer-debug.log
 
       - name: Upload serial console log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: serial-console-log
           path: /tmp/serial.log
@@ -147,14 +147,14 @@ jobs:
 
       - name: Upload KS post-install log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ks-post-log
           path: ks-post.log
 
       - name: Upload QEMU errors log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: qemu-errors-log
           path: qemu-errors.log

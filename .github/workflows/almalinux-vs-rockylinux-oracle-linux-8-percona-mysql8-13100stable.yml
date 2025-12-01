@@ -350,7 +350,7 @@ jobs:
           docker exec cmm_almalinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/almalinux_kernel-version.txt
 
       - name: Upload AlmaLinux package and repo lists
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: almalinux_lists
           path: artifacts/*
@@ -376,7 +376,7 @@ jobs:
           fi
 
       - name: Upload AlmaLinux Centmin Mod Logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: almalinux_logs
           path: centminlogs/*
@@ -719,7 +719,7 @@ jobs:
           docker exec cmm_rockylinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/rockylinux_kernel-version.txt
 
       - name: Upload Rocky Linux package and repo lists
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rockylinux_lists
           path: artifacts/*
@@ -745,7 +745,7 @@ jobs:
           fi
 
       - name: Upload Rocky Linux Centmin Mod Logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rockylinux_logs
           path: centminlogs/*
@@ -1088,7 +1088,7 @@ jobs:
           docker exec cmm_oraclelinux8 rpm -qi --changelog kernel-$(yum list installed | grep kernel | grep -v "kernel-tools" | sort -r | head -n 1 | awk '{print $2}') | head -n40 | tee artifacts/oraclelinux_kernel-version.txt
 
       - name: Upload Oracle Linux package and repo lists
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: oraclelinux_lists
           path: artifacts/*
@@ -1114,7 +1114,7 @@ jobs:
           fi
 
       - name: Upload Oracle Linux Centmin Mod Logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: oraclelinux_logs
           path: centminlogs/*
@@ -1217,25 +1217,25 @@ jobs:
           diff almalinux/almalinux_kernel-version.txt oraclelinux/oraclelinux_kernel-version.txt | tee artifacts/kernel-version_diff_almalinux8-vs-oraclelinux8.txt || true
 
       - name: Upload comparison artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: comparison_results
           path: artifacts/
 
       - name: Upload AlmaLinux Centmin Mod log artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: almalinux_cmm_logs
           path: almalinux_logs/
 
       - name: Upload Rocky Linux Centmin Mod log artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: rockylinux_cmm_logs
           path: rockylinux_logs/
 
       - name: Upload Oracle Linux Centmin Mod log artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: oraclelinux_cmm_logs
           path: oraclelinux_logs/
