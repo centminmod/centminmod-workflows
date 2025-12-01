@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: almalinux-10-qcow2
           path: .
