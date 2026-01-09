@@ -700,7 +700,7 @@ jobs:
           docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
 
       - name: Upload AlmaLinux Centmin Mod Logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: almalinux_logs
           path: centminlogs/*
