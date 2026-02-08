@@ -4383,18 +4383,21 @@ jobs:
         with:
           name: almalinux_logs
           path: almalinux_logs
+        continue-on-error: true
 
       - name: Download Rocky Linux Centmin Mod log
         uses: actions/download-artifact@v5
         with:
           name: rockylinux_logs
           path: rockylinux_logs
+        continue-on-error: true
 
       - name: Download Oracle Linux Centmin Mod log
         uses: actions/download-artifact@v5
         with:
           name: oraclelinux_logs
           path: oraclelinux_logs
+        continue-on-error: true
 
       - name: Compare AlmaLinux 9 vs Rocky Linux 9 vs Oracle Linux 9 installed packages and repos
         run: |
@@ -4411,11 +4414,11 @@ jobs:
           echo "ls -lAh oraclelinux"
           ls -lAh oraclelinux
           echo "ls -lAh almalinux_logs"
-          ls -lAh almalinux_logs
+          ls -lAh almalinux_logs || true
           echo "ls -lAh rockylinux_logs"
-          ls -lAh rockylinux_logs
+          ls -lAh rockylinux_logs || true
           echo "ls -lAh oraclelinux_logs"
-          ls -lAh oraclelinux_logs
+          ls -lAh oraclelinux_logs || true
           echo "Running diff on package lists - AlmaLinux 9 vs Rocky Linux 9"
           diff almalinux/almalinux_packages.txt rockylinux/rockylinux_packages.txt | tee artifacts/packages_diff_almalinux9-vs-rockylinux9.txt || true
           echo "Running diff on filtered package lists - AlmaLinux 9 vs Rocky Linux 9"
@@ -4464,18 +4467,21 @@ jobs:
         with:
           name: almalinux_cmm_logs
           path: almalinux_logs/
+        continue-on-error: true
 
       - name: Upload Rocky Linux Centmin Mod log artifacts
         uses: actions/upload-artifact@v4
         with:
           name: rockylinux_cmm_logs
           path: rockylinux_logs/
+        continue-on-error: true
 
       - name: Upload Oracle Linux Centmin Mod log artifacts
         uses: actions/upload-artifact@v4
         with:
           name: oraclelinux_cmm_logs
           path: oraclelinux_logs/
+        continue-on-error: true
 
 
   discordNotificationSuccess:
