@@ -19,7 +19,6 @@ jobs:
       csf_test_status: ${{ steps.csf_test.outputs.ALMALINUX_CSF_TEST_STATUS }}
       pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ALMALINUX_PUREFTPD_TEST_STATUS }}
       redis_test_status: ${{ steps.redis_test.outputs.ALMALINUX_REDIS_TEST_STATUS }}
-      php84_test_status: ${{ steps.php84_test.outputs.ALMALINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
@@ -58,7 +57,7 @@ jobs:
           output=$(tail -20 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
         continue-on-error: true
-  
+
       - name: Display Centmmin Mod LEMP Install Log
         run: |
           echo "Last 20 lines of Centmmin Mod LEMP Install Log:"
@@ -911,6 +910,54 @@ jobs:
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
 
+  almalinux-php7:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_almalinux9:latest
+
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
+        run: |
+          docker run -d --name=cmm_almalinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux9:latest
+          sleep 4
+          docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_almalinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_almalinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_almalinux9 bash -c "cmupdate"
@@ -1006,6 +1053,56 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_almalinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+  almalinux-php8:
+    runs-on: ubuntu-24.04
+    outputs:
+      php84_test_status: ${{ steps.php84_test.outputs.ALMALINUX_PHP84_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_almalinux9:latest
+
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
+        run: |
+          docker run -d --name=cmm_almalinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_almalinux9:latest
+          sleep 4
+          docker exec cmm_almalinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_almalinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_almalinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_almalinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_almalinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
@@ -1195,7 +1292,8 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
           docker exec cmm_almalinux9 bash -c "echo '---'"
         continue-on-error: true
-  
+
+
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_almalinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
@@ -1288,6 +1386,7 @@ jobs:
           name: almalinux_logs
           path: centminlogs/*
 
+
   rockylinux:
     runs-on: ubuntu-24.04
     outputs:
@@ -1297,7 +1396,6 @@ jobs:
       csf_test_status: ${{ steps.csf_test.outputs.ROCKYLINUX_CSF_TEST_STATUS }}
       pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ROCKYLINUX_PUREFTPD_TEST_STATUS }}
       redis_test_status: ${{ steps.redis_test.outputs.ROCKYLINUX_REDIS_TEST_STATUS }}
-      php84_test_status: ${{ steps.php84_test.outputs.ROCKYLINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
@@ -2188,6 +2286,54 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
 
+  rockylinux-php7:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-rockylinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_rockylinux9:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Rocky Linux 9 Install
+        run: |
+          docker run -d --name=cmm_rockylinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux9:latest
+          sleep 4
+          docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_rockylinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_rockylinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_rockylinux9 bash -c "cmupdate"
@@ -2283,6 +2429,56 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_rockylinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+  rockylinux-php8:
+    runs-on: ubuntu-24.04
+    outputs:
+      php84_test_status: ${{ steps.php84_test.outputs.ROCKYLINUX_PHP84_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-rockylinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_rockylinux9:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Rocky Linux 9 Install
+        run: |
+          docker run -d --name=cmm_rockylinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_rockylinux9:latest
+          sleep 4
+          docker exec cmm_rockylinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_rockylinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_rockylinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_rockylinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_rockylinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
@@ -2472,7 +2668,8 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
         continue-on-error: true
-  
+
+
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_rockylinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
@@ -2566,6 +2763,7 @@ jobs:
           name: rockylinux_logs
           path: centminlogs/*
 
+
   oraclelinux:
     runs-on: ubuntu-24.04
     outputs:
@@ -2575,7 +2773,6 @@ jobs:
       csf_test_status: ${{ steps.csf_test.outputs.ORACLELINUX_CSF_TEST_STATUS }}
       pureftpd_test_status: ${{ steps.pureftpd_test.outputs.ORACLELINUX_PUREFTPD_TEST_STATUS }}
       redis_test_status: ${{ steps.redis_test.outputs.ORACLELINUX_REDIS_TEST_STATUS }}
-      php84_test_status: ${{ steps.php84_test.outputs.ORACLELINUX_PHP84_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v6
@@ -3467,6 +3664,54 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
 
+  oraclelinux-php7:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-oraclelinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_oraclelinux9:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Oracle Linux 9 Install
+        run: |
+          docker run -d --name=cmm_oraclelinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux9:latest
+          sleep 4
+          docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_oraclelinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_oraclelinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+
       - name: centmin.sh menu option 5 PHP-FPM 7.4 upgrade test
         run: |
           docker exec cmm_oraclelinux9 bash -c "cmupdate"
@@ -3568,6 +3813,56 @@ jobs:
       - name: sysbench test
         run: |
           docker exec cmm_oraclelinux9 /home/sysbench-run.sh
+        continue-on-error: true
+
+  oraclelinux-php8:
+    runs-on: ubuntu-24.04
+    outputs:
+      php84_test_status: ${{ steps.php84_test.outputs.ORACLELINUX_PHP84_TEST_STATUS }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-oraclelinux9
+          platforms: linux/amd64
+          load: true
+          tags: cmm_oraclelinux9:latest
+  
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+        
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+  
+      - name: Run container Centmmin Mod LEMP Oracle Linux 9 Install
+        run: |
+          docker run -d --name=cmm_oraclelinux9 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_oraclelinux9:latest
+          sleep 4
+          docker exec cmm_oraclelinux9 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_oraclelinux9 bash -c "cat /etc/os-release"
+          docker exec cmm_oraclelinux9 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash" | tee cmm-install.log
+          output=$(tail -20 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_oraclelinux9 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_oraclelinux9 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
         continue-on-error: true
 
       - name: centmin.sh menu option 5 PHP-FPM 8.2 upgrade test
@@ -3769,7 +4064,8 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
         continue-on-error: true
-  
+
+
       - name: centmin.sh menu option 5 PHP-FPM + PostgreSQL 16 Install test
         run: |
           docker exec cmm_oraclelinux9 bash -c "echo 'POSTGRESQL=y' >> /etc/centminmod/custom_config.inc"
@@ -3865,8 +4161,9 @@ jobs:
           name: oraclelinux_logs
           path: centminlogs/*
 
+
   compare:
-    needs: [almalinux, rockylinux, oraclelinux]
+    needs: [almalinux-php8, rockylinux-php8, oraclelinux-php8]
     runs-on: ubuntu-24.04
     steps:
       - name: Download almalinux package and repo lists
@@ -3986,8 +4283,9 @@ jobs:
           name: oraclelinux_cmm_logs
           path: oraclelinux_logs/
 
+
   discordNotificationSuccess:
-    needs: [almalinux, rockylinux, compare]
+    needs: [almalinux, almalinux-php7, almalinux-php8, rockylinux, rockylinux-php7, rockylinux-php8, oraclelinux, oraclelinux-php7, oraclelinux-php8, compare]
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
@@ -4011,16 +4309,16 @@ jobs:
         almalinux_redis_test_emoji=$(if [ "${{ needs.almalinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         rockylinux_redis_test_emoji=$(if [ "${{ needs.rockylinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         oraclelinux_redis_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully! \u2705\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully! \u2705\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   discordNotificationFailure:
-    needs: [almalinux, rockylinux, compare]
+    needs: [almalinux, almalinux-php7, almalinux-php8, rockylinux, rockylinux-php7, rockylinux-php8, oraclelinux, oraclelinux-php7, oraclelinux-php8, compare]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
     steps:
@@ -4044,10 +4342,11 @@ jobs:
         almalinux_redis_test_emoji=$(if [ "${{ needs.almalinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         rockylinux_redis_test_emoji=$(if [ "${{ needs.rockylinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         oraclelinux_redis_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.redis_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
-        oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\u274C\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\u274C\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
+
