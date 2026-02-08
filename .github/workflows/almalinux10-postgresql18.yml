@@ -1,9 +1,9 @@
-name: 0 - AlmaLinux 10 + MariaDB 11.8
+name: 0 - AlmaLinux 10 + PostgreSQL 18
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-10-mariadb-118-workflow]
+    types: [run-almalinux-10-postgresql18-workflow]
 
 
 concurrency:
@@ -26,7 +26,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build 
+      - name: Build
         id: docker_build
         uses: docker/build-push-action@v6
         with:
@@ -38,7 +38,7 @@ jobs:
 
       - name: Debug payload (repository_dispatch)
         run: echo ${{ github.event.client_payload.release }}
-      
+
       - name: Debug input (workflow_dispatch)
         run: echo ${{ github.event.inputs.release }}
 
@@ -58,7 +58,8 @@ jobs:
             cmm_el89:latest
           sleep 4
           docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
-          docker exec cmm_el89 bash -c "echo 'MARIADB_INSTALLELEVENEIGHT=y' >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_el89 bash -c "echo \"POSTGRESQL_MENU='y'\" >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_el89 bash -c "echo \"POSTGRESQL='y'\" >> /etc/centminmod/custom_config.inc"
           docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
           output=$(tail -80 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -101,7 +102,7 @@ jobs:
           docker exec cmm_el89 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
           docker exec cmm_el89 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
           # Get container IP address
-          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)         
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)
           # Install lftp
           docker exec cmm_el89 bash -c 'yum -q -y install lftp'
           # Test FTP login using lftp
@@ -288,6 +289,47 @@ jobs:
           docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
         continue-on-error: true
 
+      - name: Inspect PostgreSQL setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== PostgreSQL 18 Service Status ==='"
+          docker exec cmm_el89 bash -c "systemctl status postgresql-18 --no-pager -l || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== PostgreSQL 18 Journal (Last 100 Lines) ==='"
+          docker exec cmm_el89 bash -c "journalctl -u postgresql-18 --no-pager -n 100 || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== pg_config ==='"
+          docker exec cmm_el89 bash -c "/usr/pgsql-18/bin/pg_config || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== psql version ==='"
+          docker exec cmm_el89 bash -c "/usr/pgsql-18/bin/psql --version || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== PostgreSQL Data Directory ==='"
+          docker exec cmm_el89 bash -c "ls -lAh /var/lib/pgsql/18/data/ || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== postgresql.conf (first 50 lines) ==='"
+          docker exec cmm_el89 bash -c "cat /var/lib/pgsql/18/data/postgresql.conf | head -50 || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== pg_hba.conf ==='"
+          docker exec cmm_el89 bash -c "cat /var/lib/pgsql/18/data/pg_hba.conf || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== PostgreSQL Databases ==='"
+          docker exec cmm_el89 bash -c "sudo -u postgres /usr/pgsql-18/bin/psql -c '\l' || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== PostgreSQL Roles ==='"
+          docker exec cmm_el89 bash -c "sudo -u postgres /usr/pgsql-18/bin/psql -c '\du' || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Inspect PostgreSQL PHP extensions
+        run: |
+          docker exec cmm_el89 bash -c "echo '=== PHP pgsql extension ==='"
+          docker exec cmm_el89 bash -c "php --ri pgsql || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo '=== PHP pdo_pgsql extension ==='"
+          docker exec cmm_el89 bash -c "php --ri pdo_pgsql || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
       - name: Inspect Python3 setup
         run: |
           sleep 1
@@ -357,12 +399,12 @@ jobs:
           docker exec cmm_el89 bash -c "systemctl status sysstat.service"
           docker exec cmm_el89 bash -c "systemctl status systemd-journald.service"
         continue-on-error: true
-    
+
       - name: Check permissions of /var/log/journal
         run: |
           docker exec cmm_el89 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
         continue-on-error: true
-    
+
       - name: Show recent systemd-journald logs
         run: |
           docker exec cmm_el89 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
@@ -446,14 +488,6 @@ jobs:
         with:
           name: almalinux_logs
           path: centminlogs/*
-
-      - name: Trigger AlmaLinux 10 PostgreSQL 18 workflow
-        run: |
-          curl -X POST \
-          -H "Accept: application/vnd.github.v3+json" \
-          -H "Authorization: token ${{ secrets.PAT }}" \
-          https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux10-postgresql18.yml/dispatches \
-          -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build
