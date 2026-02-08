@@ -1,4 +1,4 @@
-name: AlmaLinux 9 with PHP 8.4
+name: Rocky Linux 9 with PHP 8.5
 
 on:
   workflow_dispatch:
@@ -25,27 +25,27 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build 
+    - name: Build
       id: docker_build
       uses: docker/build-push-action@v6
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-almalinux9
+        file: ./dockerfiles/Dockerfile-rockylinux9
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
 
     - name: Debug payload (repository_dispatch)
       run: echo ${{ github.event.client_payload.release }}
-      
+
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
+    - name: Run container Centmmin Mod LEMP Rocky Linux 9 Install
       run: |
-        docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller84.sh | bash" | tee cmm-install.log
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller85.sh | bash" | tee cmm-install.log
         output=$(tail -20 cmm-install.log)
         echo "$output" >> $GITHUB_STEP_SUMMARY
       continue-on-error: true
@@ -70,7 +70,7 @@ jobs:
         docker exec cmm_el89 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
         docker exec cmm_el89 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
         # Get container IP address
-        CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)         
+        CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)
         # Install lftp
         docker exec cmm_el89 bash -c 'yum -q -y install lftp'
         # Test FTP login using lftp
@@ -272,12 +272,12 @@ jobs:
         docker exec cmm_el89 bash -c "systemctl status sysstat.service"
         docker exec cmm_el89 bash -c "systemctl status systemd-journald.service"
       continue-on-error: true
-    
+
     - name: Check permissions of /var/log/journal
       run: |
         docker exec cmm_el89 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
       continue-on-error: true
-    
+
     - name: Show recent systemd-journald logs
       run: |
         docker exec cmm_el89 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
@@ -351,8 +351,8 @@ jobs:
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
 
-    - name: Copy AlmaLinux Centmin Mod logs from container
-      # don’t fail the job if this step errors
+    - name: Copy Rocky Linux Centmin Mod logs from container
+      # don't fail the job if this step errors
       continue-on-error: true
       run: |
         mkdir -p ./centminlogs
@@ -371,19 +371,11 @@ jobs:
           echo "⚠️ /root/centminlogs not present in container; skipping log copy"
         fi
 
-    - name: Upload AlmaLinux Centmin Mod Logs
+    - name: Upload Rocky Linux Centmin Mod Logs
       uses: actions/upload-artifact@v4
       with:
-        name: almalinux_logs
+        name: rockylinux_logs
         path: centminlogs/*
-
-    - name: Trigger PHP 8.5 workflow
-      run: |
-        curl -X POST \
-        -H "Accept: application/vnd.github.v3+json" \
-        -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux9-php8.5.yml/dispatches \
-        -d '{"ref":"master"}'
 
   discordNotificationSuccess:
     needs: build
