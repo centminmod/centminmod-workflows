@@ -33,7 +33,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-almalinux9
@@ -926,7 +926,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-almalinux9
@@ -1073,7 +1073,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-almalinux9
@@ -1410,7 +1410,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-rockylinux9
@@ -2302,7 +2302,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-rockylinux9
@@ -2449,7 +2449,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-rockylinux9
@@ -2787,7 +2787,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-oraclelinux9
@@ -3680,7 +3680,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-oraclelinux9
@@ -3833,7 +3833,7 @@ jobs:
 
       - name: Build 
         id: docker_build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./dockerfiles/Dockerfile-oraclelinux9
