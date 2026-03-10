@@ -1,4 +1,9 @@
 *.sublime-workspace
 *.sublime-project
+.code-workspace
 artifacts/
 other/
+github-logs/
+memory-bank/
+zips/
+.github/workflows-131.00stable/
