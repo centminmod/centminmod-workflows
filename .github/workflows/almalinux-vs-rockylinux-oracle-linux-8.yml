@@ -30,7 +30,7 @@ jobs:
           sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build 
         id: docker_build
@@ -1383,7 +1383,7 @@ jobs:
           sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build 
         id: docker_build
@@ -2734,7 +2734,7 @@ jobs:
           sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build 
         id: docker_build
