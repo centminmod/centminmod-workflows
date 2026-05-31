@@ -265,14 +265,13 @@ jobs:
           fail=0
           note() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
           echo "## Default-state pure-ftpd/CSF assertions (PUREFTPD_DISABLED=n)" >> "$GITHUB_STEP_SUMMARY"
-          # settle the every-pass normalizer, then assert idempotency (byte-identical csf.conf on 2nd run)
-          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
-          h1=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
-          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
-          h2=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
+          # Phase 1 - assert the state the INITIAL install produced. Do NOT run the
+          # fixer first: fix_ftp_csf_ports is INITIALINSTALL-gated (skipped on initial
+          # install), so a fresh csf.conf reflects csfinstall.inc output; running the
+          # idempotent fixer here would dedupe/repair and mask an install-time regression.
           tcpin=$(docker exec cmm_el89 bash -c "grep -E '^TCP_IN = \"' /etc/csf/csf.conf | sed -E 's/^[^\"]*\"//; s/\".*\$//'")
           pf=$(docker exec cmm_el89 bash -c "grep -E '^PORTFLOOD = ' /etc/csf/csf.conf")
-          note "TCP_IN: $tcpin"
+          note "post-install TCP_IN: $tcpin"
           printf '%s' "$tcpin" | grep -q '30001:50011' && note "PASS passive range 30001:50011 present" || { note "FAIL passive range 30001:50011 MISSING"; fail=1; }
           printf '%s' ",$tcpin," | grep -q ',21,' && note "PASS control port 21 present" || { note "FAIL control port 21 MISSING"; fail=1; }
           printf '%s' "$pf" | grep -qE '(^|[",])21;tcp;[0-9]+;[0-9]+' && note "PASS PORTFLOOD 21;tcp rule present" || { note "FAIL PORTFLOOD 21;tcp rule MISSING"; fail=1; }
@@ -280,6 +279,12 @@ jobs:
             n=$(printf '%s' "$tcpin" | tr ',' '\n' | awk -v w="$p" '$0==w{c++}END{print c+0}')
             [ "$n" -eq 1 ] && note "PASS misc port $p appears once" || { note "FAIL misc port $p appears $n times (dup/missing)"; fail=1; }
           done
+          # Phase 2 - idempotency of the every-pass normalizer (simulates a cmupdate pass):
+          # running it twice must not churn csf.conf - byte-identical md5 on the repeat run.
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
+          h1=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
+          h2=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
           [ "$h1" = "$h2" ] && note "PASS fix-csf-ftp-ports.sh idempotent (csf.conf md5 stable: $h2)" || { note "FAIL not idempotent: $h1 -> $h2"; fail=1; }
           docker exec cmm_el89 bash -c "systemctl is-enabled pure-ftpd >/dev/null 2>&1" && note "INFO pure-ftpd enabled" || note "INFO pure-ftpd not enabled"
           [ "$fail" -ne 0 ] && echo "ftp-assert-failed" > ftp-assert.flag
