@@ -1,9 +1,9 @@
-name: 0 - AlmaLinux 10 - Ubicloud
+name: 0 - AlmaLinux 10 - pure-ftpd Disabled
 
 on:
   workflow_dispatch:
   repository_dispatch:
-    types: [run-almalinux-10-workflow-ubicloud]
+    types: [run-almalinux-10-workflow-pureftp-disabled]
 
 
 concurrency:
@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build:
 
-    runs-on: ubicloud-standard-16
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -57,6 +57,8 @@ jobs:
             -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
             cmm_el89:latest
           sleep 4
+          docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_el89 bash -c "echo 'PUREFTPD_DISABLED=y' >> /etc/centminmod/custom_config.inc"
           docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
           output=$(tail -80 cmm-install.log)
           echo "$output" >> $GITHUB_STEP_SUMMARY
@@ -86,17 +88,14 @@ jobs:
           docker exec cmm_el89 bash -c "ls -lahn /home/nginx"
         continue-on-error: true
 
-      - name: Check pure-ftpd virtual FTP user login
+      - name: Verify pure-ftpd disabled (post-install)
         run: |
-          # Add pure-ftpd virtual user
-          docker exec cmm_el89 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
-          docker exec cmm_el89 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
-          # Get container IP address
-          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)         
-          # Install lftp
-          docker exec cmm_el89 bash -c 'yum -q -y install lftp'
-          # Test FTP login using lftp
-          docker exec cmm_el89 bash -c "lftp -e 'set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls'"
+          echo "=== PUREFTPD_DISABLED=y: pure-ftpd should be installed-then-disabled (stopped) ==="
+          docker exec cmm_el89 bash -c "grep -n 'PUREFTPD_DISABLED' /etc/centminmod/custom_config.inc || true"
+          docker exec cmm_el89 bash -c "rpm -q pure-ftpd && echo 'pure-ftpd package installed (expected: install-then-disable)' || echo 'pure-ftpd package NOT installed'"
+          docker exec cmm_el89 bash -c "systemctl is-enabled pure-ftpd; echo \"is-enabled rc=\$?\""
+          docker exec cmm_el89 bash -c "systemctl is-active pure-ftpd; echo \"is-active rc=\$?\""
+          docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service --no-pager || true"
         continue-on-error: true
 
       - name: Nginx Configure
@@ -289,30 +288,36 @@ jobs:
           docker exec cmm_el89 bash -c "cat /etc/csf/csf.allow"
         continue-on-error: true
 
-      - name: Verify default pure-ftpd CSF state (PUREFTPD_DISABLED=n)
-        id: assert_ftp_default
+      - name: Verify disabled pure-ftpd CSF state (PUREFTPD_DISABLED=y)
+        id: assert_ftp_disabled
         run: |
           set +e
           fail=0
           note() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
-          echo "## Default-state pure-ftpd/CSF assertions (PUREFTPD_DISABLED=n)" >> "$GITHUB_STEP_SUMMARY"
-          # settle the every-pass normalizer, then assert idempotency (byte-identical csf.conf on 2nd run)
+          echo "## Disabled-state pure-ftpd/CSF assertions (PUREFTPD_DISABLED=y)" >> "$GITHUB_STEP_SUMMARY"
+          # Phase 1 - immediate post-install: passive range + PORTFLOOD-21 are gated off at install,
+          # but port 21 may STILL be present (fix_ftp_csf_ports is INITIALINSTALL-gated, cpcheck.inc).
+          tcpin0=$(docker exec cmm_el89 bash -c "grep -E '^TCP_IN = \"' /etc/csf/csf.conf | sed -E 's/^[^\"]*\"//; s/\".*\$//'")
+          note "post-install TCP_IN: $tcpin0"
+          # Phase 2 - force the every-pass normalizer to settle (clean container has no other ftpd,
+          # so port 21 becomes eligible for removal), then assert removal + idempotency.
+          docker exec cmm_el89 bash -c "rpm -q vsftpd proftpd >/dev/null 2>&1 && echo 'WARN other ftpd present - port 21 intentionally kept' || true"
           docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
           h1=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
           docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
           h2=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
           tcpin=$(docker exec cmm_el89 bash -c "grep -E '^TCP_IN = \"' /etc/csf/csf.conf | sed -E 's/^[^\"]*\"//; s/\".*\$//'")
           pf=$(docker exec cmm_el89 bash -c "grep -E '^PORTFLOOD = ' /etc/csf/csf.conf")
-          note "TCP_IN: $tcpin"
-          printf '%s' "$tcpin" | grep -q '30001:50011' && note "PASS passive range 30001:50011 present" || { note "FAIL passive range 30001:50011 MISSING"; fail=1; }
-          printf '%s' ",$tcpin," | grep -q ',21,' && note "PASS control port 21 present" || { note "FAIL control port 21 MISSING"; fail=1; }
-          printf '%s' "$pf" | grep -qE '(^|[",])21;tcp;[0-9]+;[0-9]+' && note "PASS PORTFLOOD 21;tcp rule present" || { note "FAIL PORTFLOOD 21;tcp rule MISSING"; fail=1; }
+          note "settled TCP_IN: $tcpin"
+          printf '%s' "$tcpin" | grep -q '30001:50011' && { note "FAIL passive range 30001:50011 PRESENT (should be removed)"; fail=1; } || note "PASS passive range 30001:50011 absent"
+          printf '%s' ",$tcpin," | grep -q ',21,' && { note "FAIL control port 21 PRESENT (should be removed)"; fail=1; } || note "PASS control port 21 absent"
+          printf '%s' "$pf" | grep -qE '(^|[",])21;tcp;[0-9]+;[0-9]+' && { note "FAIL PORTFLOOD 21;tcp rule PRESENT (should be removed)"; fail=1; } || note "PASS PORTFLOOD 21;tcp rule absent"
           for p in 1110 1186 1194 81 9418; do
             n=$(printf '%s' "$tcpin" | tr ',' '\n' | awk -v w="$p" '$0==w{c++}END{print c+0}')
-            [ "$n" -eq 1 ] && note "PASS misc port $p appears once" || { note "FAIL misc port $p appears $n times (dup/missing)"; fail=1; }
+            [ "$n" -eq 1 ] && note "PASS misc port $p appears once" || { note "FAIL misc port $p appears $n times"; fail=1; }
           done
           [ "$h1" = "$h2" ] && note "PASS fix-csf-ftp-ports.sh idempotent (csf.conf md5 stable: $h2)" || { note "FAIL not idempotent: $h1 -> $h2"; fail=1; }
-          docker exec cmm_el89 bash -c "systemctl is-enabled pure-ftpd >/dev/null 2>&1" && note "INFO pure-ftpd enabled" || note "INFO pure-ftpd not enabled"
+          docker exec cmm_el89 bash -c "systemctl is-active --quiet pure-ftpd" && { note "FAIL pure-ftpd is ACTIVE (should be stopped)"; fail=1; } || note "PASS pure-ftpd not running"
           [ "$fail" -ne 0 ] && echo "ftp-assert-failed" > ftp-assert.flag
           exit 0
         continue-on-error: true
@@ -376,6 +381,15 @@ jobs:
           docker exec cmm_el89 bash -c "/usr/bin/nv -d domain.com -s y"
         continue-on-error: true
 
+      - name: Verify vhost add did not re-enable pure-ftpd
+        run: |
+          set +e
+          note() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          docker exec cmm_el89 bash -c "systemctl is-enabled pure-ftpd >/dev/null 2>&1" && { note "FAIL pure-ftpd RE-ENABLED after vhost add"; echo "ftp-assert-failed" > ftp-assert.flag; } || note "PASS pure-ftpd still disabled after vhost add"
+          docker exec cmm_el89 bash -c "systemctl is-active --quiet pure-ftpd" && { note "FAIL pure-ftpd RUNNING after vhost add"; echo "ftp-assert-failed" > ftp-assert.flag; } || note "PASS pure-ftpd still stopped after vhost add"
+          exit 0
+        continue-on-error: true
+
       - name: Test mysqladmin_shell.sh MySQL Database Management
         run: |
           docker exec cmm_el89 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
@@ -423,10 +437,10 @@ jobs:
       - name: Gate on pure-ftpd CSF assertions
         run: |
           if [ -f ftp-assert.flag ]; then
-            echo "::error::pure-ftpd/CSF default-state assertions FAILED — see job summary"
+            echo "::error::pure-ftpd/CSF disabled-state assertions FAILED — see job summary"
             exit 1
           fi
-          echo "All pure-ftpd/CSF default-state assertions passed"
+          echo "All pure-ftpd/CSF disabled-state assertions passed"
 
   discordNotificationSuccess:
     needs: build
