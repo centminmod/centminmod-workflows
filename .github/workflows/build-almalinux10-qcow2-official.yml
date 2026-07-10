@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 180  # 3 hour timeout for TCG
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: |
@@ -21,7 +21,7 @@ jobs:
             cloud-image-utils
 
       - name: Setup Packer
-        uses: hashicorp/setup-packer@v3.1.0
+        uses: hashicorp/setup-packer@v3.3.0
         with:
           version: '1.12.0'
 

@@ -19,7 +19,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ALMALINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -912,7 +912,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -1060,7 +1060,7 @@ jobs:
       php85_test_status: ${{ steps.php85_test.outputs.ALMALINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -1460,7 +1460,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ROCKYLINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -2352,7 +2352,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -2500,7 +2500,7 @@ jobs:
       php85_test_status: ${{ steps.php85_test.outputs.ROCKYLINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -2901,7 +2901,7 @@ jobs:
       redis_test_status: ${{ steps.redis_test.outputs.ORACLELINUX_REDIS_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -3794,7 +3794,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
@@ -3948,7 +3948,7 @@ jobs:
       php85_test_status: ${{ steps.php85_test.outputs.ORACLELINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install Sysbox
         run: |
