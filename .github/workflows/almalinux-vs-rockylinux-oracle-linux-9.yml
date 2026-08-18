@@ -25,8 +25,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -918,8 +918,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -1065,8 +1065,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -1402,8 +1402,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2294,8 +2294,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2441,8 +2441,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2779,8 +2779,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -3672,8 +3672,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -3825,8 +3825,8 @@ jobs:
 
       - name: Install Sysbox
         run: |
-          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.6.7/sysbox-ce_0.6.7-0.linux_amd64.deb
-          sudo dpkg -i sysbox-ce_0.6.7-0.linux_amd64.deb || sudo apt-get install -f
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
