@@ -413,7 +413,8 @@ jobs:
           echo "All pure-ftpd/CSF disabled-state assertions passed"
 
       - name: Notify Discord
-        if: always()
+        if: ${{ !cancelled() }}
+        continue-on-error: true
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \

@@ -405,7 +405,8 @@ jobs:
         path: centminlogs/*
 
     - name: Notify Discord
-      if: always()
+      if: ${{ !cancelled() }}
+      continue-on-error: true
       run: |
         curl -H "Content-Type: application/json" \
              -X POST \
