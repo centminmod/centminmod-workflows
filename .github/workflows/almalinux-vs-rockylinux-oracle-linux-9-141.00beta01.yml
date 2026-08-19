@@ -4487,7 +4487,7 @@ jobs:
   discordNotificationSuccess:
     needs: [almalinux, almalinux-php7, almalinux-php8, rockylinux, rockylinux-php7, rockylinux-php8, oraclelinux, oraclelinux-php7, oraclelinux-php8, compare]
     if: ${{ success() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Notify Discord Success
       run: |
@@ -4523,7 +4523,7 @@ jobs:
   discordNotificationFailure:
     needs: [almalinux, almalinux-php7, almalinux-php8, rockylinux, rockylinux-php7, rockylinux-php8, oraclelinux, oraclelinux-php7, oraclelinux-php8, compare]
     if: ${{ failure() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Notify Discord Failure
       run: |

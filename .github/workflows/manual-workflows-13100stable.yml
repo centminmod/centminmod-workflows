@@ -5,7 +5,7 @@ on:
 
 jobs:
   trigger:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Trigger almalinux-vs-rockylinux-oracle-linux-8 workflow
         uses: peter-evans/repository-dispatch@v4

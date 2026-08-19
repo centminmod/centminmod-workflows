@@ -3887,7 +3887,7 @@ jobs:
   discordNotificationSuccess:
     needs: [almalinux, rockylinux, compare]
     if: ${{ success() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Notify Discord Success
       run: |
@@ -3917,7 +3917,7 @@ jobs:
   discordNotificationFailure:
     needs: [almalinux, rockylinux, compare]
     if: ${{ failure() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Notify Discord Failure
       run: |

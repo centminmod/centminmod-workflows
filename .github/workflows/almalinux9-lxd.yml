@@ -320,7 +320,7 @@ jobs:
   discord_success:
     needs: build
     if: ${{ success() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Discord – success
         env:
@@ -334,7 +334,7 @@ jobs:
   discord_failure:
     needs: build
     if: ${{ failure() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Discord – failure
         env:
