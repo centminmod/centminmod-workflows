@@ -327,6 +327,8 @@ jobs:
           platforms: linux/amd64
           load: true
           tags: cmm_rockylinux8:latest
+          cache-from: type=gha,scope=cmm-rockylinux8
+          cache-to: type=gha,scope=cmm-rockylinux8,mode=max
   
       - name: Debug payload (repository_dispatch)
         run: echo ${{ github.event.client_payload.release }}

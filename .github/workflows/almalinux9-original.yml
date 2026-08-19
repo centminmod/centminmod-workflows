@@ -1,21 +1,17 @@
-name: 132.00stable (1) Oracle Linux 8 + Nginx Lua Enabled
+name: AlmaLinux 9
 
 on:
   workflow_dispatch:
-
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}
-  cancel-in-progress: true
+  repository_dispatch:
+    types: [run-almalinux-9-workflow]
 
 jobs:
   build:
-
     runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v7
+      uses: actions/checkout@v4
 
     - name: Install Sysbox
       run: |
@@ -23,19 +19,17 @@ jobs:
         sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v4
+      uses: docker/setup-buildx-action@v3
 
     - name: Build 
       id: docker_build
-      uses: docker/build-push-action@v7
+      uses: docker/build-push-action@v5
       with:
         context: .
-        file: ./dockerfiles/Dockerfile-oraclelinux8
+        file: ./dockerfiles/Dockerfile-almalinux9
         platforms: linux/amd64
         load: true
         tags: cmm_el89:latest
-        cache-from: type=gha,scope=cmm-oraclelinux8
-        cache-to: type=gha,scope=cmm-oraclelinux8,mode=max
 
     - name: Debug payload (repository_dispatch)
       run: echo ${{ github.event.client_payload.release }}
@@ -43,16 +37,11 @@ jobs:
     - name: Debug input (workflow_dispatch)
       run: echo ${{ github.event.inputs.release }}
 
-    - name: Run container Centmmin Mod LEMP Oracle Linux 8 Install
+    - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
       run: |
-        docker run -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
+        docker run  --cgroupns host -d --name=cmm_el89 --runtime=sysbox-runc --cap-add=SYS_ADMIN --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined -v /tmp/$(mktemp -d):/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro cmm_el89:latest
         sleep 4
-        docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"        
-        docker exec cmm_el89 bash -c "echo 'ORESTY_LUANGINX=y' >> /etc/centminmod/custom_config.inc"
-        docker exec cmm_el89 bash -c "echo 'NGXDYNAMIC_LUA=y' >> /etc/centminmod/custom_config.inc"
-        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/installer.sh | bash" | tee cmm-install.log
-        output=$(tail -20 cmm-install.log)
-        echo "$output" >> $GITHUB_STEP_SUMMARY
+        docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller.sh | bash"
       continue-on-error: true
 
     - name: Display Centmmin Mod LEMP Install Log
@@ -176,24 +165,12 @@ jobs:
         docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/logs || true"
         docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/modules || true"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/conf/lua-package-path-include.conf || true"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/5.1/resty/ || true"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx-dep/lib/lua/5.1/resty/core || true"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "cat /usr/local/nginx/conf/lua-package-path-include.conf || true"
-        docker exec cmm_el89 bash -c "echo '---'"
-        docker exec cmm_el89 bash -c "grep 'lua-package-path-include.conf' /usr/local/nginx/conf/nginx.conf || true"
-        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid || true"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "ps aux | grep nginx"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "systemctl status nginx.service"
-        sleep 1
+        docker exec cmm_el89 bash -c "echo '---'"
         docker exec cmm_el89 bash -c "curl -I http://localhost" || true
         docker exec cmm_el89 bash -c "echo '---'" || true
         docker exec cmm_el89 bash -c "curl -sIv http://localhost" || true
@@ -368,23 +345,39 @@ jobs:
         docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
       continue-on-error: true
 
-    - name: Copy Oracle Linux 8 Centmin Mod logs from container
+    - name: Copy AlmaLinux Centmin Mod logs from container
+      # don’t fail the job if this step errors
+      continue-on-error: true
       run: |
         mkdir -p ./centminlogs
-        docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
+        # check container is still running (or at least exists)
+        CONTAINER_EXISTS=$(docker ps -aq -f name=cmm_el89)
+        if [ -z "$CONTAINER_EXISTS" ]; then
+          echo "❌ Container cmm_el89 not found; skipping log copy"
+          exit 0
+        fi
 
-    - name: Upload Oracle Linux 8 Centmin Mod Logs
-      uses: actions/upload-artifact@v7
+        # check for the logs directory inside the container
+        if docker exec cmm_el89 test -d /root/centminlogs; then
+          echo "📂 Found /root/centminlogs – copying out…"
+          docker exec cmm_el89 tar -C /root/centminlogs -cf - . \
+        | tar -C ./centminlogs -xf -
+        else
+          echo "⚠️ /root/centminlogs not present in container; skipping log copy"
+        fi
+
+    - name: Upload AlmaLinux Centmin Mod Logs
+      uses: actions/upload-artifact@v4
       with:
-        name: oraclelinux8_logs
+        name: almalinux_logs
         path: centminlogs/*
 
-    - name: Trigger ModSecurity Workflow
+    - name: Trigger Nginx HTTP/3 Workflow
       run: |
         curl -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/oraclelinux8-modsecurity-13100stable.yml/dispatches \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux9-nginx-http3.yml/dispatches \
         -d '{"ref":"master"}'
 
     - name: Notify Discord
