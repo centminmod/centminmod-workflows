@@ -261,6 +261,11 @@ jobs:
         docker exec cmm_el89 bash -c "cat /etc/csf/csf.allow"
       continue-on-error: true
 
+    - name: Assert CSF GeoLite2 integration
+      run: |
+        set -o pipefail
+        docker exec cmm_el89 bash /home/test-csf-geolite2.sh | tee -a "$GITHUB_STEP_SUMMARY"
+
     - name: Inspect logrotation setup
       run: |
         docker exec cmm_el89 bash -c "echo '---'"

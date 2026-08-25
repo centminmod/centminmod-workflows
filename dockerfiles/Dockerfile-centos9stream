@@ -119,5 +119,8 @@ RUN chmod +x /home/centmin-option-5-php8.3.sh
 COPY scripts/centmin-option-5-php8.4.sh /home/centmin-option-5-php8.4.sh
 RUN chmod +x /home/centmin-option-5-php8.4.sh
 
+COPY scripts/test-csf-geolite2.sh /home/test-csf-geolite2.sh
+RUN chmod +x /home/test-csf-geolite2.sh
+
 VOLUME [ "/sys/fs/cgroup", "/run" ]
 CMD ["/sbin/init"]

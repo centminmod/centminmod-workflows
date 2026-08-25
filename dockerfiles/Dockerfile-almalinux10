@@ -130,5 +130,8 @@ RUN chmod +x /home/mysqltuner.pl
 COPY scripts/proxysql_report.py /home/proxysql_report.py
 RUN chmod +x /home/proxysql_report.py
 
+COPY scripts/test-csf-geolite2.sh /home/test-csf-geolite2.sh
+RUN chmod +x /home/test-csf-geolite2.sh
+
 VOLUME [ "/sys/fs/cgroup", "/run", "/tmp" ]
 CMD ["/sbin/init"]
