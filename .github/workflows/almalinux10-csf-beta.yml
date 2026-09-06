@@ -1,0 +1,466 @@
+name: 0 - AlmaLinux 10 - CSF beta channel
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types: [run-almalinux-10-csf-beta-workflow]
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.release || github.event.client_payload.release }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Sysbox
+        run: |
+          curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build 
+        id: docker_build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux10
+          platforms: linux/amd64
+          load: true
+          tags: cmm_el89:latest
+
+      - name: Debug payload (repository_dispatch)
+        run: echo ${{ github.event.client_payload.release }}
+      
+      - name: Debug input (workflow_dispatch)
+        run: echo ${{ github.event.inputs.release }}
+
+      - name: Run container Centmmin Mod LEMP AlmaLinux 10 Install
+        run: |
+          docker run --cgroupns host -d --name=cmm_el89 \
+            --privileged \
+            --runtime=sysbox-runc \
+            --cap-add=SYS_ADMIN \
+            --cap-add=SYS_RESOURCE \
+            --security-opt seccomp=unconfined \
+            --security-opt label=disable \
+            --security-opt apparmor=unconfined \
+            --tmpfs /run \
+            --tmpfs /run/lock \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            cmm_el89:latest
+          sleep 4
+          # Preview the CSF Firewall fork beta channel on a fresh install: centmin.sh
+          # sources /etc/centminmod/custom_config.inc after inc/downloadlinks.inc, so
+          # this overrides CSF_LINK (default https://download.centminmod.com/csf.tgz)
+          # and inc/downloads.inc fetches /csf-beta/csf.tgz instead. No Centmin Mod
+          # code change needed; `csf -u` afterwards still follows the stable channel.
+          docker exec cmm_el89 bash -c "mkdir -p /etc/centminmod"
+          docker exec cmm_el89 bash -c "echo \"CSF_LINK='https://download.centminmod.com/csf-beta/csf.tgz'\" >> /etc/centminmod/custom_config.inc"
+          docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
+          output=$(tail -80 cmm-install.log)
+          echo "$output" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: Display Centmmin Mod LEMP Install Log
+        run: |
+          echo "Last 80 lines of Centmmin Mod LEMP Install Log:"
+          echo "----------------------------------------"
+          tail -80 cmm-install.log
+          echo "----------------------------------------"
+        continue-on-error: true
+
+      - name: EL10 Info Collection
+        run: |
+          docker exec cmm_el89 bash -c "cat /etc/releases; echo"
+          docker exec cmm_el89 bash -c "cat /etc/os-release; echo"
+          docker exec cmm_el89 bash -c "lscpu; echo"
+          docker exec cmm_el89 bash -c "dnf repolist all; echo"
+          docker exec cmm_el89 bash -c "dnf module list; echo"
+          docker exec cmm_el89 bash -c "dnf list enchant2 enchant2-devel; echo"
+        continue-on-error: true
+
+      - name: Inspect nginx uid/gid
+        run: |
+          docker exec cmm_el89 bash -c "id nginx; echo"
+          docker exec cmm_el89 bash -c "ls -lahn /home/nginx"
+        continue-on-error: true
+
+      - name: Check pure-ftpd virtual FTP user login
+        run: |
+          # Add pure-ftpd virtual user
+          docker exec cmm_el89 bash -c 'openssl dhparam -out /etc/ssl/private/pure-ftpd-dhparams.pem 2048 >/dev/null 2>&1 && systemctl restart pure-ftpd'
+          docker exec cmm_el89 bash -c '( echo "ftppass" ; echo "ftppass" ) | pure-pw useradd ftpuser -u nginx -g $(id -g nginx) -d "/home/nginx/domains/demodomain.com"; pure-pw mkdb'
+          # Get container IP address
+          CONTAINER_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cmm_el89)         
+          # Install lftp
+          docker exec cmm_el89 bash -c 'yum -q -y install lftp'
+          # Test FTP login using lftp
+          docker exec cmm_el89 bash -c "lftp -e 'set ftp:passive-mode yes; set ftp:ssl-allow yes; set ftp:ssl-force yes; set ssl:verify-certificate no; open -u ftpuser,ftppass -p 21 ftp://$CONTAINER_IP; ls'"
+        continue-on-error: true
+
+      - name: Nginx Configure
+        run: |
+          docker exec cmm_el89 bash -c "cat /root/centminlogs/nginx-configure-*"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Nginx Patches
+        run: |
+          docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_patchnginx_*"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: PHP-FPM Patches
+        run: |
+          docker exec cmm_el89 bash -c "cat /root/centminlogs/patch_php_*"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Disk Usage Analysis
+        run: |
+          docker exec cmm_el89 bash -c "du -sh /svr-setup"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "df -hT"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "rpm -qa --queryformat '%10{size} - %-25{name} \t %{version}\n' | sort -n"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_el89 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+
+      - name: YUM repolist all
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "yum repolist all"
+        continue-on-error: true
+
+      - name: Inspect wget install
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/local/bin/wget -V"
+          docker exec cmm_el89 bash -c "/usr/bin/wget -V"
+        continue-on-error: true
+
+      - name: Inspect ccache install
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -V"
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -s"
+          sleep 1
+          docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+
+      - name: Inspect ccache YUM install
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -V"
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/bin/ccache -s"
+          sleep 1
+          docker exec cmm_el89 bash -c "grep ccache ~/.bashrc"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl status php-fpm.service"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "php-config || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php -v"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Inspect Nginx setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAh /usr/local/nginx/logs || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /usr/local/nginx/logs/nginx.pid || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ps aux | grep nginx"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl status nginx.service"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "curl -I http://localhost"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "curl -sIv http://localhost"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/sbin/nginx -V"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ldd /usr/local/sbin/nginx"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Inspect MariaDB setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl status mariadb.service"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /etc/my.cnf"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c 'mysql -t -e "SELECT * FROM mysql.plugin;"'
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c 'mysql -t -e "SHOW PLUGINS;"'
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
+        continue-on-error: true
+
+      - name: Debug MariaDB setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAhrt /var/lib/mysql"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /var/lib/mysql/*.err || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "mysqladmin var | tr -s ' ' || true "
+        continue-on-error: true
+
+      - name: Inspect Python3 setup
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "python3 --version"
+          sleep 1
+          docker exec cmm_el89 bash -c "pip --version"
+          sleep 1
+          docker exec cmm_el89 bash -c "alternatives --list | grep -E -i 'pip|python' || echo 'No match for pip or python keywords'"
+        continue-on-error: true
+
+      - name: Inspect Redis Server setup
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "redis-cli info"
+          sleep 1
+          docker exec cmm_el89 bash -c "systemctl status redis"
+          sleep 1
+          docker exec cmm_el89 bash -c "php --ri redis"
+        continue-on-error: true
+
+      - name: Inspect pure-ftpd setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAh /etc/systemd/system/pure-ftpd.service.d"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /etc/systemd/system/pure-ftpd.service.d/pidfile.conf"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "journalctl -u pure-ftpd --no-pager | tail -n 100"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl status pure-ftpd.service"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAh /etc/ssl/private/pure-ftpd-dhparams.pem || echo '/etc/ssl/private/pure-ftpd-dhparams.pem not yet setup'"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /etc/pure-ftpd/pure-ftpd.conf | grep -E 'UnixAuthentication|VerboseLog|PureDB |CreateHomeDir|TLS|PassivePortRange|TLSCipherSuite|MaxClientsNumber|MaxClientsPerIP|NoAnonymous|Umask'"
+        continue-on-error: true
+
+      - name: Inspect chronyd setup
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "journalctl -u chronyd --no-pager | tail -n 100"
+          sleep 1
+          docker exec cmm_el89 bash -c "systemctl status chronyd.service || echo 'chronyd not supported in docker containers'"
+        continue-on-error: true
+
+      - name: Inspect CSF Firewall setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "grep -E '^TCP_IN|^TCP6_IN' /etc/csf/csf.conf"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "csf -v"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "csf -ra"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "cat /etc/csf/csf.allow"
+        continue-on-error: true
+
+      - name: Assert CSF beta channel installed
+        run: |
+          set -o pipefail
+          expected=$(curl -4sf https://download.centminmod.com/csf-beta/version.txt | tr -d '[:space:]')
+          installed=$(docker exec cmm_el89 bash -c "csf -v" | sed -nE 's/^csf: v([^ ]+).*/\1/p')
+          echo "mirror /csf-beta/version.txt: ${expected}  installed: ${installed}" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -z "$expected" ] || [ "$installed" != "$expected" ]; then
+            echo "::error::installed CSF ${installed:-none} does not match the /csf-beta/ channel ${expected:-unknown}"
+            exit 1
+          fi
+
+      - name: Assert CSF GeoLite2 integration
+        run: |
+          set -o pipefail
+          docker exec cmm_el89 bash /home/test-csf-geolite2.sh | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify default pure-ftpd CSF state (PUREFTPD_DISABLED=n)
+        id: assert_ftp_default
+        run: |
+          set +e
+          fail=0
+          note() { echo "$1"; echo "$1" >> "$GITHUB_STEP_SUMMARY"; }
+          echo "## Default-state pure-ftpd/CSF assertions (PUREFTPD_DISABLED=n)" >> "$GITHUB_STEP_SUMMARY"
+          # Phase 1 - assert the state the INITIAL install produced. Do NOT run the
+          # fixer first: fix_ftp_csf_ports is INITIALINSTALL-gated (skipped on initial
+          # install), so a fresh csf.conf reflects csfinstall.inc output; running the
+          # idempotent fixer here would dedupe/repair and mask an install-time regression.
+          tcpin=$(docker exec cmm_el89 bash -c "grep -E '^TCP_IN = \"' /etc/csf/csf.conf | sed -E 's/^[^\"]*\"//; s/\".*\$//'")
+          pf=$(docker exec cmm_el89 bash -c "grep -E '^PORTFLOOD = ' /etc/csf/csf.conf")
+          note "post-install TCP_IN: $tcpin"
+          printf '%s' "$tcpin" | grep -q '30001:50011' && note "PASS passive range 30001:50011 present" || { note "FAIL passive range 30001:50011 MISSING"; fail=1; }
+          printf '%s' ",$tcpin," | grep -q ',21,' && note "PASS control port 21 present" || { note "FAIL control port 21 MISSING"; fail=1; }
+          printf '%s' "$pf" | grep -qE '(^|[",])21;tcp;[0-9]+;[0-9]+' && note "PASS PORTFLOOD 21;tcp rule present" || { note "FAIL PORTFLOOD 21;tcp rule MISSING"; fail=1; }
+          for p in 1110 1186 1194 81 9418; do
+            n=$(printf '%s' "$tcpin" | tr ',' '\n' | awk -v w="$p" '$0==w{c++}END{print c+0}')
+            [ "$n" -eq 1 ] && note "PASS misc port $p appears once" || { note "FAIL misc port $p appears $n times (dup/missing)"; fail=1; }
+          done
+          # Phase 2 - idempotency of the every-pass normalizer (simulates a cmupdate pass):
+          # running it twice must not churn csf.conf - byte-identical md5 on the repeat run.
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
+          h1=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/fix-csf-ftp-ports.sh >/dev/null 2>&1"
+          h2=$(docker exec cmm_el89 bash -c "md5sum /etc/csf/csf.conf | cut -d' ' -f1")
+          [ "$h1" = "$h2" ] && note "PASS fix-csf-ftp-ports.sh idempotent (csf.conf md5 stable: $h2)" || { note "FAIL not idempotent: $h1 -> $h2"; fail=1; }
+          docker exec cmm_el89 bash -c "systemctl is-enabled pure-ftpd >/dev/null 2>&1" && note "INFO pure-ftpd enabled" || note "INFO pure-ftpd not enabled"
+          [ "$fail" -ne 0 ] && echo "ftp-assert-failed" > ftp-assert.flag
+          exit 0
+        continue-on-error: true
+
+      - name: Inspect logrotation setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/nginx"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "logrotate -dv /etc/logrotate.d/php-fpm"
+        continue-on-error: true
+
+      - name: Inspect Sysstat and systemd-journald service
+        run: |
+          docker exec cmm_el89 bash -c "systemctl status sysstat.service"
+          docker exec cmm_el89 bash -c "systemctl status systemd-journald.service"
+        continue-on-error: true
+    
+      - name: Check permissions of /var/log/journal
+        run: |
+          docker exec cmm_el89 bash -c "ls -ld /var/log/journal || echo '/var/log/journal persistent storage not configured'"
+        continue-on-error: true
+    
+      - name: Show recent systemd-journald logs
+        run: |
+          docker exec cmm_el89 bash -c "journalctl --unit=systemd-journald.service --no-pager | tail -n 100"
+        continue-on-error: true
+
+      - name: Run cminfo
+        run: |
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/cminfo.sh"
+        continue-on-error: true
+
+      - name: Run addons/golang.sh
+        run: |
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/golang.sh install"
+        continue-on-error: true
+
+      - name: Run addons/nodejs.sh
+        run: |
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/nodejs.sh install"
+        continue-on-error: true
+
+      - name: Run addons/opendkim.sh
+        run: |
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/opendkim.sh"
+        continue-on-error: true
+
+      - name: Run tools/csfcf.sh
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh"
+          sleep 1
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh auto"
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv4"
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/tools/csfcf.sh ipv6"
+        continue-on-error: true
+
+      - name: Create Nginx HTTPS vhost
+        run: |
+          docker exec cmm_el89 bash -c "/usr/bin/nv -d domain.com -s y"
+        continue-on-error: true
+
+      - name: Test mysqladmin_shell.sh MySQL Database Management
+        run: |
+          docker exec cmm_el89 bash -c "echo -e 'dbname dbusername dbpassword\ndb2name db2username db2password' > /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo 'multidb'"
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh multidb /home/nginx/domains/domain.com/dbfile.txt"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo 'createuserdb'"
+          docker exec cmm_el89 bash -c "/usr/local/src/centminmod/addons/mysqladmin_shell.sh createuserdb mydbname mydbuser mydbpass"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "echo 'showgrants'"
+          docker exec cmm_el89 bash -c "echo 'dbusername' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_el89 bash -c "echo 'db2username' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_el89 bash -c "echo 'mydbuser' | /usr/local/src/centminmod/addons/mysqladmin_shell.sh showgrants"
+          docker exec cmm_el89 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: Run cmupdate
+        run: |
+          docker exec cmm_el89 bash -c "cmupdate"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 4 Nginx upgrade test
+        run: |
+          docker exec cmm_el89 /home/centmin-option-4.sh
+          docker exec cmm_el89 bash -c "ccache -s"
+        continue-on-error: true
+
+      - name: YUM History Info
+        run: |
+          docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
+        continue-on-error: true
+
+      - name: Copy AlmaLinux Centmin Mod logs from container
+        run: |
+          mkdir -p ./centminlogs
+          docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C ./centminlogs -xf -
+
+      - name: Upload AlmaLinux Centmin Mod Logs
+        uses: actions/upload-artifact@v7
+        with:
+          name: almalinux_logs
+          path: centminlogs/*
+
+      - name: Gate on pure-ftpd CSF assertions
+        run: |
+          if [ -f ftp-assert.flag ]; then
+            echo "::error::pure-ftpd/CSF default-state assertions FAILED — see job summary"
+            exit 1
+          fi
+          echo "All pure-ftpd/CSF default-state assertions passed"
+
+      - name: Notify Discord
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and finished with status: ${{ job.status }}\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
