@@ -401,6 +401,17 @@ jobs:
           docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
         continue-on-error: true
 
+      - name: Assert CSF beta channel survived later update paths
+        run: |
+          set -o pipefail
+          expected=$(curl -4sf https://download.centminmod.com/csf-beta/version.txt | tr -d '[:space:]')
+          installed=$(docker exec cmm_el89 bash -c "csf -v" | sed -nE 's/^csf: v([^ ]+).*/\1/p')
+          echo "after csfcf.sh auto + cmupdate: mirror /csf-beta/version.txt: ${expected}  installed: ${installed}" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -z "$expected" ] || [ "$installed" != "$expected" ]; then
+            echo "::error::a later update path replaced CSF ${expected:-unknown} with ${installed:-none}"
+            exit 1
+          fi
+
       - name: Copy AlmaLinux Centmin Mod logs from container
         run: |
           mkdir -p ./centminlogs
