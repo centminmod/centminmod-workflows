@@ -414,6 +414,23 @@ jobs:
           docker exec cmm_el89 bash -c "ccache -s"
         continue-on-error: true
 
+      - name: Recompile Nginx with OpenSSL 3.5, 3.6 and 4.0
+        id: nginx_openssl_rebuilds
+        timeout-minutes: 90
+        continue-on-error: true
+        run: |
+          set +e
+          set -o pipefail
+          docker exec -i cmm_el89 bash -s < scripts/test-nginx-openssl-rebuilds.sh | tee nginx-openssl-summary.log
+          result=$?
+          {
+            echo '### Nginx OpenSSL recompile tests'
+            echo '```text'
+            cat nginx-openssl-summary.log
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
       - name: YUM History Info
         run: |
           docker exec cmm_el89 bash -c "for id in \$(/usr/bin/yum history list | awk '{print \$1}' | grep -E '^[0-9]+$'); do /usr/bin/yum history info \$id; done"
@@ -429,6 +446,12 @@ jobs:
         with:
           name: almalinux_logs
           path: centminlogs/*
+
+      - name: Gate on Nginx OpenSSL recompiles
+        if: ${{ steps.nginx_openssl_rebuilds.outcome == 'failure' }}
+        run: |
+          echo '::error::Nginx/OpenSSL recompile checks failed; see the job summary and uploaded logs'
+          exit 1
 
       - name: Gate on pure-ftpd CSF assertions
         run: |
