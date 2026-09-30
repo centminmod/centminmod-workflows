@@ -10,8 +10,10 @@ $cv = curl_version();
 echo "libcurl {$cv['version']}  ({$cv['ssl_version']})".PHP_EOL;
 
 /* ---- 1. confirm the desired libcurl version ----------------------- */
-if ($cv['version'] !== '8.13.0') {
-    echo "ERROR: PHP linked to the wrong libcurl".PHP_EOL; exit(1);
+/* optional argv[1] = expected libcurl version (default 8.13.0)       */
+$expected = $argv[1] ?? '8.13.0';
+if ($cv['version'] !== $expected) {
+    echo "ERROR: PHP linked to the wrong libcurl (expected $expected)".PHP_EOL; exit(1);
 }
 
 /* ---- 2. feature detection ----------------------------------------- */
