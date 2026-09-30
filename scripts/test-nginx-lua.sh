@@ -129,7 +129,8 @@ info "resty.upstream.healthcheck: $(val healthcheck)"
 [[ "$(val lrucache)" = v ]] && pass "resty.lrucache set/get" || fail "resty.lrucache set/get"
 code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://localhost/)
 [[ "$code" = 200 ]] && pass "default site HTTP 200" || fail "default site HTTP $code"
-new_errors=$(tail -n +$((el0 + 1)) "$errlog" 2>/dev/null | grep -E '\[(error|crit|alert|emerg)\]')
+# container-only nginx alerts (no CAP_SYS_NICE / RLIMIT raise in Docker) are not failures
+new_errors=$(tail -n +$((el0 + 1)) "$errlog" 2>/dev/null | grep -E '\[(error|crit|alert|emerg)\]' | grep -vE 'setpriority|setrlimit')
 if [[ -z "$new_errors" ]]; then
   pass "no new error.log errors"
 else

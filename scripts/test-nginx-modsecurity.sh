@@ -81,7 +81,8 @@ if [[ -f "$modsec_conf" ]]; then
     [[ "$sqli" = 403 ]] && pass "SQLi request blocked (HTTP 403)" || fail "SQLi request HTTP $sqli (expected 403)"
     denied=$(tail -n +$((vl0 + 1)) "$vhost_log" 2>/dev/null | grep -c 'ModSecurity: Access denied')
     [[ "$denied" -gt 0 ]] && pass "$vhost_log has $denied 'ModSecurity: Access denied' entries" || fail "no 'ModSecurity: Access denied' entries in $vhost_log"
-    new_errors=$( { tail -n +$((el0 + 1)) "$errlog"; tail -n +$((vl0 + 1)) "$vhost_log"; } 2>/dev/null | grep -E '\[(crit|alert|emerg)\]')
+    # container-only nginx alerts (no CAP_SYS_NICE / RLIMIT raise in Docker) are not failures
+    new_errors=$( { tail -n +$((el0 + 1)) "$errlog"; tail -n +$((vl0 + 1)) "$vhost_log"; } 2>/dev/null | grep -E '\[(crit|alert|emerg)\]' | grep -vE 'setpriority|setrlimit')
     [[ -z "$new_errors" ]] && pass "no new crit/alert/emerg error.log entries" || { fail "new error.log entries:"; echo "$new_errors" | tail -5; }
   else
     nginx -t
