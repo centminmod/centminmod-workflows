@@ -34,11 +34,11 @@ jobs:
           # "Could not execute systemctl"); start them here and fail this step
           # instead of letting the later container steps fail with continue-on-error
           for i in 1 2 3; do
-            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo test -S /run/sysbox/sysfs.sock && break
             sudo systemctl restart sysbox || true
             sleep 10
           done
-          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -1118,11 +1118,11 @@ jobs:
           # "Could not execute systemctl"); start them here and fail this step
           # instead of letting the later container steps fail with continue-on-error
           for i in 1 2 3; do
-            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo test -S /run/sysbox/sysfs.sock && break
             sudo systemctl restart sysbox || true
             sleep 10
           done
-          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2201,11 +2201,11 @@ jobs:
           # "Could not execute systemctl"); start them here and fail this step
           # instead of letting the later container steps fail with continue-on-error
           for i in 1 2 3; do
-            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo test -S /run/sysbox/sysfs.sock && break
             sudo systemctl restart sysbox || true
             sleep 10
           done
-          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
