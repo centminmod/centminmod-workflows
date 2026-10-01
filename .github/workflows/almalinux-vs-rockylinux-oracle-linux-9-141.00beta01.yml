@@ -25,6 +25,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -918,6 +927,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -1066,6 +1084,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -1466,6 +1493,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2358,6 +2394,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2506,6 +2551,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -2907,6 +2961,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -3800,6 +3863,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -3954,6 +4026,15 @@ jobs:
         run: |
           curl -LO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
           sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for i in 1 2 3; do
+            [ -S /run/sysbox/sysfs.sock ] && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          [ -S /run/sysbox/sysfs.sock ] || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v4
