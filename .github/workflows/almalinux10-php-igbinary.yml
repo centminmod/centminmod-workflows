@@ -99,10 +99,10 @@ jobs:
           sleep 4
           docker exec cmm_el10_igbinary dnf -y install git
           docker exec cmm_el10_igbinary mkdir -p /etc/centminmod /root/centminlogs /opt
-          docker cp "$RUNNER_TEMP/centminmod-source.bundle" cmm_el10_igbinary:/opt/centminmod-source.bundle
-          docker cp centminmod-source/installer-el10.sh cmm_el10_igbinary:/opt/installer-el10.sh
-          docker cp scripts/php-igbinary-benchmark.php cmm_el10_igbinary:/opt/php-igbinary-benchmark.php
-          docker cp scripts/test-php-igbinary.sh cmm_el10_igbinary:/opt/test-php-igbinary.sh
+          docker exec -i cmm_el10_igbinary tee /opt/centminmod-source.bundle < "$RUNNER_TEMP/centminmod-source.bundle" >/dev/null
+          docker exec -i cmm_el10_igbinary tee /opt/installer-el10.sh < centminmod-source/installer-el10.sh >/dev/null
+          docker exec -i cmm_el10_igbinary tee /opt/php-igbinary-benchmark.php < scripts/php-igbinary-benchmark.php >/dev/null
+          docker exec -i cmm_el10_igbinary tee /opt/test-php-igbinary.sh < scripts/test-php-igbinary.sh >/dev/null
           cat > "$RUNNER_TEMP/custom_config.inc" <<'CONFIG'
           CMGIT='/opt/centminmod-source.bundle'
           AUTO_GITUPDATE='n'
@@ -145,9 +145,10 @@ jobs:
       - name: Collect logs and benchmark results
         if: always()
         run: |
+          set -o pipefail
           mkdir -p results/centminlogs
           if docker container inspect cmm_el10_igbinary >/dev/null 2>&1; then
-            docker cp cmm_el10_igbinary:/root/centminlogs/. results/centminlogs/ || true
+            docker exec cmm_el10_igbinary tar -C /root/centminlogs -cf - . | tar -C results/centminlogs -xf - || true
             docker exec cmm_el10_igbinary journalctl -u php-fpm -u nginx -u redis --no-pager > results/services.log || true
           fi
           {
