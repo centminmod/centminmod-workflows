@@ -36,7 +36,7 @@ mkdir -p "$output"
 /usr/local/sbin/php-fpm -t
 systemctl is-active --quiet php-fpm nginx redis
 fpm_pid=$(systemctl show --property MainPID --value php-fpm)
-[[ $(stat -Lc '%d:%i' "/proc/$fpm_pid/exe") = $(stat -Lc '%d:%i' /usr/local/sbin/php-fpm) ]]
+cmp -s "/proc/$fpm_pid/exe" /usr/local/sbin/php-fpm
 endpoint=/usr/local/nginx/html/cmm-igbinary-benchmark.php
 trap 'rm -f "$endpoint"' EXIT
 install -m 0644 /opt/php-igbinary-benchmark.php "$endpoint"
