@@ -118,7 +118,7 @@ jobs:
           if [[ "$IGBINARY_SUPPORT" = y ]]; then
             echo "PHPREDIS_IGBINARY='y'" >> "$RUNNER_TEMP/custom_config.inc"
           fi
-          docker cp "$RUNNER_TEMP/custom_config.inc" cmm_el10_igbinary:/etc/centminmod/custom_config.inc
+          docker exec -i cmm_el10_igbinary tee /etc/centminmod/custom_config.inc < "$RUNNER_TEMP/custom_config.inc" >/dev/null
           docker exec cmm_el10_igbinary bash /opt/installer-el10.sh 2>&1 | tee results/install.log
 
       - name: Check install and benchmark CLI and FPM
