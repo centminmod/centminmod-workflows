@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run inside the disposable AlmaLinux 10 CI container after install and rebuild.
 set -euo pipefail
+trap 'printf "FAIL: line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 stage=${1:?before or after}
 expected=${2:?y or n}
 source_sha=${3:?expected source SHA}
@@ -21,8 +22,12 @@ mkdir -p "$output"
     git -C "$centmin_dir" rev-parse HEAD
     git -C "$centmin_dir" diff -- centmin.sh
     /usr/local/bin/php-config --configure-options
-    sed -n -E '/^(CC|CXX|CFLAGS|CFLAGS_CLEAN|CXXFLAGS|LDFLAGS) = /p' \
-        /svr-setup/php-8.4.26/fpm-build/Makefile
+    if [[ -f /svr-setup/php-8.4.26/fpm-build/Makefile ]]; then
+        sed -n -E '/^(CC|CXX|CFLAGS|CFLAGS_CLEAN|CXXFLAGS|LDFLAGS) = /p' \
+            /svr-setup/php-8.4.26/fpm-build/Makefile
+    else
+        echo 'Build tree cleaned; compiler commands are retained in the workflow install/rebuild logs.'
+    fi
     /usr/local/bin/php --ini
     /usr/local/bin/php --ri igbinary
     /usr/local/bin/php --ri redis
