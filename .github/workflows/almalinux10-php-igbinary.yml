@@ -98,6 +98,12 @@ jobs:
             cmm_el10_igbinary:latest
           sleep 4
           docker exec cmm_el10_igbinary dnf -y install git
+          # Keep libzip runtime/headers aligned when a Remi mirror has stale metadata.
+          docker exec cmm_el10_igbinary dnf -y install epel-release https://rpms.remirepo.net/enterprise/remi-release-10.rpm
+          docker exec cmm_el10_igbinary dnf -y --refresh --enablerepo=remi,remi-safe \
+            --setopt=remi.mirrorlist= --setopt=remi.baseurl=https://rpms.remirepo.net/enterprise/10/remi/x86_64/ \
+            --setopt=remi-safe.mirrorlist= --setopt=remi-safe.baseurl=https://rpms.remirepo.net/enterprise/10/safe/x86_64/ \
+            install remi-libzip remi-libzip-devel
           docker exec cmm_el10_igbinary mkdir -p /etc/centminmod /root/centminlogs /opt
           docker exec -i cmm_el10_igbinary tee /opt/centminmod-source.bundle < "$RUNNER_TEMP/centminmod-source.bundle" >/dev/null
           docker exec -i cmm_el10_igbinary tee /opt/installer-el10.sh < centminmod-source/installer-el10.sh >/dev/null
