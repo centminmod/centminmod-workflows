@@ -1,0 +1,173 @@
+name: AlmaLinux 10 + PHP 8.4 igbinary
+
+on:
+  push:
+    branches: [php-igbinary]
+    paths:
+      - .github/workflows/almalinux10-php-igbinary.yml
+      - scripts/php-igbinary-benchmark.php
+      - scripts/test-php-igbinary.sh
+  workflow_dispatch:
+    inputs:
+      centminmod_ref:
+        description: Centmin Mod source branch, tag or commit
+        required: true
+        default: php-igbinary
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    name: PHP 8.4, PHPREDIS_IGBINARY=${{ matrix.igbinary }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        igbinary: ['n', 'y']
+    steps:
+      - name: Checkout workflows
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install Sysbox
+        run: |
+          curl -fLO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          for i in 1 2 3; do
+            sudo test -S /run/sysbox/sysfs.sock && break
+            echo "Waiting for Sysbox ($i/3)"
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; exit 1; }
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build AlmaLinux 10 image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux10
+          platforms: linux/amd64
+          load: true
+          tags: cmm_el10_igbinary:latest
+
+      - name: Checkout selected Centmin Mod source
+        uses: actions/checkout@v7
+        with:
+          repository: centminmod/centminmod-claudecode
+          ref: ${{ inputs.centminmod_ref || 'php-igbinary' }}
+          path: centminmod-source
+          fetch-depth: 0
+          token: ${{ secrets.PAT }}
+          persist-credentials: false
+
+      - name: Freeze source for the standard EL10 installer
+        id: source
+        run: |
+          source_sha=$(git -C centminmod-source rev-parse HEAD)
+          git -C centminmod-source update-ref refs/heads/141.00beta01 "$source_sha"
+          git -C centminmod-source bundle create "$RUNNER_TEMP/centminmod-source.bundle" refs/heads/141.00beta01
+          echo "sha=$source_sha" >> "$GITHUB_OUTPUT"
+          mkdir -p results
+          {
+            echo "centminmod=$source_sha"
+            echo "workflows=$(git rev-parse HEAD)"
+            sha256sum centminmod-source/installer-el10.sh
+          } > results/source.txt
+
+      - name: Install PHP 8.4 on AlmaLinux 10
+        env:
+          IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+        run: |
+          set -o pipefail
+          docker run --cgroupns host -d --name=cmm_el10_igbinary \
+            --privileged --runtime=sysbox-runc \
+            --cap-add=SYS_ADMIN --cap-add=SYS_RESOURCE \
+            --security-opt seccomp=unconfined --security-opt label=disable --security-opt apparmor=unconfined \
+            --tmpfs /run --tmpfs /run/lock -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            cmm_el10_igbinary:latest
+          sleep 4
+          docker exec cmm_el10_igbinary dnf -y install git
+          docker exec cmm_el10_igbinary mkdir -p /etc/centminmod /root/centminlogs /opt
+          docker cp "$RUNNER_TEMP/centminmod-source.bundle" cmm_el10_igbinary:/opt/centminmod-source.bundle
+          docker cp centminmod-source/installer-el10.sh cmm_el10_igbinary:/opt/installer-el10.sh
+          docker cp scripts/php-igbinary-benchmark.php cmm_el10_igbinary:/opt/php-igbinary-benchmark.php
+          docker cp scripts/test-php-igbinary.sh cmm_el10_igbinary:/opt/test-php-igbinary.sh
+          cat > "$RUNNER_TEMP/custom_config.inc" <<'CONFIG'
+          CMGIT='/opt/centminmod-source.bundle'
+          AUTO_GITUPDATE='n'
+          PHP_VERSION='8.4.26'
+          PHPREDIS='y'
+          # Match the Git source that PHP 8.4 menu 5 rebuilds use.
+          REDISPHP_GIT='y'
+          IGBINARY_INSTALL='y'
+          IGBINARYGIT='n'
+          IGBINARY_VERSION='3.2.16'
+          CONFIG
+          # The n job deliberately omits the new setting to test its shipped default.
+          if [[ "$IGBINARY_SUPPORT" = y ]]; then
+            echo "PHPREDIS_IGBINARY='y'" >> "$RUNNER_TEMP/custom_config.inc"
+          fi
+          docker cp "$RUNNER_TEMP/custom_config.inc" cmm_el10_igbinary:/etc/centminmod/custom_config.inc
+          docker exec cmm_el10_igbinary bash /opt/installer-el10.sh 2>&1 | tee results/install.log
+
+      - name: Check install and benchmark CLI and FPM
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+        run: |
+          set -o pipefail
+          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh before "$IGBINARY_SUPPORT" "$SOURCE_SHA" 2>&1 | tee results/before.log
+
+      - name: Rebuild the same PHP version
+        run: |
+          set -o pipefail
+          docker exec cmm_el10_igbinary bash /usr/local/src/centminmod/centmin-cli.sh phpupgrade 8.4.26 2>&1 | tee results/rebuild.log
+
+      - name: Gate on rebuild correctness and collect new samples
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+          IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+        run: |
+          set -o pipefail
+          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh after "$IGBINARY_SUPPORT" "$SOURCE_SHA" 2>&1 | tee results/after.log
+
+      - name: Collect logs and benchmark results
+        if: always()
+        run: |
+          mkdir -p results/centminlogs
+          if docker container inspect cmm_el10_igbinary >/dev/null 2>&1; then
+            docker cp cmm_el10_igbinary:/root/centminlogs/. results/centminlogs/ || true
+            docker exec cmm_el10_igbinary journalctl -u php-fpm -u nginx -u redis --no-pager > results/services.log || true
+          fi
+          {
+            echo '### PHP 8.4 igbinary benchmark'
+            echo 'Correctness checks gate this job. Timing differences are advisory on hosted runners.'
+            for stage in before after; do
+              summary="results/centminlogs/php-igbinary/$stage-summary.txt"
+              if [[ -f "$summary" ]]; then
+                cat "$summary"
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload logs and raw benchmark samples
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: almalinux10-php84-igbinary-${{ matrix.igbinary }}-${{ github.run_attempt }}
+          path: results/
+
+      - name: Remove disposable container
+        if: always()
+        run: docker rm -f cmm_el10_igbinary || true
