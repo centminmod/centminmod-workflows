@@ -1,18 +1,12 @@
 name: AlmaLinux 10 + PHP 8.4 igbinary
 
 on:
-  push:
-    branches: [php-igbinary]
-    paths:
-      - .github/workflows/almalinux10-php-igbinary.yml
-      - scripts/php-igbinary-benchmark.php
-      - scripts/test-php-igbinary.sh
   workflow_dispatch:
     inputs:
       centminmod_ref:
         description: Centmin Mod source branch, tag or commit
         required: true
-        default: php-igbinary
+        default: 141.00beta01
         type: string
 
 permissions:
@@ -66,7 +60,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           repository: centminmod/centminmod-claudecode
-          ref: ${{ inputs.centminmod_ref || 'php-igbinary' }}
+          ref: ${{ inputs.centminmod_ref || '141.00beta01' }}
           path: centminmod-source
           fetch-depth: 0
           token: ${{ secrets.PAT }}
