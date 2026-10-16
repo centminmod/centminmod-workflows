@@ -5,8 +5,10 @@ trap 'printf "FAIL: line %s: %s\n" "$LINENO" "$BASH_COMMAND" >&2' ERR
 stage=${1:?before or after}
 expected=${2:?y or n}
 source_sha=${3:?expected source SHA}
+redis_source=${4:?stable or git}
 [[ "$stage" = before || "$stage" = after ]]
 [[ "$expected" = y || "$expected" = n ]]
+[[ "$redis_source" = stable || "$redis_source" = git ]]
 [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
 # shellcheck source=/dev/null
 source /etc/os-release
@@ -45,19 +47,22 @@ install -m 0644 /opt/php-igbinary-benchmark.php "$endpoint"
 /usr/local/bin/php /opt/php-igbinary-benchmark.php "$expected" > "$output/$stage-cli.json"
 curl --fail --silent --show-error --max-time 120 -H 'Host: localhost' \
     "http://127.0.0.1/cmm-igbinary-benchmark.php?igbinary=$expected" > "$output/$stage-fpm.json"
-python3 - "$output" "$stage" "$expected" <<'PY'
+python3 - "$output" "$stage" "$expected" "$redis_source" <<'PY'
 import json
 import pathlib
 import sys
 
 root, stage, expected = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3] == 'y'
-summary = [f'\n{stage}, PHPREDIS_IGBINARY={"y" if expected else "n"}\n',
+redis_source = sys.argv[4]
+summary = [f'\n{stage}, PhpRedis={redis_source}, PHPREDIS_IGBINARY={"y" if expected else "n"}\n',
            '| SAPI | Posts serializer/compression | Stored bytes | Redis allocation bytes | SET us | GET us |',
            '|---|---|---:|---:|---:|---:|']
 for mode, sapi in [('cli', 'cli'), ('fpm', 'fpm-fcgi')]:
     result = json.loads((root / f'{stage}-{mode}.json').read_text())
     assert result['metadata']['sapi'] == sapi, result
     assert result['metadata']['redis_igbinary'] == expected, result
+    if redis_source == 'stable':
+        assert result['metadata']['redis'] == '6.3.0', result['metadata']
     assert len(result['serialization']) == 4 and len(result['redis']) == 4, result
     assert all(len(cases) == (6 if expected else 3) for cases in result['redis'].values()), result
     if stage == 'after':

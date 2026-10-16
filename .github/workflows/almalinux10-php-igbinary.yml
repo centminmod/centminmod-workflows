@@ -24,12 +24,13 @@ concurrency:
 
 jobs:
   benchmark:
-    name: PHP 8.4, PHPREDIS_IGBINARY=${{ matrix.igbinary }}
+    name: PHP 8.4, PhpRedis ${{ matrix.phpredis }}, PHPREDIS_IGBINARY=${{ matrix.igbinary }}
     runs-on: ubuntu-24.04
     timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
+        phpredis: ['git', 'stable']
         igbinary: ['n', 'y']
     steps:
       - name: Checkout workflows
@@ -82,12 +83,14 @@ jobs:
           {
             echo "centminmod=$source_sha"
             echo "workflows=$(git rev-parse HEAD)"
+            echo "phpredis=${{ matrix.phpredis }}"
             sha256sum centminmod-source/installer-el10.sh
           } > results/source.txt
 
       - name: Install PHP 8.4 on AlmaLinux 10
         env:
           IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+          PHPREDIS_SOURCE: ${{ matrix.phpredis }}
         run: |
           set -o pipefail
           docker run --cgroupns host -d --name=cmm_el10_igbinary \
@@ -120,12 +123,16 @@ jobs:
           AUTO_GITUPDATE='n'
           PHP_VERSION='8.4.26'
           PHPREDIS='y'
-          # Match the Git source that PHP 8.4 menu 5 rebuilds use.
-          REDISPHP_GIT='y'
           IGBINARY_INSTALL='y'
           IGBINARYGIT='n'
           IGBINARY_VERSION='3.2.16'
           CONFIG
+          if [[ "$PHPREDIS_SOURCE" = stable ]]; then
+            echo "PHPREDIS_STABLE='y'" >> "$RUNNER_TEMP/custom_config.inc"
+            echo "REDISPHPSEVENFOUR_VER='6.3.0'" >> "$RUNNER_TEMP/custom_config.inc"
+          else
+            echo "REDISPHP_GIT='y'" >> "$RUNNER_TEMP/custom_config.inc"
+          fi
           # The n job deliberately omits the new setting to test its shipped default.
           if [[ "$IGBINARY_SUPPORT" = y ]]; then
             echo "PHPREDIS_IGBINARY='y'" >> "$RUNNER_TEMP/custom_config.inc"
@@ -137,9 +144,10 @@ jobs:
         env:
           SOURCE_SHA: ${{ steps.source.outputs.sha }}
           IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+          PHPREDIS_SOURCE: ${{ matrix.phpredis }}
         run: |
           set -o pipefail
-          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh before "$IGBINARY_SUPPORT" "$SOURCE_SHA" 2>&1 | tee results/before.log
+          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh before "$IGBINARY_SUPPORT" "$SOURCE_SHA" "$PHPREDIS_SOURCE" 2>&1 | tee results/before.log
 
       - name: Rebuild the same PHP version
         run: |
@@ -150,9 +158,20 @@ jobs:
         env:
           SOURCE_SHA: ${{ steps.source.outputs.sha }}
           IGBINARY_SUPPORT: ${{ matrix.igbinary }}
+          PHPREDIS_SOURCE: ${{ matrix.phpredis }}
         run: |
           set -o pipefail
-          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh after "$IGBINARY_SUPPORT" "$SOURCE_SHA" 2>&1 | tee results/after.log
+          docker exec cmm_el10_igbinary bash /opt/test-php-igbinary.sh after "$IGBINARY_SUPPORT" "$SOURCE_SHA" "$PHPREDIS_SOURCE" 2>&1 | tee results/after.log
+          if [[ "$PHPREDIS_SOURCE" = stable ]]; then
+            for build_log in results/install.log results/rebuild.log; do
+              grep -Fq 'REDISPHP_GIT=n: REDISPHP_VER=6.3.0' "$build_log"
+              grep -Fq ' -c /svr-setup/phpredis-6.3.0/redis.c ' "$build_log"
+              if grep -Fq 'Compiling PHP redis extension from phpredis develop branch' "$build_log"; then
+                echo "Unexpected PhpRedis develop build in $build_log" >&2
+                exit 1
+              fi
+            done
+          fi
 
       - name: Collect logs and benchmark results
         if: always()
@@ -178,7 +197,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: almalinux10-php84-igbinary-${{ matrix.igbinary }}-${{ github.run_attempt }}
+          name: almalinux10-php84-phpredis-${{ matrix.phpredis }}-igbinary-${{ matrix.igbinary }}-${{ github.run_attempt }}
           path: results/
 
       - name: Remove disposable container
