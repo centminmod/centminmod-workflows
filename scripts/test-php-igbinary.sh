@@ -34,7 +34,9 @@ mkdir -p "$output"
     rpm -q libzstd libzstd-devel lz4 lz4-devel
 } > "$output/$stage-environment.txt"
 /usr/local/sbin/php-fpm -t
-systemctl is-active --quiet php-fpm nginx redis
+for cmm_service in php-fpm nginx redis; do
+    systemctl is-active --quiet "$cmm_service" || { echo "$cmm_service is not active" >&2; exit 1; }
+done
 fpm_pid=$(systemctl show --property MainPID --value php-fpm)
 cmp -s "/proc/$fpm_pid/exe" /usr/local/sbin/php-fpm
 endpoint=/usr/local/nginx/html/cmm-igbinary-benchmark.php

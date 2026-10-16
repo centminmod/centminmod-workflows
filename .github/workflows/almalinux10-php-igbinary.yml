@@ -104,6 +104,12 @@ jobs:
             --setopt=remi.mirrorlist= --setopt=remi.baseurl=https://rpms.remirepo.net/enterprise/10/remi/x86_64/ \
             --setopt=remi-safe.mirrorlist= --setopt=remi-safe.baseurl=https://rpms.remirepo.net/enterprise/10/safe/x86_64/ \
             install remi-libzip remi-libzip-devel
+          # Select the Redis stream Centmin enables when it first configures Remi.
+          docker exec cmm_el10_igbinary dnf -y --refresh --enablerepo=remi-modular \
+            --setopt=remi-modular.mirrorlist= --setopt=remi-modular.baseurl=https://rpms.remirepo.net/enterprise/10/modular/x86_64/ \
+            module install redis:remi-8.6/common
+          docker exec cmm_el10_igbinary systemctl enable --now redis
+          [[ "$(docker exec cmm_el10_igbinary redis-cli ping)" = PONG ]]
           docker exec cmm_el10_igbinary mkdir -p /etc/centminmod /root/centminlogs /opt
           docker exec -i cmm_el10_igbinary tee /opt/centminmod-source.bundle < "$RUNNER_TEMP/centminmod-source.bundle" >/dev/null
           docker exec -i cmm_el10_igbinary tee /opt/installer-el10.sh < centminmod-source/installer-el10.sh >/dev/null
