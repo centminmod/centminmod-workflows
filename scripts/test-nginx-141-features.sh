@@ -159,7 +159,7 @@ done
 [[ "$missing" -eq 0 ]] && pass "all ${#known[@]} toggles defined in centmin.sh"
 enabled=()
 for t in "${known[@]}"; do
-  [[ "$t" = *VER* || "$t" = *COMMIT ]] && continue
+  [[ "$t" = *VER || "$t" = *VERSION || "$t" = *COMMIT ]] && continue
   on "$t" && enabled+=("$t")
 done
 info "toggles on: ${enabled[*]}"

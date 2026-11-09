@@ -1,7 +1,7 @@
 #!/bin/bash
 # config/nginx/mcp_proxy.conf and mcp_proxy_http.conf checks for 141.00beta01+.
-# Run inside the test container after a centmin.sh/centmin-cli.sh run has
-# copied the templates to /usr/local/nginx/conf (maintenance_confcheck):
+# Run inside the test container after the install copied config/nginx to
+# /usr/local/nginx/conf (maintenance_confcheck adds missing ones on upgrades):
 #   docker exec cmm_el89 bash /opt/ci141/test-nginx-mcp-proxy.sh
 # Phase 1 includes the shipped templates unchanged in a 127.0.0.1:8120 test
 # server proxying to a loopback SSE backend. Phase 2 uses edited copies: one
@@ -63,7 +63,7 @@ body='{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_weathe
 post() { curl -s -m 10 -o /dev/null -w '%{http_code}' -X POST -H 'Content-Type: application/json' --data "$body" "$@" http://127.0.0.1:8120/mcp; }
 
 for f in "$tmpl_http" "$tmpl_loc"; do
-  [[ -f "$f" ]] && pass "$f" || fail "$f missing (not copied by maintenance_confcheck)"
+  [[ -f "$f" ]] && pass "$f" || fail "$f missing (not copied from config/nginx at install or by maintenance_confcheck)"
 done
 if [[ "$failed" -ne 0 ]]; then
   echo "RESULT: FAIL"

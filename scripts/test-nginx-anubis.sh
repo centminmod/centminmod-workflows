@@ -38,6 +38,12 @@ fi
 ver=$(sed -nE "s/^ANUBIS_VER_DEFAULT='([^']+)'.*/\1/p" "$addon")
 port=$(sed -nE "s/^ANUBIS_PORT='([0-9]+)'.*/\1/p" "$addon")
 mport=$(sed -nE "s/^ANUBIS_METRICS_PORT='([0-9]+)'.*/\1/p" "$addon")
+# anubis.sh sources /etc/centminmod/custom_config.inc after these defaults, so
+# ANUBIS_VER, ANUBIS_PORT and ANUBIS_METRICS_PORT set there win. tail: the
+# values are the last line, whatever the sourced file prints
+read -r ver port mport < <(ANUBIS_VER=$ver ANUBIS_PORT=$port ANUBIS_METRICS_PORT=$mport bash -c '
+  [[ -f /etc/centminmod/custom_config.inc ]] && source /etc/centminmod/custom_config.inc
+  echo "$ANUBIS_VER $ANUBIS_PORT $ANUBIS_METRICS_PORT"' | tail -n 1)
 echo "== anubis.sh install (Anubis $ver, 127.0.0.1:$port, metrics :$mport)"
 nginx -V 2>&1 | grep -q -- '--with-http_auth_request_module' && pass "nginx has auth_request" || fail "nginx lacks auth_request (NGINX_AUTHREQ='y' expected)"
 bash "$addon" install < /dev/null > "$work/install.log" 2>&1

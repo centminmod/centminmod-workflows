@@ -1,7 +1,7 @@
 #!/bin/bash
 # tools/nginx-aicrawlers.sh and botlimit.conf AI crawler map checks for
-# 141.00beta01+. Run inside the test container after a centmin.sh/centmin-cli.sh
-# run has copied the shipped empty maps (maintenance_confcheck):
+# 141.00beta01+. Run inside the test container after the install copied the
+# shipped empty maps from config/nginx (maintenance_confcheck on upgrades):
 #   docker exec cmm_el89 bash /opt/ci141/test-nginx-aicrawlers.sh
 # Loads the shipped config/nginx/botlimit.conf at http level through a test
 # conf.d file next to a 127.0.0.1:8140 test server, then checks the empty maps,
@@ -55,7 +55,7 @@ command -v jq > /dev/null 2>&1 && pass "jq installed" || fail "jq not installed"
 
 echo "== shipped empty maps (A2-stubs)"
 for f in aicrawlers_ua.conf aicrawlers_ip.conf; do
-  [[ -f "$aic_dir/$f" ]] && pass "$aic_dir/$f" || fail "$aic_dir/$f missing (not copied by maintenance_confcheck)"
+  [[ -f "$aic_dir/$f" ]] && pass "$aic_dir/$f" || fail "$aic_dir/$f missing (not copied from config/nginx at install or by maintenance_confcheck)"
 done
 if nginx -T 2>/dev/null | grep -q 'map $http_user_agent $bot_agent_ua'; then
   fail "a botlimit.conf with the AI maps is already loaded, this test adds its own copy"

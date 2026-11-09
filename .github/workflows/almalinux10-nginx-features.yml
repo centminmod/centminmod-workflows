@@ -20,7 +20,7 @@ on:
         default: 141.00beta01
         type: string
       include_otel:
-        description: Also run the NGINX_OTEL job (cmake gRPC build, an hour or more)
+        description: Also run the NGINX_OTEL job (long cmake gRPC and opentelemetry-cpp build)
         required: false
         default: false
         type: boolean
@@ -33,7 +33,8 @@ env:
   SOURCE_REF: ${{ inputs.centminmod_ref || github.event.client_payload.ref || '141.00beta01' }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.centminmod_ref || github.event.client_payload.ref || '141.00beta01' }}
+  # push runs and manual runs of the same ref don't cancel each other
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ inputs.centminmod_ref || github.event.client_payload.ref || '141.00beta01' }}
   cancel-in-progress: true
 
 jobs:
