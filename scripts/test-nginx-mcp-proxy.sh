@@ -44,7 +44,7 @@ upstream ci141_mcp_backend {
 }
 server {
   listen 127.0.0.1:8120;
-  $3
+  ${3:-}
   location /mcp {
     include $2;
     proxy_pass http://ci141_mcp_backend;

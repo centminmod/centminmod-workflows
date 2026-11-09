@@ -94,9 +94,12 @@ hdr=$(bot_header "$googlebot")
 [[ "$hdr" = '1  ' ]] && pass "empty maps: Googlebot keeps level 1, no claim ('$hdr')" || fail "empty maps: Googlebot header '$hdr', expected '1  '"
 hdr=$(bot_header "$browser")
 [[ "$hdr" = '0  ' ]] && pass "browser user agent: level 0, no claim ('$hdr')" || fail "browser user agent header '$hdr', expected '0  '"
+# return 444 closes the connection without a response: curl reports exit 52
+# (empty reply) or 56 (connection reset), depending on how the close arrives
+dropped() { [[ "$1" = 000 && ( "$2" -eq 52 || "$2" -eq 56 ) ]]; }
 c=$(curl -s -m 10 -o /dev/null -w '%{http_code}' -A 'HTTrack' http://127.0.0.1:8140/)
 rc=$?
-[[ "$c" = 000 && "$rc" -eq 52 ]] && pass "HTTrack user agent dropped (444)" || fail "HTTrack user agent: HTTP $c, curl exit $rc"
+dropped "$c" "$rc" && pass "HTTrack user agent dropped (444, curl exit $rc)" || fail "HTTrack user agent: HTTP $c, curl exit $rc"
 
 echo "== dry-run and print"
 sum_before=$(md5sum "$aic_dir"/*.conf)
@@ -141,7 +144,7 @@ sed -i -E 's/^([[:space:]]*training[[:space:]]+)0;/\13;/' "$conf_d/zz-ci141-botl
 if reload; then
   c=$(curl -s -m 10 -o /dev/null -w '%{http_code}' -A "$gptbot" http://127.0.0.1:8140/)
   rc=$?
-  [[ "$c" = 000 && "$rc" -eq 52 ]] && pass "training category at level 3: GPTBot dropped (444)" || fail "training category at level 3: GPTBot HTTP $c, curl exit $rc"
+  dropped "$c" "$rc" && pass "training category at level 3: GPTBot dropped (444, curl exit $rc)" || fail "training category at level 3: GPTBot HTTP $c, curl exit $rc"
   c=$(curl -s -m 10 -o /dev/null -w '%{http_code}' -A "$browser" http://127.0.0.1:8140/)
   [[ "$c" = 200 ]] && pass "training category at level 3: browser HTTP 200" || fail "training category at level 3: browser HTTP $c"
 else
