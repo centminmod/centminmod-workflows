@@ -273,6 +273,10 @@ NGX
       # an expected-fail rebuild (nginx-141-rebuild.sh) removed the QuickJS
       # build dir before aborting; the running nginx is still the earlier build
       info "/svr-setup/njs-quickjs holds '$got' after an expected-fail rebuild ($(cat /root/ci141-expected-fail)), not checked"
+    elif [[ "$label" = install ]]; then
+      # the install ends with disk_cleanups (inc/centminfinish.inc), which
+      # deletes every folder in /svr-setup; menu 4 rebuilds keep it
+      info "/svr-setup/njs-quickjs holds '$got' after the install's /svr-setup cleanup, not checked"
     else
       [[ "$got" = 'libquickjs.a quickjs.h' ]] && pass "/svr-setup/njs-quickjs holds only quickjs.h and libquickjs.a" || fail "/svr-setup/njs-quickjs holds '$got'"
     fi
@@ -669,14 +673,22 @@ if on NGINX_STICKY; then
   module_present sticky nginx-sticky-module nginx-sticky-module n
   sticky_opt=$(modopt nginx-sticky-module)
   sticky_src="/svr-setup/${sticky_opt#--add-module=../}/ngx_http_sticky_module.c"
-  if [[ ! -f "$sticky_src" ]]; then
-    fail "sticky: $sticky_src missing"
-  else
+  if [[ -f "$sticky_src" ]]; then
     if [[ "$core" != nginx ]] || (( cv >= 1023000 )); then
       grep -q 'r->headers_in.cookie, ' "$sticky_src" && pass "sticky: source patched for the nginx 1.23.0+ cookie API" || fail "sticky: $sticky_src not patched for the nginx 1.23.0+ cookie API"
     fi
     if [[ "$core" = angie ]]; then
       grep -q 'ngx_sticky_peer_recovered' "$sticky_src" && pass "sticky: fail_timeout check patched for Angie" || fail "sticky: $sticky_src not patched for Angie recover_at"
+    fi
+  else
+    # the source is gone after the build: the install's disk_cleanups and the
+    # menu 4 "Nginx Cleanup" (inc/nginx_upgrade.inc) delete it so the next build
+    # downloads master again. Each build patches the fresh copy and says so
+    if [[ "$core" != nginx ]] || (( cv >= 1023000 )); then
+      in_log 'nginx-sticky-module-ng: cookie lookup switched to the nginx 1\.23\.0\+ API' && pass "sticky: build log: source patched for the nginx 1.23.0+ cookie API" || fail "sticky: $sticky_src gone and no cookie API patch message in the build log"
+    fi
+    if [[ "$core" = angie ]]; then
+      in_log 'nginx-sticky-module-ng: fail_timeout check made Angie compatible' && pass "sticky: build log: fail_timeout check patched for Angie" || fail "sticky: $sticky_src gone and no Angie recover_at patch message in the build log"
     fi
   fi
   if [[ -n "$native" ]]; then
@@ -728,7 +740,9 @@ if [[ "$rt_purge" = y ]]; then
   c2=$(curl -s -m 10 -o /dev/null -D - http://127.0.0.1:8101/c/ci141 | grep -i '^x-ci141-cache:' | tr -d '\r' | awk '{print $2}')
   [[ "$c1" = MISS && "$c2" = HIT ]] && pass "ngx_cache_purge: cache MISS then HIT" || fail "ngx_cache_purge: cache status '$c1' then '$c2', expected MISS then HIT"
   expect_code "ngx_cache_purge: purge a cached key" 200 http://127.0.0.1:8101/purge/c/ci141
-  expect_code "ngx_cache_purge: purge a missing key" 404 http://127.0.0.1:8101/purge/c/ci141
+  # ngx_cache_purge 3.0.x answers 412 for a key not in the cache while
+  # cache_purge_legacy_status is on (the default), 404 only when it is off
+  expect_code "ngx_cache_purge: purge a missing key" 412 http://127.0.0.1:8101/purge/c/ci141
 fi
 if [[ "$rt_hm" = y ]]; then
   h=$(curl -s -m 10 -o /dev/null -D - http://127.0.0.1:8103/hm | tr -d '\r')
@@ -846,7 +860,10 @@ fi
 
 echo "== error.log"
 new=$(tail -n +$((el0 + 1)) "$errlog" 2>/dev/null)
-crit=$(grep -E '\[(crit|alert|emerg)\]' <<< "$new" | grep -vE 'setpriority|setrlimit')
+# the rate_limit request on 127.0.0.1:8113 deliberately uses a Redis without
+# the redis-rate-limiter module (HTTP 500), and the module logs an alert for it
+crit=$(grep -E '\[(crit|alert|emerg)\]' <<< "$new" | grep -vE 'setpriority|setrlimit' |
+  grep -vE 'header already sent while sending to client, .*request: "GET /limit HTTP/1\.1".*host: "127\.0\.0\.1:8113"')
 [[ -z "$crit" ]] && pass "no new crit/alert/emerg error.log entries" || { fail "new error.log entries:"; tail -5 <<< "$crit" | sed 's/^/  /'; }
 if [[ "$rt_lua" = y || "$rt_ja4" = y ]]; then
   luaerr=$(grep -E '\[error\]' <<< "$new" | grep -i lua)

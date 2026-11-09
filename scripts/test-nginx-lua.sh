@@ -116,7 +116,9 @@ val() { sed -n "s/^$1=//p" <<< "$out" | head -1; }
 expect_num=$(awk -F. '{printf "%d", $1*1000000 + $2*1000 + $3}' <<< "$luangx_ver")
 [[ "$(val ngx_lua_version)" = "$expect_num" ]] && pass "ngx_lua_version $expect_num" || fail "ngx_lua_version '$(val ngx_lua_version)' != $expect_num"
 [[ "$(val resty_core_loaded)" = true ]] && pass "resty.core loaded" || fail "resty.core not loaded"
-[[ "$(val resty_core_base)" = "$core_ver" ]] && pass "lua-resty-core $core_ver" || fail "lua-resty-core '$(val resty_core_base)' != $core_ver"
+# release candidates keep the release's base.version: 0.1.35rc2 reports 0.1.35
+core_base=${core_ver%rc[0-9]*}
+[[ "$(val resty_core_base)" = "$core_base" ]] && pass "lua-resty-core $core_ver (base.version $core_base)" || fail "lua-resty-core base.version '$(val resty_core_base)' != $core_base ($core_ver)"
 [[ "$(val jit)" == LuaJIT* ]] && pass "$(val jit)" || fail "LuaJIT not active: '$(val jit)'"
 while IFS= read -r line; do
   [[ "$line" == *"=FAIL"* ]] && fail "require ${line#lib }" || pass "require ${line#lib }"
