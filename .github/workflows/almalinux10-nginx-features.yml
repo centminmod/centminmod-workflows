@@ -1,0 +1,438 @@
+name: AlmaLinux 10 + 141.00beta01 Nginx Features
+
+# Runs on a push to centminmod/centminmod 141.00beta01, through the
+# repository_dispatch event run-almalinux-10-nginx-features-workflow that
+# .github/workflows/cmm-almalinux10-nginx-features.yml in that repo sends with
+# the pushed ref and commit, or manually. Installs that Centmin Mod commit
+# (frozen for every job) with feature toggles set before the install, then
+# rebuilds nginx through centmin-cli.sh nginx-update (the centmin.sh menu 4
+# code path, no menus) and checks build evidence after each step: nginx -V
+# flags, module .so files and load_module lines, nginx -t, HTTP status codes
+# and abort/patch failure markers in the build output.
+on:
+  repository_dispatch:
+    types: [run-almalinux-10-nginx-features-workflow]
+  workflow_dispatch:
+    inputs:
+      centminmod_ref:
+        description: Centmin Mod branch, tag or commit in centminmod/centminmod
+        required: true
+        default: 141.00beta01
+        type: string
+      include_otel:
+        description: Also run the NGINX_OTEL job (cmake gRPC build, an hour or more)
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  # manual input, else the ref sent by the centminmod/centminmod push dispatch
+  SOURCE_REF: ${{ inputs.centminmod_ref || github.event.client_payload.ref || '141.00beta01' }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.centminmod_ref || github.event.client_payload.ref || '141.00beta01' }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Select jobs and check toggles
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      sha: ${{ steps.plan.outputs.sha }}
+    env:
+      # One entry per job.
+      #   install: custom_config.inc lines written before the install
+      #   stage1/stage2: lines appended before a centmin-cli.sh nginx-update
+      #     rebuild. target: same | freenginx | angie | <nginx version>.
+      #     expect: pass, or fail (the build must stop, print marker and leave
+      #     the running nginx in place). An empty target skips the stage.
+      #   addons: extra checks run after stage 1 (mcp aicrawlers anubis lua-base)
+      GROUPS_JSON: |
+        [
+          {"group": "defaults", "timeout": 150, "rebuild_timeout": 60,
+           "install": [],
+           "stage1": {"target": "same", "config": [], "expect": "pass", "marker": ""},
+           "stage2": {"target": "", "config": [], "expect": "pass", "marker": ""},
+           "addons": "mcp aicrawlers"},
+          {"group": "njs-quickjs", "timeout": 150, "rebuild_timeout": 60,
+           "install": ["NGINX_NJS='y'", "NGINX_NJS_QUICKJS='y'"],
+           "stage1": {"target": "same", "config": ["NGXDYNAMIC_NJS='y'"], "expect": "pass", "marker": ""},
+           "stage2": {"target": "same", "config": ["NGINX_NJS_QUICKJS_VER='1999-01-01'"], "expect": "fail", "marker": "njs did not detect QuickJS"},
+           "addons": ""},
+          {"group": "lua-extras", "timeout": 150, "rebuild_timeout": 60,
+           "install": ["ORESTY_LUANGINX='y'", "NGXDYNAMIC_LUA='y'", "ORESTY_LUALIMITTRAFFIC='y'", "ORESTY_LUAHTTP='y'", "ORESTY_LUAOPENSSL='y'", "ORESTY_LUAPROMETHEUS='y'", "ORESTY_LUAJA4='y'"],
+           "stage1": {"target": "same", "config": [], "expect": "pass", "marker": ""},
+           "stage2": {"target": "", "config": [], "expect": "pass", "marker": ""},
+           "addons": "lua-base"},
+          {"group": "auth-keyval-ratelimit", "timeout": 150, "rebuild_timeout": 60,
+           "install": ["NGINX_AUTHREQ='y'", "NGINX_AUTHJWT='y'", "NGINX_KEYVAL='y'", "NGINX_KEYVAL_REDIS='y'", "NGINX_RATELIMIT='y'"],
+           "stage1": {"target": "same", "config": [], "expect": "pass", "marker": ""},
+           "stage2": {"target": "same", "config": ["NGINX_AUTHJWT='n'", "NGINX_KEYVAL='n'", "NGINX_KEYVAL_REDIS='n'", "NGINX_RATELIMIT='n'"], "expect": "pass", "marker": ""},
+           "addons": "anubis"},
+          {"group": "legacy-flv", "timeout": 150, "rebuild_timeout": 60,
+           "install": ["NGINX_UPSTREAMCHECK='y'", "NGINX_TLS_FINGERPRINT='y'", "NGINX_RTMP='y'", "NGINX_RTMP_HTTPFLV='y'"],
+           "stage1": {"target": "same", "config": ["NGINX_STICKY='y'"], "expect": "pass", "marker": ""},
+           "stage2": {"target": "", "config": [], "expect": "pass", "marker": ""},
+           "addons": ""},
+          {"group": "angie-freenginx", "timeout": 150, "rebuild_timeout": 60,
+           "install": [],
+           "stage1": {"target": "freenginx", "config": ["FREENGINX_INSTALL='y'"], "expect": "pass", "marker": ""},
+           "stage2": {"target": "angie", "config": ["FREENGINX_INSTALL='n'"], "expect": "pass", "marker": ""},
+           "addons": ""},
+          {"group": "otel", "timeout": 330, "rebuild_timeout": 270,
+           "install": [],
+           "stage1": {"target": "same", "config": ["NGINX_OTEL='y'"], "expect": "pass", "marker": ""},
+           "stage2": {"target": "", "config": [], "expect": "pass", "marker": ""},
+           "addons": ""}
+        ]
+    steps:
+      - name: Checkout selected Centmin Mod source
+        uses: actions/checkout@v7
+        with:
+          repository: centminmod/centminmod
+          # a push dispatch sends the pushed commit, so a later push to the
+          # branch does not change what this run tests
+          ref: ${{ github.event.client_payload.sha || env.SOURCE_REF }}
+          path: centminmod-source
+          persist-credentials: false
+
+      - name: Select jobs and check their toggles exist in centmin.sh
+        id: plan
+        env:
+          # repository_dispatch has no inputs: no OTEL job
+          INCLUDE_OTEL: ${{ inputs.include_otel || false }}
+        run: |
+          set -euo pipefail
+          sha=$(git -C centminmod-source rev-parse HEAD)
+          matrix=$(jq -c --argjson otel "$INCLUDE_OTEL" '{include: [.[] | select(.group != "otel" or $otel)]}' <<< "$GROUPS_JSON")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Centmin Mod $SOURCE_REF at \`$sha\`"
+            echo
+            echo "Jobs: $(jq -r '[.include[].group] | join(", ")' <<< "$matrix")"
+            echo
+            echo '| Toggle set by a job | centmin.sh default |'
+            echo '|---|---|'
+          } >> "$GITHUB_STEP_SUMMARY"
+          missing=0
+          for name in $(jq -r '.include[] | (.install + .stage1.config + .stage2.config)[] | sub("=.*"; "")' <<< "$matrix" | sort -u); do
+            if line=$(grep -m1 "^${name}=" centminmod-source/centmin.sh); then
+              echo "| \`$name\` | \`${line%%#*}\` |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| \`$name\` | **missing** |" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error::$name is not defined in centmin.sh at $sha (renamed, or this ref predates it)"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+  features:
+    name: ${{ matrix.group }}
+    needs: plan
+    runs-on: ubuntu-24.04
+    timeout-minutes: ${{ matrix.timeout }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      GROUP: ${{ matrix.group }}
+      SOURCE_SHA: ${{ needs.plan.outputs.sha }}
+    steps:
+      - name: Checkout workflows
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install Sysbox
+        run: |
+          curl -fLO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services; start them here
+          # and fail this step instead of the later container steps
+          for _ in 1 2 3; do
+            sudo test -S /run/sysbox/sysfs.sock && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build AlmaLinux 10 image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux10
+          platforms: linux/amd64
+          load: true
+          tags: cmm_el89:latest
+
+      - name: Checkout Centmin Mod source commit
+        uses: actions/checkout@v7
+        with:
+          repository: centminmod/centminmod
+          ref: ${{ needs.plan.outputs.sha }}
+          path: centminmod-source
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Freeze source for the EL10 installer
+        run: |
+          set -euo pipefail
+          git -C centminmod-source update-ref refs/heads/141.00beta01 "$SOURCE_SHA"
+          git -C centminmod-source bundle create "$RUNNER_TEMP/centminmod-source.bundle" refs/heads/141.00beta01
+          mkdir -p results
+          {
+            echo "centminmod=$SOURCE_SHA"
+            echo "workflows=$(git rev-parse HEAD)"
+            echo "group=$GROUP"
+          } > results/source.txt
+
+      - name: Start container and copy test scripts
+        run: |
+          set -euo pipefail
+          docker run --cgroupns host -d --name=cmm_el89 \
+            --privileged \
+            --runtime=sysbox-runc \
+            --cap-add=SYS_ADMIN \
+            --cap-add=SYS_RESOURCE \
+            --security-opt seccomp=unconfined \
+            --security-opt label=disable \
+            --security-opt apparmor=unconfined \
+            --tmpfs /run \
+            --tmpfs /run/lock \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            cmm_el89:latest
+          sleep 4
+          docker exec cmm_el89 mkdir -p /etc/centminmod /root/centminlogs /opt/ci141
+          for f in scripts/test-nginx-141-features.sh scripts/nginx-141-rebuild.sh scripts/test-nginx-141-backend.py \
+                   scripts/test-nginx-anubis.sh scripts/test-nginx-aicrawlers.sh scripts/test-nginx-mcp-proxy.sh scripts/test-nginx-lua.sh; do
+            # shellcheck disable=SC2094 # tee writes inside the container, not the host file $f
+            docker exec -i cmm_el89 tee "/opt/ci141/$(basename "$f")" < "$f" > /dev/null
+          done
+
+      - name: Install Centmin Mod with the job's toggles
+        timeout-minutes: 120
+        env:
+          INSTALL_CONFIG: ${{ toJSON(matrix.install) }}
+        run: |
+          set -euo pipefail
+          docker exec cmm_el89 dnf -y install git
+          docker exec -i cmm_el89 tee /opt/centminmod-source.bundle < "$RUNNER_TEMP/centminmod-source.bundle" > /dev/null
+          docker exec -i cmm_el89 tee /opt/installer-el10.sh < centminmod-source/installer-el10.sh > /dev/null
+          {
+            echo "CMGIT='/opt/centminmod-source.bundle'"
+            echo "AUTO_GITUPDATE='n'"
+            jq -r '.[]' <<< "$INSTALL_CONFIG"
+          } > results/custom_config-install.inc
+          {
+            echo "### $GROUP: custom_config.inc before install"
+            echo '```text'
+            cat results/custom_config-install.inc
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          docker exec -i cmm_el89 tee /etc/centminmod/custom_config.inc < results/custom_config-install.inc > /dev/null
+          docker exec cmm_el89 bash /opt/installer-el10.sh 2>&1 | tee results/install.log
+          # the build output test-nginx-141-features.sh checks
+          docker exec -i cmm_el89 tee /root/ci-nginx-build.log < results/install.log > /dev/null
+
+      - name: Verify install
+        run: |
+          set -euo pipefail
+          docker exec cmm_el89 nginx -V
+          docker exec cmm_el89 systemctl is-active nginx php-fpm mariadb
+          docker exec cmm_el89 curl -fsS -o /dev/null -w 'default site HTTP %{http_code}\n' http://127.0.0.1/
+
+      - name: Feature checks after install
+        id: check_install
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-141-features.sh install 2>&1 | tee results/check-install.log
+          result=$?
+          { echo "### $GROUP: feature checks after install"; echo '```text'; cat results/check-install.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: "Stage 1 rebuild: ${{ matrix.stage1.target }}"
+        id: stage1
+        if: ${{ matrix.stage1.target != '' }}
+        continue-on-error: true
+        timeout-minutes: ${{ matrix.rebuild_timeout }}
+        env:
+          STAGE_CONFIG: ${{ toJSON(matrix.stage1.config) }}
+          STAGE_TARGET: ${{ matrix.stage1.target }}
+          STAGE_EXPECT: ${{ matrix.stage1.expect }}
+          STAGE_MARKER: ${{ matrix.stage1.marker }}
+        run: |
+          set +e
+          set -o pipefail
+          jq -r '.[]' <<< "$STAGE_CONFIG" | docker exec -i cmm_el89 tee /root/ci141-stage.inc > /dev/null
+          docker exec cmm_el89 bash /opt/ci141/nginx-141-rebuild.sh "$STAGE_TARGET" "$STAGE_EXPECT" "$STAGE_MARKER" 2>&1 | tee results/stage1-rebuild.log
+          result=$?
+          { echo "### $GROUP: stage 1 rebuild ($STAGE_TARGET, expect $STAGE_EXPECT)"; echo '```text'; cat results/stage1-rebuild.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Feature checks after stage 1
+        id: check_stage1
+        if: ${{ steps.stage1.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-141-features.sh stage1 2>&1 | tee results/check-stage1.log
+          result=$?
+          { echo "### $GROUP: feature checks after stage 1"; echo '```text'; cat results/check-stage1.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: MCP proxy template checks
+        id: mcp
+        if: ${{ steps.stage1.outcome == 'success' && contains(matrix.addons, 'mcp') }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-mcp-proxy.sh 2>&1 | tee results/mcp.log
+          result=$?
+          { echo "### $GROUP: MCP proxy templates"; echo '```text'; cat results/mcp.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: AI crawler map checks
+        id: aicrawlers
+        if: ${{ steps.stage1.outcome == 'success' && contains(matrix.addons, 'aicrawlers') }}
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-aicrawlers.sh 2>&1 | tee results/aicrawlers.log
+          result=$?
+          { echo "### $GROUP: nginx-aicrawlers.sh and botlimit.conf"; echo '```text'; cat results/aicrawlers.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Anubis addon checks
+        id: anubis
+        if: ${{ steps.stage1.outcome == 'success' && contains(matrix.addons, 'anubis') }}
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-anubis.sh 2>&1 | tee results/anubis.log
+          result=$?
+          { echo "### $GROUP: addons/anubis.sh"; echo '```text'; cat results/anubis.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Nginx Lua base checks
+        id: lua_base
+        if: ${{ steps.stage1.outcome == 'success' && contains(matrix.addons, 'lua-base') }}
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-lua.sh 2>&1 | tee results/lua-base.log
+          result=$?
+          { echo "### $GROUP: Nginx Lua base checks"; echo '```text'; cat results/lua-base.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: "Stage 2 rebuild: ${{ matrix.stage2.target }}"
+        id: stage2
+        if: ${{ matrix.stage2.target != '' }}
+        continue-on-error: true
+        timeout-minutes: ${{ matrix.rebuild_timeout }}
+        env:
+          STAGE_CONFIG: ${{ toJSON(matrix.stage2.config) }}
+          STAGE_TARGET: ${{ matrix.stage2.target }}
+          STAGE_EXPECT: ${{ matrix.stage2.expect }}
+          STAGE_MARKER: ${{ matrix.stage2.marker }}
+        run: |
+          set +e
+          set -o pipefail
+          jq -r '.[]' <<< "$STAGE_CONFIG" | docker exec -i cmm_el89 tee /root/ci141-stage.inc > /dev/null
+          docker exec cmm_el89 bash /opt/ci141/nginx-141-rebuild.sh "$STAGE_TARGET" "$STAGE_EXPECT" "$STAGE_MARKER" 2>&1 | tee results/stage2-rebuild.log
+          result=$?
+          { echo "### $GROUP: stage 2 rebuild ($STAGE_TARGET, expect $STAGE_EXPECT)"; echo '```text'; cat results/stage2-rebuild.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Feature checks after stage 2
+        id: check_stage2
+        if: ${{ steps.stage2.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          set +e
+          set -o pipefail
+          docker exec cmm_el89 bash /opt/ci141/test-nginx-141-features.sh stage2 2>&1 | tee results/check-stage2.log
+          result=$?
+          { echo "### $GROUP: feature checks after stage 2"; echo '```text'; cat results/check-stage2.log; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit "$result"
+
+      - name: Collect logs
+        if: always()
+        run: |
+          mkdir -p results/centminlogs
+          if docker container inspect cmm_el89 > /dev/null 2>&1; then
+            docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C results/centminlogs -xf - || true
+            docker exec cmm_el89 bash -c 'nginx -V 2>&1; echo ---; nginx -T 2>&1' > results/nginx-T.txt || true
+            docker exec cmm_el89 tail -n 500 /usr/local/nginx/logs/error.log > results/nginx-error.log || true
+            docker exec cmm_el89 cat /etc/centminmod/custom_config.inc > results/custom_config-final.inc || true
+            { docker exec cmm_el89 df -hT; docker exec cmm_el89 du -sh /svr-setup; } > results/disk.txt 2>&1 || true
+          fi
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: almalinux10-nginx-features-${{ matrix.group }}-${{ github.run_attempt }}
+          path: results/
+
+      - name: Gate on feature checks
+        if: ${{ !cancelled() }}
+        env:
+          OUTCOMES: >-
+            check_install=${{ steps.check_install.outcome }}
+            stage1=${{ steps.stage1.outcome }}
+            check_stage1=${{ steps.check_stage1.outcome }}
+            mcp=${{ steps.mcp.outcome }}
+            aicrawlers=${{ steps.aicrawlers.outcome }}
+            anubis=${{ steps.anubis.outcome }}
+            lua_base=${{ steps.lua_base.outcome }}
+            stage2=${{ steps.stage2.outcome }}
+            check_stage2=${{ steps.check_stage2.outcome }}
+        run: |
+          tr ' ' '\n' <<< "$OUTCOMES"
+          failed=$(tr ' ' '\n' <<< "$OUTCOMES" | grep '=failure$' | cut -d= -f1 | xargs)
+          if [ -n "$failed" ]; then
+            echo "::error::$GROUP failed: $failed (see the job summary and uploaded logs)"
+            exit 1
+          fi
+
+      - name: Remove container
+        if: always()
+        run: docker rm -f cmm_el89 || true
+
+  notify:
+    name: Notify Discord
+    needs: [plan, features]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Notify Discord
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MESSAGE: "Workflow '${{ github.workflow }}' (${{ env.SOURCE_REF }} ${{ needs.plan.outputs.sha }}, ${{ github.event_name }}) finished: plan ${{ needs.plan.result }}, features ${{ needs.features.result }}"
+        run: |
+          jq -n --arg content "$MESSAGE" '{content: $content}' | \
+            curl -fsS -H "Content-Type: application/json" -X POST -d @- "$DISCORD_WEBHOOK_URL"

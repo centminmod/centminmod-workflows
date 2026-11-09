@@ -61,6 +61,22 @@ grep -qE "^[[:space:]]*modsecurity_rules_file[[:space:]]+$main_conf;" <<< "$T" &
 crs_dir=/usr/local/nginx/coreruleset-$crs_ver
 [[ -f "$crs_dir/crs-setup.conf" ]] && pass "OWASP CRS $crs_ver installed" || fail "$crs_dir/crs-setup.conf missing"
 grep -q "^Include $crs_dir/rules/\*\.conf" "$main_conf" 2>/dev/null && pass "main.conf includes CRS $crs_ver rules" || fail "main.conf does not include $crs_dir/rules/*.conf"
+# 141.00beta01+ pins libmodsecurity and the connector to release tags
+# (MODSECURITY_LIBVER, MODSECURITY_NGINXVER); older Centmin Mod builds git master
+libver=$(cfg MODSECURITY_LIBVER)
+connver=$(cfg MODSECURITY_NGINXVER)
+if [[ -n "$libver" && -n "$connver" ]]; then
+  got=$(strings "$libmodsec" 2>/dev/null | grep -m1 -oE 'ModSecurity v[0-9]+\.[0-9]+\.[0-9]+')
+  [[ "$got" = "ModSecurity v$libver" ]] && pass "libmodsecurity reports $got" || fail "libmodsecurity reports '${got:-no version}', expected ModSecurity v$libver"
+  got=$(strings "$module" /usr/local/sbin/nginx 2>/dev/null | grep -m1 -oE 'ModSecurity-nginx v[0-9]+\.[0-9]+\.[0-9]+')
+  [[ -n "$got" ]] || got="ModSecurity-nginx $(git -C /svr-setup/ModSecurity-nginx describe --tags --exact-match 2>/dev/null)"
+  [[ "$got" = "ModSecurity-nginx v$connver" ]] && pass "connector $got" || fail "connector '$got', expected ModSecurity-nginx v$connver"
+  for f in modsecurity.conf unicode.mapping; do
+    [[ -s "/usr/local/nginx/modsec/$f" ]] && pass "/usr/local/nginx/modsec/$f present" || fail "/usr/local/nginx/modsec/$f missing or empty"
+  done
+else
+  info "MODSECURITY_LIBVER/MODSECURITY_NGINXVER not in centmin.sh (pre-141 Centmin Mod), release tag checks skipped"
+fi
 engine=$(awk '/^SecRuleEngine/ {print $2; exit}' "$modsec_conf" 2>/dev/null)
 info "default SecRuleEngine: ${engine:-unset}"
 nginx -t >/dev/null 2>&1 && pass "nginx -t" || { nginx -t; fail "nginx -t"; }
