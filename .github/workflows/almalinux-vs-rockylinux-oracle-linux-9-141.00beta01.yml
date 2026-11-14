@@ -1060,6 +1060,20 @@ jobs:
           docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_almalinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
+        continue-on-error: true
+
 
       - name: MariaDB SSL Setup test
         run: |
@@ -1422,6 +1436,20 @@ jobs:
       - name: PHP-FPM 8.1 phpbench.php
         run: |
           docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_almalinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
         continue-on-error: true
 
       - name: Run cmupdate
@@ -2527,6 +2555,20 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_rockylinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
+        continue-on-error: true
+
 
       - name: MariaDB SSL Setup test
         run: |
@@ -2889,6 +2931,20 @@ jobs:
       - name: PHP-FPM 8.1 phpbench.php
         run: |
           docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_rockylinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
         continue-on-error: true
 
 
@@ -4002,6 +4058,20 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_oraclelinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
+        continue-on-error: true
+
 
       - name: MariaDB SSL Setup test
         run: |
@@ -4384,6 +4454,20 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
         continue-on-error: true
 
+      - name: Tabulate PHP benchmark results
+        run: |
+          mkdir -p phpbench
+          docker exec cmm_oraclelinux9 bash -c 'ls -1tr /home/phpbench_logs/phpbench-summary-*.log 2>/dev/null | xargs -r cat' > "phpbench/$GITHUB_JOB.log"
+          bash scripts/phpbench-table.sh "phpbench/$GITHUB_JOB.log"
+        continue-on-error: true
+
+      - name: Upload PHP benchmark results
+        uses: actions/upload-artifact@v7
+        with:
+          name: phpbench_${{ github.job }}
+          path: phpbench/
+        continue-on-error: true
+
 
       - name: Run cmupdate
         run: |
@@ -4564,6 +4648,30 @@ jobs:
           path: oraclelinux_logs/
         continue-on-error: true
 
+
+  phpbench-summary:
+    needs: [almalinux-php7, almalinux-php8, rockylinux-php7, rockylinux-php8, oraclelinux-php7, oraclelinux-php8]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+
+      - name: Download PHP benchmark results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: phpbench_*
+          path: phpbench
+          merge-multiple: true
+        continue-on-error: true
+
+      - name: Tabulate all PHP versions benchmark results
+        run: |
+          {
+            echo "### PHP benchmark results for all PHP versions (seconds, lower is better)"
+            echo
+            bash scripts/phpbench-table.sh phpbench/*.log
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   discordNotificationSuccess:
     needs: [almalinux, almalinux-php7, almalinux-php8, rockylinux, rockylinux-php7, rockylinux-php8, oraclelinux, oraclelinux-php7, oraclelinux-php8, compare]
