@@ -1077,6 +1077,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       php84_test_status: ${{ steps.php84_test.outputs.ALMALINUX_PHP84_TEST_STATUS }}
+      php85_test_status: ${{ steps.php85_test.outputs.ALMALINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v7
@@ -1307,6 +1308,68 @@ jobs:
           docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp84.log && outputlddphp84=$(cat cmm-lddphp84.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp84" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php84verupgrade.log && outputphp84verupgrade=$(cat cmm-php84verupgrade.log) && echo -e "php -v\n$outputphp84verupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.5 upgrade test
+        run: |
+          docker exec cmm_almalinux9 bash -c "cmupdate"
+          docker exec cmm_almalinux9 /home/centmin-option-5-php8.5.sh
+          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_almalinux9 bash -c "rm -rf /svr-setup/nginx-*"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --rintlli"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-php85zip.log && outputphp85zip=$(cat cmm-php85zip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphp85zip" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: PHP-FPM 8.5 phpbench.php
+        run: |
+          docker exec cmm_almalinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.5 setup
+        id: php85_test
+        run: |
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ALMALINUX_PHP85_TEST_STATUS=0" >> $GITHUB_ENV && echo "ALMALINUX_PHP85_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ALMALINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ALMALINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ALMALINUX_PHP85_TEST_STATUS=$ALMALINUX_PHP85_TEST_STATUS"
+          docker exec cmm_almalinux9 bash -c "php -v" | tee cmm-php85ver.log
+          outputver=$(cat cmm-php85ver.log)
+          echo "AlmaLinux PHP 8.5 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "php-config || true" | tee cmm-php85config.log && outputphp85config=$(cat cmm-php85config.log) && echo "$outputphp85config" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-php85ini.log && outputphp85ini=$(cat cmm-php85ini.log) && echo "$outputphp85ini" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_almalinux9 bash -c "echo '---'"
+          docker exec cmm_almalinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_almalinux9 bash -c "echo '---'"
           docker exec cmm_almalinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_almalinux9 bash -c "echo '---'"
@@ -2480,6 +2543,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       php84_test_status: ${{ steps.php84_test.outputs.ROCKYLINUX_PHP84_TEST_STATUS }}
+      php85_test_status: ${{ steps.php85_test.outputs.ROCKYLINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v7
@@ -2710,6 +2774,68 @@ jobs:
           docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp84.log && outputlddphp84=$(cat cmm-lddphp84.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp84" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php84verupgrade.log && outputphp84verupgrade=$(cat cmm-php84verupgrade.log) && echo -e "php -v\n$outputphp84verupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || tgeoip"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.5 upgrade test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "cmupdate"
+          docker exec cmm_rockylinux9 /home/centmin-option-5-php8.5.sh
+          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_rockylinux9 bash -c "rm -rf /svr-setup/nginx-*"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --riintli"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-php85zip.log && outputphp85zip=$(cat cmm-php85zip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphp85zip" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: PHP-FPM 8.5 phpbench.php
+        run: |
+          docker exec cmm_rockylinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.5 setup
+        id: php85_test
+        run: |
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ROCKYLINUX_PHP85_TEST_STATUS=0" >> $GITHUB_ENV && echo "ROCKYLINUX_PHP85_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ROCKYLINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ROCKYLINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ROCKYLINUX_PHP85_TEST_STATUS=$ROCKYLINUX_PHP85_TEST_STATUS"
+          docker exec cmm_rockylinux9 bash -c "php -v" | tee cmm-php85ver.log
+          outputver=$(cat cmm-php85ver.log)
+          echo "RockyLinux PHP 8.5 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "php-config || true" | tee cmm-php85config.log && outputphp85config=$(cat cmm-php85config.log) && echo "$outputphp85config" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-php85ini.log && outputphp85ini=$(cat cmm-php85ini.log) && echo "$outputphp85ini" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_rockylinux9 bash -c "echo '---'"
+          docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_rockylinux9 bash -c "echo '---'"
           docker exec cmm_rockylinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_rockylinux9 bash -c "echo '---'"
@@ -3891,6 +4017,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       php84_test_status: ${{ steps.php84_test.outputs.ORACLELINUX_PHP84_TEST_STATUS }}
+      php85_test_status: ${{ steps.php85_test.outputs.ORACLELINUX_PHP85_TEST_STATUS }}
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v7
@@ -4131,6 +4258,72 @@ jobs:
           docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp84.log && outputlddphp84=$(cat cmm-lddphp84.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp84" >> $GITHUB_STEP_SUMMARY_DISABLED || true 
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php84verupgrade.log && outputphp84verupgrade=$(cat cmm-php84verupgrade.log) && echo -e "php -v\n$outputphp84verupgrade" >> $GITHUB_STEP_SUMMARY 
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.5 upgrade test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "cmupdate"
+          docker exec cmm_oraclelinux9 /home/centmin-option-5-php8.5.sh
+          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/php-*"
+          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/openssl-*"
+          docker exec cmm_oraclelinux9 bash -c "rm -rf /svr-setup/nginx-*"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqlnd"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri mysqli"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri intl"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri geoip"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri zip" | tee cmm-php85zip.log && outputphp85zip=$(cat cmm-php85zip.log) && echo -e "/usr/local/bin/php --ri zip\n$outputphp85zip" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+      - name: PHP-FPM 8.5 phpbench.php
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.5 setup
+        id: php85_test
+        run: |
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl restart php-fpm.service"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "journalctl -xe --no-pager | tail -n 35"
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "systemctl status php-fpm.service --no-pager" && echo "ORACLELINUX_PHP85_TEST_STATUS=0" >> $GITHUB_ENV && echo "ORACLELINUX_PHP85_TEST_STATUS=0" >> $GITHUB_OUTPUT || echo "ORACLELINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_ENV; echo "ORACLELINUX_PHP85_TEST_STATUS=$?" >> $GITHUB_OUTPUT
+          echo "ORACLELINUX_PHP85_TEST_STATUS=$ORACLELINUX_PHP85_TEST_STATUS"
+          docker exec cmm_oraclelinux9 bash -c "php -v" | tee cmm-php85ver.log
+          outputver=$(cat cmm-php85ver.log)
+          echo "OracleLinux PHP 8.5 Version: $outputver" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "php-config || true" | tee cmm-php85config.log && outputphp85config=$(cat cmm-php85config.log) && echo "$outputphp85config" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ini" | tee cmm-php85ini.log && outputphp85ini=$(cat cmm-php85ini.log) && echo "$outputphp85ini" >> $GITHUB_STEP_SUMMARY
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "ldd /usr/local/bin/php" | tee cmm-lddphp85.log && outputlddphp85=$(cat cmm-lddphp85.log) && echo -e "ldd /usr/local/bin/php\n$outputlddphp85" >> $GITHUB_STEP_SUMMARY_DISABLED || true
+          docker exec cmm_oraclelinux9 bash -c "echo '---'"
+          docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php -v" | tee cmm-php85verupgrade.log && outputphp85verupgrade=$(cat cmm-php85verupgrade.log) && echo -e "php -v\n$outputphp85verupgrade" >> $GITHUB_STEP_SUMMARY
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
           docker exec cmm_oraclelinux9 bash -c "/usr/local/bin/php --ri openssl"
           docker exec cmm_oraclelinux9 bash -c "echo '---'"
@@ -4399,9 +4592,12 @@ jobs:
         almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_php85_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php85_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php85_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully! \u2705\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and completed successfully! \u2705\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux PHP-FPM 8.5 test returned: ${{ needs.almalinux-php8.outputs.php85_test_status }} $almalinux_php85_test_emoji\\nRocky Linux PHP-FPM 8.5 test returned: ${{ needs.rockylinux-php8.outputs.php85_test_status }} $rockylinux_php85_test_emoji\\nOracle Linux PHP-FPM 8.5 test returned: ${{ needs.oraclelinux-php8.outputs.php85_test_status }} $oraclelinux_php85_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   discordNotificationFailure:
@@ -4432,8 +4628,11 @@ jobs:
         almalinux_php84_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         rockylinux_php84_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         oraclelinux_php84_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php84_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        almalinux_php85_test_emoji=$(if [ "${{ needs.almalinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        rockylinux_php85_test_emoji=$(if [ "${{ needs.rockylinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
+        oraclelinux_php85_test_emoji=$(if [ "${{ needs.oraclelinux-php8.outputs.php85_test_status }}" = "0" ]; then echo -e "\u2705"; else echo -e "\u274C"; fi)
         curl -H "Content-Type: application/json" \
              -X POST \
-             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\u274C\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
+             -d "{\"content\":\"Workflow '${{ github.workflow }}' was triggered by '${{ github.event_name }}' and failed!\u274C\\nAlmaLinux PHP-FPM test returned: ${{ needs.almalinux.outputs.php_test_status }} $almalinux_php_test_emoji\\nRocky Linux PHP-FPM test returned: ${{ needs.rockylinux.outputs.php_test_status }} $rockylinux_php_test_emoji\\nOracle Linux PHP-FPM test returned: ${{ needs.oraclelinux.outputs.php_test_status }} $oraclelinux_php_test_emoji\\nAlmaLinux PHP-FPM 8.4 test returned: ${{ needs.almalinux-php8.outputs.php84_test_status }} $almalinux_php84_test_emoji\\nRocky Linux PHP-FPM 8.4 test returned: ${{ needs.rockylinux-php8.outputs.php84_test_status }} $rockylinux_php84_test_emoji\\nOracle Linux PHP-FPM 8.4 test returned: ${{ needs.oraclelinux-php8.outputs.php84_test_status }} $oraclelinux_php84_test_emoji\\nAlmaLinux PHP-FPM 8.5 test returned: ${{ needs.almalinux-php8.outputs.php85_test_status }} $almalinux_php85_test_emoji\\nRocky Linux PHP-FPM 8.5 test returned: ${{ needs.rockylinux-php8.outputs.php85_test_status }} $rockylinux_php85_test_emoji\\nOracle Linux PHP-FPM 8.5 test returned: ${{ needs.oraclelinux-php8.outputs.php85_test_status }} $oraclelinux_php85_test_emoji\\nAlmaLinux Nginx test returned: ${{ needs.almalinux.outputs.nginx_test_status }} $almalinux_nginx_test_emoji\\nRocky Linux Nginx test returned: ${{ needs.rockylinux.outputs.nginx_test_status }} $rockylinux_nginx_test_emoji\\nOracle Linux Nginx test returned: ${{ needs.oraclelinux.outputs.nginx_test_status }} $oraclelinux_nginx_test_emoji\\nAlmaLinux MariaDB test returned: ${{ needs.almalinux.outputs.mariadb_test_status }} $almalinux_mariadb_test_emoji\\nRocky Linux MariaDB test returned: ${{ needs.rockylinux.outputs.mariadb_test_status }} $rockylinux_mariadb_test_emoji\\nOracle Linux MariaDB test returned: ${{ needs.oraclelinux.outputs.mariadb_test_status }} $oraclelinux_mariadb_test_emoji\\nAlmaLinux CSF test returned: ${{ needs.almalinux.outputs.csf_test_status }} $almalinux_csf_test_emoji\\nRocky Linux CSF test returned: ${{ needs.rockylinux.outputs.csf_test_status }} $rockylinux_csf_test_emoji\\nOracle Linux CSF test returned: ${{ needs.oraclelinux.outputs.csf_test_status }} $oraclelinux_csf_test_emoji\\nAlmaLinux PUREFTPD test returned: ${{ needs.almalinux.outputs.pureftpd_test_status }} $almalinux_pureftpd_test_emoji\\nRocky Linux PUREFTPD test returned: ${{ needs.rockylinux.outputs.pureftpd_test_status }} $rockylinux_pureftpd_test_emoji\\nOracle Linux PUREFTPD test returned: ${{ needs.oraclelinux.outputs.pureftpd_test_status }} $oraclelinux_pureftpd_test_emoji\\nAlmaLinux REDIS test returned: ${{ needs.almalinux.outputs.redis_test_status }} $almalinux_redis_test_emoji\\nRocky Linux REDIS test returned: ${{ needs.rockylinux.outputs.redis_test_status }} $rockylinux_redis_test_emoji\\nOracle Linux REDIS test returned: ${{ needs.oraclelinux.outputs.redis_test_status }} $oraclelinux_redis_test_emoji\"}" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
