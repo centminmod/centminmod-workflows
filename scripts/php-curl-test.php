@@ -10,8 +10,19 @@ $cv = curl_version();
 echo "libcurl {$cv['version']}  ({$cv['ssl_version']})".PHP_EOL;
 
 /* ---- 1. confirm the desired libcurl version ----------------------- */
-/* optional argv[1] = expected libcurl version (default 8.13.0)       */
-$expected = $argv[1] ?? '8.13.0';
+/* optional argv[1] = expected libcurl version. Without it, expect the */
+/* custom libcurl Centmin Mod built: compile_custom_curl picks the     */
+/* version per OpenSSL and installs it, with its libcurl.pc, under     */
+/* /opt/curl_php (CURL_PHP_PREFIX env overrides that prefix)           */
+$expected = $argv[1] ?? '';
+if ($expected === '') {
+    $pc = (getenv('CURL_PHP_PREFIX') ?: '/opt/curl_php').'/lib/pkgconfig/libcurl.pc';
+    if (!is_readable($pc) || !preg_match('/^Version:\s*(\S+)/m', (string)file_get_contents($pc), $m)) {
+        echo "ERROR: no expected libcurl version: pass one as argv[1] or install the custom libcurl (cannot read a Version: line from $pc)".PHP_EOL; exit(1);
+    }
+    $expected = $m[1];
+    echo "Expected libcurl $expected (from $pc)".PHP_EOL;
+}
 if ($cv['version'] !== $expected) {
     echo "ERROR: PHP linked to the wrong libcurl (expected $expected)".PHP_EOL; exit(1);
 }
