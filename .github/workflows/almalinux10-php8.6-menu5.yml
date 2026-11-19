@@ -88,7 +88,7 @@ jobs:
       - name: Update Centmin Mod and record PHP before the upgrade
         run: |
           mkdir -p results
-          docker exec cmm_el89 bash -c "cmupdate"
+          docker exec cmm_el89 bash -c "cmupdate" || echo "::warning::cmupdate failed; menu 5 runs on the tree the installer cloned"
           docker exec cmm_el89 bash -c "git -C /usr/local/src/centminmod log -1 --format='%h %s'" | tee results/centminmod-commit.txt
           docker exec cmm_el89 bash -c "php -v" | tee results/php-v-before.txt
           docker exec cmm_el89 bash -c "php -m" > results/php-m-before.txt
@@ -100,10 +100,13 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
 
+      # centmin.sh exits non-zero when the PHP upgrade fails, and the expect
+      # script then errors on its next send; pipefail keeps that status past tee
       - name: centmin.sh menu option 5 PHP-FPM 8.6 upgrade test
+        id: menu5
         timeout-minutes: 60
         run: |
-          docker exec cmm_el89 bash -c "mkdir -p /root/centminlogs;/home/centmin-option-5-php8.6.sh 2>&1 | tee /root/centminlogs/php86-menu5-upgrade.log"
+          docker exec cmm_el89 bash -c "set -o pipefail; mkdir -p /root/centminlogs; /home/centmin-option-5-php8.6.sh 2>&1 | tee /root/centminlogs/php86-menu5-upgrade.log"
         continue-on-error: true
 
       - name: PHP-FPM 8.6 phpbench.php
@@ -129,28 +132,30 @@ jobs:
 
       - name: Inspect PHP-FPM 8.6 setup
         run: |
+          # diagnostics only: keep going past a failing line
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "systemctl status php-fpm.service --no-pager"
+          docker exec cmm_el89 bash -c "systemctl status php-fpm.service --no-pager" || true
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "php-config || true"
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ini" || true
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_el89 bash -c "ldd /usr/local/bin/php" || true
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri redis"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri redis" || true
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri openssl" || true
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri zip" || true
           docker exec cmm_el89 bash -c "echo '---'"
-          docker exec cmm_el89 bash -c "ls -lAhrt /etc/centminmod/php.d"
+          docker exec cmm_el89 bash -c "ls -lAhrt /etc/centminmod/php.d" || true
           docker exec cmm_el89 bash -c "echo '---'"
           docker exec cmm_el89 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
         continue-on-error: true
 
+      # always(): keep the logs when the job times out or is cancelled mid-hang
       - name: Copy Centmin Mod logs from container
-        if: ${{ !cancelled() }}
+        if: always()
         run: |
           mkdir -p results/centminlogs
           cp cmm-install.log results/ || true
@@ -162,7 +167,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload results
-        if: ${{ !cancelled() }}
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: almalinux10_php86_menu5
@@ -173,7 +178,7 @@ jobs:
         if: ${{ !cancelled() }}
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          MESSAGE: "Workflow '${{ github.workflow }}' (${{ github.event_name }}) finished: PHP ${{ env.PHP_TEST_VERSION }} menu 5 checks ${{ steps.php86_check.outcome }}"
+          MESSAGE: "Workflow '${{ github.workflow }}' (${{ github.event_name }}) finished: PHP ${{ env.PHP_TEST_VERSION }} menu 5 run ${{ steps.menu5.outcome }}, checks ${{ steps.php86_check.outcome }}"
         run: |
           jq -n --arg content "$MESSAGE" '{content: $content}' | \
             curl -fsS -H "Content-Type: application/json" -X POST -d @- "$DISCORD_WEBHOOK_URL"
@@ -182,10 +187,11 @@ jobs:
       - name: Gate on PHP 8.6 checks
         if: ${{ !cancelled() }}
         env:
+          MENU5_OUTCOME: ${{ steps.menu5.outcome }}
           CHECK_OUTCOME: ${{ steps.php86_check.outcome }}
         run: |
-          echo "php86_check=$CHECK_OUTCOME"
-          if [ "$CHECK_OUTCOME" != success ]; then
-            echo "::error::PHP $PHP_TEST_VERSION menu 5 checks failed (see the job summary and the almalinux10_php86_menu5 artifact)"
+          echo "menu5=$MENU5_OUTCOME php86_check=$CHECK_OUTCOME"
+          if [ "$MENU5_OUTCOME" != success ] || [ "$CHECK_OUTCOME" != success ]; then
+            echo "::error::PHP $PHP_TEST_VERSION menu 5 run or checks failed (see the job summary and the almalinux10_php86_menu5 artifact)"
             exit 1
           fi

@@ -74,8 +74,8 @@ check 'memcache skipped' 'menu 5 output (PHPMEMCACHE_MAXVERNUM)' \
 check 'mcrypt skipped' 'menu 5 output (PHPMCRYPT_MAXVERNUM)' \
   grep -qF 'skipping mcrypt PECL extension' "$clean"
 
-fatal=$(grep -cE 'PHP configure failed|PHP make failed|\[FATAL\]|Aborting script' "$clean")
-check 'no fatal markers' "$fatal lines: PHP configure/make failed, [FATAL], Aborting script" test "$fatal" -eq 0
+fatal=$(grep -cE 'PHP configure failed|PHP make failed|PHP upgrade aborted|\[FATAL\]|Aborting script' "$clean")
+check 'no fatal markers' "$fatal lines: PHP configure/make failed, PHP upgrade aborted, [FATAL], Aborting script" test "$fatal" -eq 0
 
 echo
 echo "Patching failed lines (not gated; the imagick PHP 8.4 patch failure is known and harmless):"
