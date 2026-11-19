@@ -380,12 +380,12 @@ jobs:
         name: almalinux_logs
         path: centminlogs/*
 
-    - name: Trigger RockyLinux PHP 8.2 workflow
+    - name: Trigger PHP 8.6 workflow
       run: |
         curl -X POST \
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token ${{ secrets.PAT }}" \
-        https://api.github.com/repos/${{ github.repository }}/actions/workflows/rockylinux9-php8.2.yml/dispatches \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/almalinux9-php8.6.yml/dispatches \
         -d '{"ref":"master"}'
 
     - name: Notify Discord

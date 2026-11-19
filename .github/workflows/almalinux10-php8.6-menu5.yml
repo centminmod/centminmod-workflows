@@ -1,0 +1,181 @@
+name: AlmaLinux 10 + 141.00beta01 PHP 8.6 Menu 5 Upgrade
+
+# Manual run. Installs 141.00beta01 through centminmod.com/betainstaller-el10.sh,
+# then upgrades PHP to 8.6.0 through centmin.sh menu 5 (expect script
+# scripts/centmin-option-5-php8.6.sh) and checks the result with
+# scripts/php86-menu5-check.sh: PHP, php-config and php-fpm versions, services,
+# a PHP page through nginx, phpredis built from its develop branch, memcache and
+# mcrypt skipped (PHPMEMCACHE_MAXVERNUM / PHPMCRYPT_MAXVERNUM = 80600), no
+# swoole, and no fatal markers in the menu 5 output. The version is passed in
+# full (8.6.0): the short form 8.6 depends on getphpver, which can return an
+# empty version after a GitHub API rate limit.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      PHP_TEST_VERSION: '8.6.0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Sysbox
+        run: |
+          curl -fLO https://downloads.nestybox.com/sysbox/releases/v0.7.1/sysbox-ce_0.7.1-0.linux_amd64.deb
+          sudo dpkg -i sysbox-ce_0.7.1-0.linux_amd64.deb || sudo apt-get install -f
+          # dpkg postinst can fail to start the sysbox services (deb-systemd-invoke
+          # "Could not execute systemctl"); start them here and fail this step
+          # instead of letting the later container steps fail with continue-on-error
+          for _ in 1 2 3; do
+            sudo test -S /run/sysbox/sysfs.sock && break
+            sudo systemctl restart sysbox || true
+            sleep 10
+          done
+          sudo test -S /run/sysbox/sysfs.sock || { sudo systemctl status sysbox sysbox-fs sysbox-mgr --no-pager; echo "::error::sysbox-fs did not start"; exit 1; }
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./dockerfiles/Dockerfile-almalinux10
+          platforms: linux/amd64
+          load: true
+          tags: cmm_el89:latest
+
+      - name: Run container Centmin Mod LEMP AlmaLinux 10 Install
+        timeout-minutes: 90
+        run: |
+          docker run --cgroupns host -d --name=cmm_el89 \
+            --privileged \
+            --runtime=sysbox-runc \
+            --cap-add=SYS_ADMIN \
+            --cap-add=SYS_RESOURCE \
+            --security-opt seccomp=unconfined \
+            --security-opt label=disable \
+            --security-opt apparmor=unconfined \
+            --tmpfs /run \
+            --tmpfs /run/lock \
+            -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+            cmm_el89:latest
+          sleep 4
+          docker exec cmm_el89 bash -c "curl -4sL https://centminmod.com/betainstaller-el10.sh | bash" | tee cmm-install.log
+          tail -80 cmm-install.log >> "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+
+      - name: Record PHP before the upgrade
+        run: |
+          mkdir -p results
+          docker exec cmm_el89 bash -c "git -C /usr/local/src/centminmod log -1 --format='%h %s'" | tee results/centminmod-commit.txt
+          docker exec cmm_el89 bash -c "php -v" | tee results/php-v-before.txt
+          docker exec cmm_el89 bash -c "php -m" > results/php-m-before.txt
+          {
+            echo "### Before menu 5"
+            echo '```'
+            cat results/centminmod-commit.txt results/php-v-before.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+        continue-on-error: true
+
+      - name: centmin.sh menu option 5 PHP-FPM 8.6 upgrade test
+        timeout-minutes: 60
+        run: |
+          docker exec cmm_el89 bash -c "cmupdate"
+          docker exec cmm_el89 bash -c "mkdir -p /root/centminlogs; /home/centmin-option-5-php8.6.sh 2>&1 | tee /root/centminlogs/php86-menu5-upgrade.log"
+        continue-on-error: true
+
+      - name: PHP-FPM 8.6 phpbench.php
+        run: |
+          docker exec cmm_el89 bash -c "/home/phpbench.sh" || true
+        continue-on-error: true
+
+      - name: Check PHP 8.6 upgrade
+        id: php86_check
+        run: |
+          mkdir -p results
+          status=0
+          docker exec -i cmm_el89 bash -s -- "$PHP_TEST_VERSION" /root/centminlogs/php86-menu5-upgrade.log < scripts/php86-menu5-check.sh > results/php86-checks.md || status=$?
+          cat results/php86-checks.md
+          {
+            echo "### PHP $PHP_TEST_VERSION menu 5 checks"
+            cat results/php86-checks.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          docker exec cmm_el89 bash -c "php -m" > results/php-m-after.txt || true
+          diff results/php-m-before.txt results/php-m-after.txt || true
+          exit "$status"
+        continue-on-error: true
+
+      - name: Inspect PHP-FPM 8.6 setup
+        run: |
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "systemctl status php-fpm.service --no-pager"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "php-config || true"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ini"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ldd /usr/local/bin/php"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri redis"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri openssl"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "/usr/local/bin/php --ri zip"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAhrt /etc/centminmod/php.d"
+          docker exec cmm_el89 bash -c "echo '---'"
+          docker exec cmm_el89 bash -c "ls -lAhrt \$(php-config --extension-dir || true)"
+        continue-on-error: true
+
+      - name: Copy Centmin Mod logs from container
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p results/centminlogs
+          cp cmm-install.log results/ || true
+          if docker exec cmm_el89 test -d /root/centminlogs; then
+            docker exec cmm_el89 tar -C /root/centminlogs -cf - . | tar -C results/centminlogs -xf -
+          else
+            echo "/root/centminlogs not present in container"
+          fi
+        continue-on-error: true
+
+      - name: Upload results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: almalinux10_php86_menu5
+          path: results/
+        continue-on-error: true
+
+      - name: Notify Discord
+        if: ${{ !cancelled() }}
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MESSAGE: "Workflow '${{ github.workflow }}' (${{ github.event_name }}) finished: PHP ${{ env.PHP_TEST_VERSION }} menu 5 checks ${{ steps.php86_check.outcome }}"
+        run: |
+          jq -n --arg content "$MESSAGE" '{content: $content}' | \
+            curl -fsS -H "Content-Type: application/json" -X POST -d @- "$DISCORD_WEBHOOK_URL"
+        continue-on-error: true
+
+      - name: Gate on PHP 8.6 checks
+        if: ${{ !cancelled() }}
+        env:
+          CHECK_OUTCOME: ${{ steps.php86_check.outcome }}
+        run: |
+          echo "php86_check=$CHECK_OUTCOME"
+          if [ "$CHECK_OUTCOME" != success ]; then
+            echo "::error::PHP $PHP_TEST_VERSION menu 5 checks failed (see the job summary and the almalinux10_php86_menu5 artifact)"
+            exit 1
+          fi
