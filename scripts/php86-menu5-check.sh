@@ -55,8 +55,11 @@ done
 
 printf '<?php echo "menu5test ", PHP_VERSION, " ", PHP_SAPI, "\\n";\n' > /usr/local/nginx/html/php-menu5-test.php
 resp=$(curl -s --max-time 60 -w 'http=%{http_code}' http://localhost/php-menu5-test.php)
+curl_rc=$?
 rm -f /usr/local/nginx/html/php-menu5-test.php
-check 'PHP page via nginx' "${resp//$'\n'/ }" starts_with "$resp" "menu5test $want_ver fpm-fcgi"$'\n'"http=200"
+# a timed-out or truncated transfer can still print the expected text, so curl must exit 0
+page_ok() { [ "$curl_rc" -eq 0 ] && starts_with "$resp" "menu5test $want_ver fpm-fcgi"$'\n'"http=200"; }
+check 'PHP page via nginx' "curl exit $curl_rc, ${resp//$'\n'/ }" page_ok
 
 check 'redis loaded' 'php -m' has_module redis
 for ext in memcache mcrypt swoole; do
