@@ -75,9 +75,20 @@ jobs:
           tail -80 cmm-install.log >> "$GITHUB_STEP_SUMMARY"
         continue-on-error: true
 
-      - name: Record PHP before the upgrade
+      # installer-el10.sh removes the email ini files after the install, and
+      # centmin.sh then prompts for both emails before its menu, which the
+      # menu 5 expect script does not answer
+      - name: centmin.sh setup
+        run: |
+          sleep 1
+          docker exec cmm_el89 bash -c "echo '1' > /etc/centminmod/email-primary.ini"
+          docker exec cmm_el89 bash -c "echo '2' > /etc/centminmod/email-secondary.ini"
+        continue-on-error: true
+
+      - name: Update Centmin Mod and record PHP before the upgrade
         run: |
           mkdir -p results
+          docker exec cmm_el89 bash -c "cmupdate"
           docker exec cmm_el89 bash -c "git -C /usr/local/src/centminmod log -1 --format='%h %s'" | tee results/centminmod-commit.txt
           docker exec cmm_el89 bash -c "php -v" | tee results/php-v-before.txt
           docker exec cmm_el89 bash -c "php -m" > results/php-m-before.txt
@@ -92,8 +103,7 @@ jobs:
       - name: centmin.sh menu option 5 PHP-FPM 8.6 upgrade test
         timeout-minutes: 60
         run: |
-          docker exec cmm_el89 bash -c "cmupdate"
-          docker exec cmm_el89 bash -c "mkdir -p /root/centminlogs; /home/centmin-option-5-php8.6.sh 2>&1 | tee /root/centminlogs/php86-menu5-upgrade.log"
+          docker exec cmm_el89 bash -c "mkdir -p /root/centminlogs;/home/centmin-option-5-php8.6.sh 2>&1 | tee /root/centminlogs/php86-menu5-upgrade.log"
         continue-on-error: true
 
       - name: PHP-FPM 8.6 phpbench.php

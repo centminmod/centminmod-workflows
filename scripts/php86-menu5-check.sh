@@ -54,7 +54,7 @@ for svc in php-fpm nginx; do
 done
 
 printf '<?php echo "menu5test ", PHP_VERSION, " ", PHP_SAPI, "\\n";\n' > /usr/local/nginx/html/php-menu5-test.php
-resp=$(curl -s -w 'http=%{http_code}' http://localhost/php-menu5-test.php)
+resp=$(curl -s --max-time 60 -w 'http=%{http_code}' http://localhost/php-menu5-test.php)
 rm -f /usr/local/nginx/html/php-menu5-test.php
 check 'PHP page via nginx' "${resp//$'\n'/ }" starts_with "$resp" "menu5test $want_ver fpm-fcgi"$'\n'"http=200"
 
