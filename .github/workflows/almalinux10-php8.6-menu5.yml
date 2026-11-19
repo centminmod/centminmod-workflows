@@ -119,7 +119,10 @@ jobs:
         run: |
           mkdir -p results
           status=0
-          docker exec -i cmm_el89 bash -s -- "$PHP_TEST_VERSION" /root/centminlogs/php86-menu5-upgrade.log < scripts/php86-menu5-check.sh > results/php86-checks.md || status=$?
+          # run as a file without stdin: piped into bash -s, a command that reads
+          # stdin would swallow the rest of the script and exit 0
+          docker cp scripts/php86-menu5-check.sh cmm_el89:/root/php86-menu5-check.sh
+          docker exec cmm_el89 bash /root/php86-menu5-check.sh "$PHP_TEST_VERSION" /root/centminlogs/php86-menu5-upgrade.log > results/php86-checks.md || status=$?
           cat results/php86-checks.md
           {
             echo "### PHP $PHP_TEST_VERSION menu 5 checks"

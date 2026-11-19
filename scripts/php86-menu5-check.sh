@@ -1,6 +1,9 @@
 #!/bin/bash
-# Checks a centmin.sh menu 5 upgrade to PHP 8.6 inside the Centmin Mod container:
-#   docker exec -i cmm_el89 bash -s -- 8.6.0 /root/centminlogs/php86-menu5-upgrade.log < scripts/php86-menu5-check.sh
+# Checks a centmin.sh menu 5 upgrade to PHP 8.6 inside the Centmin Mod container.
+# Run it as a file, not through `bash -s` on stdin (a command that reads stdin
+# would swallow the rest of the script and the run would end with exit 0):
+#   docker cp scripts/php86-menu5-check.sh cmm_el89:/root/php86-menu5-check.sh
+#   docker exec cmm_el89 bash /root/php86-menu5-check.sh 8.6.0 /root/centminlogs/php86-menu5-upgrade.log
 # PHP 8.6 differences it expects: memcache and mcrypt are skipped
 # (PHPMEMCACHE_MAXVERNUM / PHPMCRYPT_MAXVERNUM = 80600), phpredis builds from
 # its develop branch, and there is no swoole for PHP 8.6.
@@ -24,8 +27,10 @@ check() {
     fails=$((fails + 1))
   fi
 }
-has_module() { php -m 2>/dev/null | grep -qix "$1"; }
-lacks_module() { ! has_module "$1"; }
+# module checks fail outright when php -m itself fails ($mods_rc), so a broken
+# php cannot pass a "not loaded" row
+has_module() { [ "$mods_rc" -eq 0 ] && grep -qix "$1" <<< "$mods"; }
+lacks_module() { [ "$mods_rc" -eq 0 ] && ! grep -qix "$1" <<< "$mods"; }
 starts_with() { [[ $1 == "$2"* ]]; }
 
 clean=$(mktemp)
@@ -45,8 +50,11 @@ check 'php-config --vernum' "got ${vernum:-none}, want $want_vernum" test "$vern
 fpm=$(/usr/local/sbin/php-fpm -v 2>/dev/null | head -n1)
 check 'php-fpm -v' "${fpm:-none}" starts_with "$fpm" "PHP $want_ver (fpm-fcgi)"
 
-startup=$(php -v 2>&1 | grep -ciE 'warning|deprecated|unable to load|fatal')
-check 'no PHP startup messages' "$startup warning/deprecated/fatal lines in php -v" test "$startup" -eq 0
+php_v=$(php -v 2>&1)
+php_v_rc=$?
+startup=$(grep -ciE 'warning|deprecated|unable to load|fatal' <<< "$php_v")
+startup_ok() { [ "$php_v_rc" -eq 0 ] && [ "$startup" -eq 0 ]; }
+check 'no PHP startup messages' "php -v exit $php_v_rc, $startup warning/deprecated/fatal lines" startup_ok
 
 for svc in php-fpm nginx; do
   state=$(systemctl is-active "$svc" 2>/dev/null)
@@ -54,16 +62,22 @@ for svc in php-fpm nginx; do
 done
 
 printf '<?php echo "menu5test ", PHP_VERSION, " ", PHP_SAPI, "\\n";\n' > /usr/local/nginx/html/php-menu5-test.php
-resp=$(curl -s --max-time 60 -w 'http=%{http_code}' http://localhost/php-menu5-test.php)
+resp=$(curl -s --max-time 60 -w '\n%{http_code}' http://localhost/php-menu5-test.php)
 curl_rc=$?
 rm -f /usr/local/nginx/html/php-menu5-test.php
-# a timed-out or truncated transfer can still print the expected text, so curl must exit 0
-page_ok() { [ "$curl_rc" -eq 0 ] && starts_with "$resp" "menu5test $want_ver fpm-fcgi"$'\n'"http=200"; }
-check 'PHP page via nginx' "curl exit $curl_rc, ${resp//$'\n'/ }" page_ok
+# the status code is the last line curl writes; the body must match exactly, and
+# curl must exit 0 (a timed-out or truncated transfer can still print the text)
+code=${resp##*$'\n'}
+body=${resp%$'\n'*}
+body=${body%$'\n'}
+page_ok() { [ "$curl_rc" -eq 0 ] && [ "$code" = 200 ] && [ "$body" = "menu5test $want_ver fpm-fcgi" ]; }
+check 'PHP page via nginx' "curl exit $curl_rc, http $code, body: ${body//$'\n'/ }" page_ok
 
-check 'redis loaded' 'php -m' has_module redis
+mods=$(php -m 2>/dev/null)
+mods_rc=$?
+check 'redis loaded' "php -m exit $mods_rc" has_module redis
 for ext in memcache mcrypt swoole; do
-  check "$ext not loaded" 'php -m (no PHP 8.6 support upstream)' lacks_module "$ext"
+  check "$ext not loaded" "php -m exit $mods_rc (no PHP 8.6 support upstream)" lacks_module "$ext"
   check "no $ext.ini" "$scandir" test ! -e "$scandir/$ext.ini"
 done
 
