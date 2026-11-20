@@ -54,10 +54,14 @@ jobs:
           tags: cmm_almalinux9:latest
 
       - name: Debug payload (repository_dispatch)
-        run: echo ${{ github.event.client_payload.release }}
+        env:
+          PAYLOAD_RELEASE: ${{ github.event.client_payload.release }}
+        run: printf '%s\n' "$PAYLOAD_RELEASE"
         
       - name: Debug input (workflow_dispatch)
-        run: echo ${{ github.event.inputs.release }}
+        env:
+          INPUT_RELEASE: ${{ github.event.inputs.release }}
+        run: printf '%s\n' "$INPUT_RELEASE"
   
       - name: Run container Centmmin Mod LEMP AlmaLinux 9 Install
         run: |
@@ -1152,10 +1156,14 @@ jobs:
           tags: cmm_rockylinux9:latest
   
       - name: Debug payload (repository_dispatch)
-        run: echo ${{ github.event.client_payload.release }}
+        env:
+          PAYLOAD_RELEASE: ${{ github.event.client_payload.release }}
+        run: printf '%s\n' "$PAYLOAD_RELEASE"
         
       - name: Debug input (workflow_dispatch)
-        run: echo ${{ github.event.inputs.release }}
+        env:
+          INPUT_RELEASE: ${{ github.event.inputs.release }}
+        run: printf '%s\n' "$INPUT_RELEASE"
   
       - name: Run container Centmmin Mod LEMP Rocky Linux 9 Install
         run: |
@@ -2249,10 +2257,14 @@ jobs:
           tags: cmm_oraclelinux9:latest
   
       - name: Debug payload (repository_dispatch)
-        run: echo ${{ github.event.client_payload.release }}
+        env:
+          PAYLOAD_RELEASE: ${{ github.event.client_payload.release }}
+        run: printf '%s\n' "$PAYLOAD_RELEASE"
         
       - name: Debug input (workflow_dispatch)
-        run: echo ${{ github.event.inputs.release }}
+        env:
+          INPUT_RELEASE: ${{ github.event.inputs.release }}
+        run: printf '%s\n' "$INPUT_RELEASE"
   
       - name: Run container Centmmin Mod LEMP Oracle Linux 9 Install
         run: |

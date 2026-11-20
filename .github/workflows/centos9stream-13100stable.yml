@@ -45,10 +45,14 @@ jobs:
         tags: cmm_el89:latest
 
     - name: Debug payload (repository_dispatch)
-      run: echo ${{ github.event.client_payload.release }}
+      env:
+        PAYLOAD_RELEASE: ${{ github.event.client_payload.release }}
+      run: printf '%s\n' "$PAYLOAD_RELEASE"
       
     - name: Debug input (workflow_dispatch)
-      run: echo ${{ github.event.inputs.release }}
+      env:
+        INPUT_RELEASE: ${{ github.event.inputs.release }}
+      run: printf '%s\n' "$INPUT_RELEASE"
 
     - name: Run container Centmmin Mod LEMP CentOS 9 Stream Install
       run: |
